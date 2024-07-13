@@ -12,7 +12,7 @@ const HelpModalBody = ({ useEmoji, closeModal }) => {
 
   return (
     <div>
-      <h1>Welcome to Two-Corner Tile Solitaire</h1>
+      <h1>Welcome to Unicode Mahjong Tile Solitaire</h1>
       <div>
         <p>
           The goal is to clear all tiles from the board by clicking or tapping

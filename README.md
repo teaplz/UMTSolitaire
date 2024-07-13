@@ -1,16 +1,21 @@
-# 🀄 Two-Corner Tile Solitaire 🀄
+# 🀄 Unicode Mahjong Tile Solitaire 🀄
 
-**[Two-Corner Tile Solitaire](https://teaplz.github.io/2ctilesol)** is a simple web adaptation of the tile puzzle game "Nikakudori" (or "Shisen-Sho").
+**[Unicode Mahjong Tile Solitaire](https://teaplz.github.io/2ctilesol)** 
+is a simple web adaptation of the [Mahjong solitaire](https://en.wikipedia.org/wiki/Mahjong_solitaire) puzzle game that does not use any custom images or fonts for displaying tiles, instead utilizing the [Mahjong Tiles Unicode block](https://en.wikipedia.org/wiki/Mahjong_Tiles_(Unicode_block)) with standard fonts, either adjusted with CSS to better resemble tiles or using non-standard emoji variants (namely Microsoft's Segoe UI Emoji).
 
 ## The Game
 
-The game itself is similar to [Mahjong solitaire](https://en.wikipedia.org/wiki/Mahjong_solitaire), in which a board full of Mahjong tiles is cleared by matching pairs of exposed tiles.
+### Traditional
 
-The main differences are that tiles are no longer stacked on top of each-other and that all tiles are now considered exposed, but can only be matched as a pair if they follow the rule of "nikakudori" (or "two-angle take"):
+This version is currently not implemented.
+
+### Two-Corner
+
+In "Two-Corner", tiles are no longer stacked on top of each-other and all tiles are now considered exposed, but can only be matched as a pair if they follow the rule of "nikakudori" (or "two-angle take"):
 
 - When matching pairs, a path of 1-3 orthogonal line segments must be imagined between them so that no line touches any other tile. This, by definition, forms less than three right angles, or up to two "corners".
 
-More information on the game itself can be found [in this Wikipedia article](https://en.wikipedia.org/wiki/Shisen-Sho).
+More information on this game can be found [in this Wikipedia article](https://en.wikipedia.org/wiki/Shisen-Sho).
 
 ## The Tech
 
@@ -28,15 +33,13 @@ This project was developed with [React](https://reactjs.org/), uses the [Vite](h
 
 * Limited [PWA](https://en.wikipedia.org/wiki/Progressive_web_application) support.
 
-This project does not use any custom images or fonts for displaying tiles, instead utilizing the [Mahjong Tiles Unicode block](https://en.wikipedia.org/wiki/Mahjong_Tiles_(Unicode_block)) with standard fonts, adjusted with CSS to better resemble tiles. Supports non-standard emoji variants (namely Microsoft's Segoe UI Emoji).
-
 The game will not display correctly in earlier browsers and may not display correctly with certain fonts.
 
 ---
 
 <p align="center">
     <a href="./readme/desktop-emoji.png"><img src="./readme/desktop-emoji-t.png" title="A game board rendered using non-standard emojis"></a><br/>
-    A game board rendered using non-standard emojis, via the font Segoe UI Emoji.
+    A game board rendered using non-standard emojis, via the font Segoe UI Emoji on Windows 10.
 </p>
 
 <p align="center">

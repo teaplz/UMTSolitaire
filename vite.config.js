@@ -16,8 +16,8 @@ export default defineConfig(({mode}) => {
           "icon-safari-pinned-tab.svg",
         ],
         manifest: {
-          short_name: "2-Corner",
-          name: "Two-Corner Tile Solitaire",
+          short_name: "UMTSolitaire",
+          name: "Unicode Mahjong Tile Solitaire",
           icons: [
             {
               src: "favicon.ico",
