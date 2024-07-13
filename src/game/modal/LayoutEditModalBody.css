@@ -1,0 +1,10 @@
+.layoutEditor .row {
+  display: flex;
+  justify-content: center;
+}
+
+.layoutEditor .cell {
+  width: 2em;
+  height: 2em;
+  border: 1px solid gray;
+}

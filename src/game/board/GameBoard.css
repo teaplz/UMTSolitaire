@@ -1,0 +1,294 @@
+.game-board {
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.game-board-emoji {
+  font-family: "Segoe UI Emoji";
+  line-height: 1.2em;
+  letter-spacing: -0.16em;
+}
+
+.game-board-glyph {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Symbol", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  line-height: 0.95em;
+  letter-spacing: 0.08em;
+}
+
+.game-board-vertical {
+  display: none;
+}
+
+@media (max-aspect-ratio: 1/1) {
+  .game-board-vertical {
+    display: flex;
+  }
+
+  .game-board-horizontal {
+    display: none;
+  }
+}
+
+.game-board-emoji span:not(.game-path),
+.game-board-emoji span:not(.game-path).game-tile-anim-fadeout:hover {
+  color: black;
+  text-shadow: 0.1em 0.1em 0 grey;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .game-board-emoji span:not(.game-path):hover {
+    color: #000000b0;
+    text-shadow: 0 0 0.3em yellow, 0 0 0 black, 0.1em 0.1em 0 grey;
+  }
+}
+
+.game-board-emoji span:not(.game-path).game-tile-selected {
+  color: #00000055;
+  text-shadow: 0 0 0.3em yellow, 0 0 0 black, 0.1em 0.1em 0 grey;
+}
+
+.game-board-emoji span:not(.game-path).game-tile-hint-all {
+  color: #000000b0;
+  text-shadow: 0 0 0 red, 0.1em 0.1em 0 grey;
+}
+
+.game-board-emoji span:not(.game-path).game-tile-hint-current {
+  color: #000000b0;
+  text-shadow: 0 0 0 blue, 0.1em 0.1em 0 grey;
+}
+
+.game-board-glyph span:not(.game-path):before {
+  content: "\1F02B\FE0E";
+  position: absolute;
+  z-index: -1;
+  font-weight: bolder;
+}
+
+.game-board-glyph span:not(.game-path):before,
+.game-board-glyph span:not(.game-path).game-tile-anim-fadeout:hover:before {
+  color: white;
+  text-shadow: 0.1em 0.1em 0 grey;
+}
+
+.game-board-glyph span:not(.game-path) {
+  position: relative;
+  z-index: 1;
+}
+
+.game-board-glyph span:not(.game-path),
+.game-board-glyph span:not(.game-path).game-tile-anim-fadeout:hover {
+  color: black;
+  text-shadow: 0 0 0.01em black;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-glyph-red,
+.game-board-glyph span:not(.game-path).game-tile-glyph-red.game-tile-anim-fadeout:hover {
+  color: #aa0000;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-glyph-green,
+.game-board-glyph span:not(.game-path).game-tile-glyph-green.game-tile-anim-fadeout:hover {
+  color: #00aa00;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-glyph-blue,
+.game-board-glyph span:not(.game-path).game-tile-glyph-blue.game-tile-anim-fadeout:hover {
+  color: #0000aa;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-glyph-flowers,
+.game-board-glyph span:not(.game-path).game-tile-glyph-flowers.game-tile-anim-fadeout:hover {
+  color: #00aaaa;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-glyph-seasons,
+.game-board-glyph span:not(.game-path).game-tile-glyph-seasons.game-tile-anim-fadeout:hover {
+  color: #aa6600;
+}
+
+@media (hover: hover) {
+  .game-board-glyph span:not(.game-path):hover:before {
+    color: #fcfcd9;
+    text-shadow: 0 0 0.2em yellow, 0.1em 0.1em 0 grey;
+  }
+
+  .game-board-glyph span:not(.game-path):hover {
+    color: #000000b0;
+  }
+
+  .game-board-glyph span:not(.game-path).game-tile-glyph-red:hover {
+    color: #aa0000b0;
+  }
+
+  .game-board-glyph span:not(.game-path).game-tile-glyph-green:hover {
+    color: #00aa00b0;
+  }
+
+  .game-board-glyph span:not(.game-path).game-tile-glyph-blue:hover {
+    color: #0000aab0;
+  }
+
+  .game-board-glyph span:not(.game-path).game-tile-glyph-flowers:hover {
+    color: #00aaaab0;
+  }
+
+  .game-board-glyph span:not(.game-path).game-tile-glyph-seasons:hover {
+    color: #aa6600b0;
+  }
+}
+
+.game-board-glyph span:not(.game-path).game-tile-selected:before {
+  color: #f5f5a7;
+  text-shadow: 0 0 0.2em yellow, 0.1em 0.1em 0 grey;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-hint-all:before {
+  color: #f5a7a7;
+  text-shadow: 0.1em 0.1em 0 grey;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-hint-current:before {
+  color: #a7a7f5;
+  text-shadow: 0.1em 0.1em 0 grey;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-selected,
+.game-board-glyph span:not(.game-path).game-tile-hint-all,
+.game-board-glyph span:not(.game-path).game-tile-hint-current {
+  color: #00000055;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-glyph-red.game-tile-selected,
+.game-board-glyph span:not(.game-path).game-tile-glyph-red.game-tile-hint-all,
+.game-board-glyph span:not(.game-path).game-tile-glyph-red.game-tile-hint-current {
+  color: #aa000055;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-glyph-green.game-tile-selected,
+.game-board-glyph span:not(.game-path).game-tile-glyph-green.game-tile-hint-all,
+.game-board-glyph span:not(.game-path).game-tile-glyph-green.game-tile-hint-current {
+  color: #00aa0055;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-glyph-blue.game-tile-selected,
+.game-board-glyph span:not(.game-path).game-tile-glyph-blue.game-tile-hint-all,
+.game-board-glyph span:not(.game-path).game-tile-glyph-blue.game-tile-hint-current {
+  color: #0000aa55;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-glyph-flowers.game-tile-selected,
+.game-board-glyph span:not(.game-path).game-tile-glyph-flowers.game-tile-hint-all,
+.game-board-glyph span:not(.game-path).game-tile-glyph-flowers.game-tile-hint-current {
+  color: #00aaaa55;
+}
+
+.game-board-glyph span:not(.game-path).game-tile-glyph-seasons.game-tile-selected,
+.game-board-glyph span:not(.game-path).game-tile-glyph-seasons.game-tile-hint-all,
+.game-board-glyph span:not(.game-path).game-tile-glyph-seasons.game-tile-hint-current {
+  color: #aa660055;
+}
+
+.game-tile-empty {
+  visibility: hidden;
+}
+
+.game-path {
+  color: gold;
+  position: absolute;
+  transform: translateX(-100%);
+  z-index: 2;
+}
+
+.game-path-L:after,
+.game-path-R:after,
+.game-board-vertical .game-path-U:after,
+.game-board-vertical .game-path-D:after {
+  content: "\2501";
+}
+
+.game-path-U:after,
+.game-path-D:after,
+.game-board-vertical .game-path-L:after,
+.game-board-vertical .game-path-R:after {
+  content: "\2503";
+}
+
+.game-path-L-start:after,
+.game-path-R-end:after,
+.game-board-vertical .game-path-D-start:after,
+.game-board-vertical .game-path-U-end:after {
+  content: "\2578";
+}
+
+.game-path-U-start:after,
+.game-path-D-end:after,
+.game-board-vertical .game-path-L-start:after,
+.game-board-vertical .game-path-R-end:after {
+  content: "\2579";
+}
+
+.game-path-R-start:after,
+.game-path-L-end:after,
+.game-board-vertical .game-path-U-start:after,
+.game-board-vertical .game-path-D-end:after {
+  content: "\257A";
+}
+
+.game-path-D-start:after,
+.game-path-U-end:after,
+.game-board-vertical .game-path-R-start:after,
+.game-board-vertical .game-path-L-end:after {
+  content: "\257B";
+}
+
+.game-path-UR:after,
+.game-path-LD:after,
+.game-board-vertical .game-path-DR:after,
+.game-board-vertical .game-path-LU:after {
+  content: "\250F";
+}
+
+.game-path-UL:after,
+.game-path-RD:after,
+.game-board-vertical .game-path-UR:after,
+.game-board-vertical .game-path-LD:after {
+  content: "\2513";
+}
+
+.game-path-DL:after,
+.game-path-RU:after,
+.game-board-vertical .game-path-UL:after,
+.game-board-vertical .game-path-RD:after {
+  content: "\251B";
+}
+
+.game-path-DR:after,
+.game-path-LU:after,
+.game-board-vertical .game-path-DL:after,
+.game-board-vertical .game-path-RU:after {
+  content: "\2517";
+}
+
+.game-tile-anim-fadeout,
+.game-path-anim-fadeout {
+  animation: cubic-bezier(0.47, 0, 0.75, 0.72) 1s fadeout;
+  visibility: hidden;
+}
+
+@keyframes fadeout {
+  from {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

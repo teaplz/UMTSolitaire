@@ -1,0 +1,43 @@
+.App {
+  text-align: center;
+  background-color: hsl(180, 45%, 15%);
+  background-size: cover; 
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.fancyAnimatedBackground {
+  animation: fancyAnimatedBackgroundColors 120s infinite linear;
+}
+
+@keyframes fancyAnimatedBackgroundColors {
+  0%, 100% {
+    background-color: hsl(180, 45%, 15%);
+  }
+  12.5% {
+    background-color: hsl(225, 45%, 15%);
+  }
+  25% {
+    background-color: hsl(270, 45%, 15%);
+  }
+  37.5% {
+    background-color: hsl(315, 45%, 15%);
+  }
+  50% {
+    background-color: hsl(0, 45%, 15%);
+  }
+  62.5% {
+    background-color: hsl(45, 45%, 15%);
+  }
+  75% {
+    background-color: hsl(90, 45%, 15%);
+  }
+  87.5% {
+    background-color: hsl(135, 45%, 15%);
+  }
+}

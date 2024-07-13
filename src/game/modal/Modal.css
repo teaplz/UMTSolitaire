@@ -1,0 +1,31 @@
+.ReactModal__Overlay {
+  z-index: 1000;
+}
+
+.GameModal {
+  position: absolute;
+  inset: 40px;
+  background: rgb(255, 255, 255);
+  overflow: auto;
+  outline: none;
+  padding: 20px;
+
+  text-align: center;
+  border: 5px solid black;
+  border-radius: 2em;
+}
+
+.GameModal button {
+  font-size: large;
+  padding: 0.5em;
+  margin: 1em;
+}
+
+.GameModal button.large-button {
+  font-size: x-large;
+  padding: 1em;
+}
+
+.GameModal hr {
+  margin: 2em 3em;
+}
