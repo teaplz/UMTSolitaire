@@ -19,7 +19,7 @@ More information on this game can be found [in this Wikipedia article](https://e
 
 ## The Tech
 
-![](../../actions/workflows/github-pages.yaml/badge.svg)
+![](../../actions/workflows/github-pages.yml/badge.svg)
 
 This project was developed with [React](https://reactjs.org/), uses the [Vite](https://vitejs.dev/) toolchain, and is hosted on [GitHub Pages](https://pages.github.com/). Some technical features of the game include:
 
