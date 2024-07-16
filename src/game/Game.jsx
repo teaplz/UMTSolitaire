@@ -567,7 +567,7 @@ export default function Game({
   }
 
   // Revert the board to the previous state.
-  function undoMatch(doHideModal = false) {
+  function undoMatch({doHideModal = false}) {
     if (tileHistory.length > 0) {
       const newTiles = tiles.slice();
       const lastMatch = tileHistory.slice(-1)[0];
@@ -731,7 +731,7 @@ export default function Game({
               layoutCode,
               canUndo: tileHistory.length === 0,
               shareUrls: generateShareUrls(),
-              handleUndoMatch: () => undoMatch(true),
+              handleUndoMatch: () => undoMatch({doHideModal: true}),
               handleResetBoard: resetGameState,
               newBoardModal: () => showModal(GameModals.NEW_BOARD),
             }}
