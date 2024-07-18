@@ -17,37 +17,21 @@ export default function GameBoard({
   fixRedDragonBugs,
   handleTileClick,
 }) {
-  // Tile maps, which are used to correlate each tile object with their
-  // proper placement on the board. Standard tile maps are used for the
-  // landscape orientation while rotated tile maps are "rotated" for better
-  // use in portrait orientation (such as smartphones). These are stored as
-  // arrays of rows of tiles.
-  const [horizontalTileMap, setHorizontalTileMap] = useState([]);
-  const [verticalTileMap, setVerticalTileMap] = useState([]);
+  // These are stored as arrays of rows of tiles.
+  const [tileMap, setTileMap] = useState([]);
 
   // Regenerate tile maps every time the tile layout changes.
   useEffect(() => {
-    const horizontalTileMap = [],
-      verticalTileMap = [];
+    const tileMap = [];
 
-    // Generate standard tile map, used for the landscape orientation.
     for (let y = 0; y < boardHeight + 2; y++) {
-      horizontalTileMap[y] = tiles.slice(
+      tileMap[y] = tiles.slice(
         y * (boardWidth + 2),
         (y + 1) * (boardWidth + 2)
       );
     }
 
-    setHorizontalTileMap(horizontalTileMap);
-
-    // Generate rotated tile map, used for the portrait orientation.
-    for (let x = 0; x < boardWidth + 2; x++) {
-      verticalTileMap[x] = tiles
-        .filter((_el, index) => index % (boardWidth + 2) === x)
-        .reverse();
-    }
-
-    setVerticalTileMap(verticalTileMap);
+    setTileMap(tileMap);
   }, [tiles]);
 
   // Change the key for the pathing elements so that on a new path, any
@@ -57,12 +41,9 @@ export default function GameBoard({
 
   useEffect(() => setCurPathingKey(~curPathingKey), [pathingTiles]);
 
-  const renderTileMap = (tileMap, keyprefix) => {
-    // For each row in the tile map, create a div with each of the tile
-    // entries as a span, which contains both the corresponding Tile component
-    // and pathing node.
+  const renderTileMap = () => {
     return tileMap.map((row, index) => (
-      <div key={keyprefix + "-" + index}>
+      <div key={"board-" + index}>
         {row.map((val) => (
           <Fragment key={val.id}>
             <Tile
@@ -90,6 +71,12 @@ export default function GameBoard({
   const [verticalTileStyle, setVerticalTileStyle] = useState({});
 
   useEffect(() => {
+    // Set the font size based on magic numbers and the size of the board.
+    // TODO: Better way of doing this.
+
+    // For landscape/widescreen orientation, have the font size determined by
+    // either width or height, based on the size of the board and the current
+    // aspect ratio.
     setHorizontalTileStyle({
       fontSize:
         "min(" +
@@ -102,36 +89,29 @@ export default function GameBoard({
           : glyphFontSizeHeights[Math.min(Math.max(boardHeight, 2), 12) - 2]) +
         "vh)",
     });
+
+    // For portrait orientation, have the font size determined by the height
+    // and use a scrollbar. Adjust for both the scrollbar and a potentially
+    // larger game bar. Do not make it so large that scrolling is difficult.
     setVerticalTileStyle({
       fontSize:
         (useEmoji
-          ? emojiFontSizePortraitWidths[
-              Math.min(Math.max(boardHeight, 2), 12) - 2
-            ]
-          : glyphFontSizePortraitWidths[
-              Math.min(Math.max(boardHeight, 2), 12) - 2
-            ]) + "vw",
-      marginTop: "0.75em",
+          ? emojiFontSizeHeights[Math.min(Math.max(boardHeight, 5), 12) - 2] - 1
+          : glyphFontSizeHeights[Math.min(Math.max(boardHeight, 5), 12) - 2] -
+            1) + "vh",
     });
-  }, [tiles, useEmoji]);
+  }, [boardWidth, boardHeight, useEmoji]);
 
+  // Render three nesting divs: one that handles the main game board in its
+  // widescreen orientation, one that changes it for the portrait orientation,
+  // and one that handles the game's font (which is determined by whether or not
+  // the game-board-v div overwrites the game-board div).
   return (
-    <div>
-      <div
-        className={`game-board game-board-horizontal ${
-          useEmoji ? "game-board-emoji" : "game-board-glyph"
-        }`}
-        style={horizontalTileStyle}
-      >
-        {renderTileMap(horizontalTileMap, "board-hori")}
-      </div>
-      <div
-        className={`game-board game-board-vertical ${
-          useEmoji ? "game-board-emoji" : "game-board-glyph"
-        }`}
-        style={verticalTileStyle}
-      >
-        {renderTileMap(verticalTileMap, "board-vert")}
+    <div className="game-board" style={horizontalTileStyle}>
+      <div className="game-board-v" style={verticalTileStyle}>
+        <div className={useEmoji ? "game-board-emoji" : "game-board-glyph"}>
+          {renderTileMap()}
+        </div>
       </div>
     </div>
   );
@@ -158,12 +138,4 @@ const glyphFontSizeWidths = [
 const glyphFontSizeHeights = [
   23.9, 19.5, 16.4, 14.2, 12.5, 11.2, 10.1, 9.2, 8.5, 7.8, 7.3, 6.8, 6.4, 6.0,
   5.7, 5.4, 5.1, 4.9, 4.7,
-];
-
-const emojiFontSizePortraitWidths = [
-  10, 10, 10, 10, 10, 10, 10, 9.5, 8.7, 8.1, 7.5,
-];
-
-const glyphFontSizePortraitWidths = [
-  12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 12.5, 11.4, 10.4, 9.6, 8.9,
 ];

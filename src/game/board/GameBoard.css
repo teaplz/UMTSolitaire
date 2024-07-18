@@ -3,7 +3,8 @@
   flex-direction: column;
   user-select: none;
   white-space: nowrap;
-  overflow: hidden;
+  width: 100%;
+  position: relative;
 }
 
 .game-board-emoji {
@@ -20,17 +21,9 @@
   letter-spacing: 0.08em;
 }
 
-.game-board-vertical {
-  display: none;
-}
-
-@media (max-aspect-ratio: 1/1) {
-  .game-board-vertical {
-    display: flex;
-  }
-
-  .game-board-horizontal {
-    display: none;
+@media (min-aspect-ratio: 1/1) {
+  .game-board-v {
+    all: inherit !important;
   }
 }
 
@@ -206,72 +199,52 @@
 }
 
 .game-path-L:after,
-.game-path-R:after,
-.game-board-vertical .game-path-U:after,
-.game-board-vertical .game-path-D:after {
+.game-path-R:after {
   content: "\2501";
 }
 
 .game-path-U:after,
-.game-path-D:after,
-.game-board-vertical .game-path-L:after,
-.game-board-vertical .game-path-R:after {
+.game-path-D:after {
   content: "\2503";
 }
 
 .game-path-L-start:after,
-.game-path-R-end:after,
-.game-board-vertical .game-path-D-start:after,
-.game-board-vertical .game-path-U-end:after {
+.game-path-R-end:after {
   content: "\2578";
 }
 
 .game-path-U-start:after,
-.game-path-D-end:after,
-.game-board-vertical .game-path-L-start:after,
-.game-board-vertical .game-path-R-end:after {
+.game-path-D-end:after {
   content: "\2579";
 }
 
 .game-path-R-start:after,
-.game-path-L-end:after,
-.game-board-vertical .game-path-U-start:after,
-.game-board-vertical .game-path-D-end:after {
+.game-path-L-end:after {
   content: "\257A";
 }
 
 .game-path-D-start:after,
-.game-path-U-end:after,
-.game-board-vertical .game-path-R-start:after,
-.game-board-vertical .game-path-L-end:after {
+.game-path-U-end:after {
   content: "\257B";
 }
 
 .game-path-UR:after,
-.game-path-LD:after,
-.game-board-vertical .game-path-DR:after,
-.game-board-vertical .game-path-LU:after {
+.game-path-LD:after {
   content: "\250F";
 }
 
 .game-path-UL:after,
-.game-path-RD:after,
-.game-board-vertical .game-path-UR:after,
-.game-board-vertical .game-path-LD:after {
+.game-path-RD:after {
   content: "\2513";
 }
 
 .game-path-DL:after,
-.game-path-RU:after,
-.game-board-vertical .game-path-UL:after,
-.game-board-vertical .game-path-RD:after {
+.game-path-RU:after {
   content: "\251B";
 }
 
 .game-path-DR:after,
-.game-path-LU:after,
-.game-board-vertical .game-path-DL:after,
-.game-board-vertical .game-path-RU:after {
+.game-path-LU:after {
   content: "\2517";
 }
 

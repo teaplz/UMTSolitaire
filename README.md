@@ -27,7 +27,7 @@ This project was developed with [React](https://reactjs.org/), uses the [Vite](h
 
 * Custom layout editor, with a "layout code" to allow sharing custom layouts.
 
-* Reponsive game window, adjusting automatically to window size, orientation, and pointer style. When played on a portrait screen (such as a phone held upright), the board layout is rotated to make the most use of space.
+* Reponsive game window, adjusting automatically to window size, orientation, and pointer style.
 
 * From-scratch algorithms to generate the game board and detect valid matches.
 
