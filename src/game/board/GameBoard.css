@@ -30,30 +30,30 @@
 .game-board-emoji span:not(.game-path),
 .game-board-emoji span:not(.game-path).game-tile-anim-fadeout:hover {
   color: black;
-  text-shadow: 0.1em 0.1em 0 grey;
+  text-shadow: 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
   cursor: pointer;
 }
 
 @media (hover: hover) {
   .game-board-emoji span:not(.game-path):hover {
     color: #000000b0;
-    text-shadow: 0 0 0.3em yellow, 0 0 0 black, 0.1em 0.1em 0 grey;
+    text-shadow: 0 0 0.3em yellow, 0 0 0 black, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
   }
 }
 
 .game-board-emoji span:not(.game-path).game-tile-selected {
   color: #00000055;
-  text-shadow: 0 0 0.3em yellow, 0 0 0 black, 0.1em 0.1em 0 grey;
+  text-shadow: 0 0 0.3em yellow, 0 0 0 black, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
 .game-board-emoji span:not(.game-path).game-tile-hint-all {
   color: #000000b0;
-  text-shadow: 0 0 0 red, 0.1em 0.1em 0 grey;
+  text-shadow: 0 0 0 red, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
 .game-board-emoji span:not(.game-path).game-tile-hint-current {
   color: #000000b0;
-  text-shadow: 0 0 0 blue, 0.1em 0.1em 0 grey;
+  text-shadow: 0 0 0 blue, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
 .game-board-glyph span:not(.game-path):before {
@@ -66,7 +66,7 @@
 .game-board-glyph span:not(.game-path):before,
 .game-board-glyph span:not(.game-path).game-tile-anim-fadeout:hover:before {
   color: white;
-  text-shadow: 0.1em 0.1em 0 grey;
+  text-shadow: 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
 .game-board-glyph span:not(.game-path) {
@@ -108,7 +108,7 @@
 @media (hover: hover) {
   .game-board-glyph span:not(.game-path):hover:before {
     color: #fcfcd9;
-    text-shadow: 0 0 0.2em yellow, 0.1em 0.1em 0 grey;
+    text-shadow: 0 0 0.2em yellow, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
   }
 
   .game-board-glyph span:not(.game-path):hover {
@@ -138,17 +138,17 @@
 
 .game-board-glyph span:not(.game-path).game-tile-selected:before {
   color: #f5f5a7;
-  text-shadow: 0 0 0.2em yellow, 0.1em 0.1em 0 grey;
+  text-shadow: 0 0 0.2em yellow, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
 .game-board-glyph span:not(.game-path).game-tile-hint-all:before {
   color: #f5a7a7;
-  text-shadow: 0.1em 0.1em 0 grey;
+  text-shadow: 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
 .game-board-glyph span:not(.game-path).game-tile-hint-current:before {
   color: #a7a7f5;
-  text-shadow: 0.1em 0.1em 0 grey;
+  text-shadow: 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
 .game-board-glyph span:not(.game-path).game-tile-selected,
