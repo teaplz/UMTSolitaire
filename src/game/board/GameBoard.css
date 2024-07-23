@@ -81,9 +81,6 @@
   position: absolute;
   z-index: -1;
   font-weight: bolder;
-}
-
-.game-board-glyph .game-tile span:before {
   color: white;
   text-shadow: 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
@@ -91,9 +88,6 @@
 .game-board-glyph .game-tile span {
   position: relative;
   z-index: 1;
-}
-
-.game-board-glyph .game-tile span {
   color: black;
   text-shadow: 0 0 0.01em black;
 }

@@ -22,54 +22,82 @@ const HelpModalBody = ({ useEmoji, closeModal }) => {
           className={useEmoji ? "game-board-emoji" : "game-board-glyph"}
           style={helpImageBoardStyle}
         >
-          <span>
-            <Tile {...{ useEmoji }} />
-            <PathNode node={["L", "D"]} fadeout={false} />
-          </span>
-          <span>
-            <Tile char={0x14} {...{ useEmoji }} />
-            <PathNode node={["L", "-start"]} fadeout={false} />
-          </span>
-          <span>
-            <Tile char={0x1d} {...{ useEmoji }} />
-            <PathNode node={["R", "-start"]} fadeout={false} />
-          </span>
-          <span>
-            <Tile {...{ useEmoji }} />
-            <PathNode node={["R", "D"]} fadeout={false} />
-          </span>
-          <br />
-          <span>
-            <Tile char={0x14} {...{ useEmoji }} />
-            <PathNode node={["D", "-end"]} fadeout={false} />
-          </span>
-          <span>
-            <Tile char={0x0b} {...{ useEmoji }} />
-            <PathNode node={["D", "-start"]} fadeout={false} />
-          </span>
-          <span>
-            <Tile char={0x05} {...{ useEmoji }} />
-          </span>
-          <span>
-            <Tile {...{ useEmoji }} />
-            <PathNode node={["D"]} fadeout={false} />
-          </span>
-          <br />
-          <span>
-            <Tile char={0x03} {...{ useEmoji }} />
-          </span>
-          <span>
-            <Tile char={0x0b} {...{ useEmoji }} />
-            <PathNode node={["D", "-end"]} fadeout={false} />
-          </span>
-          <span>
-            <Tile char={0x1d} {...{ useEmoji }} />
-            <PathNode node={["L", "-end"]} fadeout={false} />
-          </span>
-          <span>
-            <Tile {...{ useEmoji }} />
-            <PathNode node={["D", "L"]} fadeout={false} />
-          </span>
+          <div>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile {...{ useEmoji }} />
+              </span>
+              <PathNode node={["L", "D"]} fadeout={false} />
+            </span>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile char={0x14} {...{ useEmoji }} />
+              </span>
+              <PathNode node={["L", "-start"]} fadeout={false} />
+            </span>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile char={0x1d} {...{ useEmoji }} />
+              </span>
+              <PathNode node={["R", "-start"]} fadeout={false} />
+            </span>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile {...{ useEmoji }} />
+              </span>
+              <PathNode node={["R", "D"]} fadeout={false} />
+            </span>
+          </div>
+          <div>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile char={0x14} {...{ useEmoji }} />
+              </span>
+              <PathNode node={["D", "-end"]} fadeout={false} />
+            </span>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile char={0x0b} {...{ useEmoji }} />
+              </span>
+              <PathNode node={["D", "-start"]} fadeout={false} />
+            </span>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile char={0x05} {...{ useEmoji }} />
+              </span>
+            </span>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile {...{ useEmoji }} />
+              </span>
+              <PathNode node={["D"]} fadeout={false} />
+            </span>
+          </div>
+          <div>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile char={0x03} {...{ useEmoji }} />
+              </span>
+            </span>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile char={0x0b} {...{ useEmoji }} />
+              </span>
+              <PathNode node={["D", "-end"]} fadeout={false} />
+            </span>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile char={0x1d} {...{ useEmoji }} />
+              </span>
+              <PathNode node={["L", "-end"]} fadeout={false} />
+            </span>
+            <span className="game-board-coord">
+              <span className="game-tile">
+                <Tile {...{ useEmoji }} />
+              </span>
+              <PathNode node={["D", "L"]} fadeout={false} />
+            </span>
+          </div>
         </div>
         <p>
           In this type of mahjong solitaire, tiles can only be matched if they
