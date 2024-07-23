@@ -4,13 +4,11 @@ import ClassNames from "classnames";
 // the Mahjong Tiles Unicode block (U+1F000 to U+1F02B).
 export default function Tile({
   char,
-  useEmoji,
   isSelected,
   canBeMatchedWithSelected,
   canBeMatchedWithOther,
-  isFadingOut,
+  useEmoji,
   fixRedDragonBugs,
-  onClick,
 }) {
   // Check if tile is valid to display. They should be sent in the "char"
   // property from 0 (U+1F000) to 43 (U+1F02B).
@@ -30,8 +28,6 @@ export default function Tile({
   else if (canBeMatchedWithSelected) tileStatusClass = "game-tile-hint-current";
   // Whether or not the tile is highlighted as a valid match in general.
   else if (canBeMatchedWithOther) tileStatusClass = "game-tile-hint-all";
-  // Whether or not we're currently in the removal fade-out animation.
-  else if (isFadingOut) tileStatusClass = "game-tile-anim-fadeout";
 
   if (useEmoji) {
     // In certain versions of Windows, change the revamped Red Dragon emoji
@@ -40,7 +36,7 @@ export default function Tile({
 
     // If we're using the non-standard emoji variant, just display them normally.
     return (
-      <span className={tileStatusClass} onClick={onClick}>
+      <span className={tileStatusClass}>
         {String.fromCodePoint(0x1f000 + char)}
       </span>
     );
@@ -77,7 +73,7 @@ export default function Tile({
     const classNames = ClassNames(tileColorClass, tileStatusClass);
 
     return (
-      <span className={classNames === "" ? null : classNames} onClick={onClick}>
+      <span className={classNames === "" ? null : classNames}>
         {String.fromCodePoint(0x1f000 + char)}&#xFE0E;
       </span>
     );

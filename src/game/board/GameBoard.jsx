@@ -25,10 +25,9 @@ export default function GameBoard({
     const tileMap = [];
 
     for (let y = 0; y < boardHeight + 2; y++) {
-      tileMap[y] = tiles.slice(
-        y * (boardWidth + 2),
-        (y + 1) * (boardWidth + 2)
-      );
+      tileMap[y] = tiles
+        .slice(y * (boardWidth + 2), (y + 1) * (boardWidth + 2))
+        .map((val) => Array(1).fill(val));
     }
 
     setTileMap(tileMap);
@@ -39,29 +38,50 @@ export default function GameBoard({
   // with CSS animation.
   const [curPathingKey, setCurPathingKey] = useState(1);
 
-  useEffect(() => setCurPathingKey(~curPathingKey), [pathingTiles]);
+  useEffect(() => setCurPathingKey(-curPathingKey), [pathingTiles]);
 
   const renderTileMap = () => {
     return tileMap.map((row, index) => (
-      <div key={"board-" + index}>
-        {row.map((val) => (
-          <Fragment key={val.id}>
-            <Tile
-              char={val.char}
-              useEmoji={useEmoji}
-              isSelected={val.id === selectedTile}
-              canBeMatchedWithSelected={
-                hintedTiles?.includes(val) && !val.inRemovalAnim
-              }
-              canBeMatchedWithOther={wholeMatchingTiles?.includes(val.id)}
-              isFadingOut={val.inRemovalAnim}
-              onClick={() => handleTileClick(val.id)}
-              fixRedDragonBugs={fixRedDragonBugs}
-            />
-            {pathingTiles[val.id] && (
-              <PathNode key={curPathingKey} node={pathingTiles[val.id]} />
+      <div key={index}>
+        {row.map((loc, index) => (
+          <span className="game-board-coord" key={index}>
+            {loc.map((tile, height) => (
+              <span
+                className={`game-tile${
+                  tile.inRemovalAnim ? " game-tile-anim-fadeout" : ""
+                }${
+                  tile.char !== null &&
+                  tile.char !== 0x2B && 
+                  !tile.inRemovalAnim ? " game-tile-selectable" : ""
+                }`}
+                style={height > 0 ? { top: height * -0.12 + "em" } : {}}
+                onClick={
+                  tile.char !== null &&
+                  tile.char !== 0x2B && 
+                  !tile.inRemovalAnim
+                    ? () => handleTileClick(tile.id)
+                    : null
+                }
+                key={height}
+              >
+                <Tile
+                  char={tile.char}
+                  isSelected={tile.id === selectedTile}
+                  canBeMatchedWithSelected={
+                    hintedTiles?.includes(tile) && !tile.inRemovalAnim
+                  }
+                  canBeMatchedWithOther={wholeMatchingTiles?.includes(tile.id)}
+                  isFadingOut={tile.inRemovalAnim}
+                  useEmoji={useEmoji}
+                  fixRedDragonBugs={fixRedDragonBugs}
+                />
+              </span>
+            ))}
+
+            {pathingTiles[loc[0].id] && (
+              <PathNode key={curPathingKey} node={pathingTiles[loc[0].id]} />
             )}
-          </Fragment>
+          </span>
         ))}
       </div>
     ));
@@ -102,10 +122,11 @@ export default function GameBoard({
     });
   }, [boardWidth, boardHeight, useEmoji]);
 
-  // Render three nesting divs: one that handles the main game board in its
-  // widescreen orientation, one that changes it for the portrait orientation,
-  // and one that handles the game's font (which is determined by whether or not
-  // the game-board-v div overwrites the game-board div).
+  // The base game board is nested in three divs, one for handling the base
+  // settings and generated landscape orientation font-size, one for handling
+  // the generated portrait orientation font-size (using CSS trickery to disable
+  // itself through "inheriting" the parent div), and one for handling which
+  // font style to use (emoji or text glyph).
   return (
     <div className="game-board" style={horizontalTileStyle}>
       <div className="game-board-v" style={verticalTileStyle}>

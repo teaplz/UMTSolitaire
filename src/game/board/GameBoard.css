@@ -1,24 +1,8 @@
 .game-board {
-  display: flex;
-  flex-direction: column;
   user-select: none;
   white-space: nowrap;
   width: 100%;
   position: relative;
-}
-
-.game-board-emoji {
-  font-family: "Segoe UI Emoji";
-  line-height: 1.2em;
-  letter-spacing: -0.16em;
-}
-
-.game-board-glyph {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Symbol", "Roboto",
-    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  line-height: 0.95em;
-  letter-spacing: 0.08em;
 }
 
 @media (min-aspect-ratio: 1/1) {
@@ -27,175 +11,202 @@
   }
 }
 
-.game-board-emoji span:not(.game-path),
-.game-board-emoji span:not(.game-path).game-tile-anim-fadeout:hover {
-  color: black;
-  text-shadow: 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
+.game-board-emoji {
+  font-family: "Segoe UI Emoji";
+  line-height: 1.1em;
+  letter-spacing: -0.25em;
+}
+
+.game-board-glyph {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Symbol", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  line-height: 0.9em;
+}
+
+.game-board-emoji div {
+  display: flex;
+  justify-content: center;
+  min-width: fit-content;
+}
+
+.game-board-glyph div {
+  display: flex;
+  justify-content: center;
+  min-width: fit-content;
+}
+
+.game-board-coord {
+  display: grid;
+}
+
+.game-board-coord span {
+  grid-area: 1/1;
+  position: relative;
+}
+
+.game-tile.game-tile-selectable {
   cursor: pointer;
 }
 
+.game-board-emoji .game-tile span {
+  color: black;
+  text-shadow: 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
+}
+
 @media (hover: hover) {
-  .game-board-emoji span:not(.game-path):hover {
+  .game-board-emoji .game-tile span:hover {
     color: #000000b0;
     text-shadow: 0 0 0.3em yellow, 0 0 0 black, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
   }
 }
 
-.game-board-emoji span:not(.game-path).game-tile-selected {
+.game-board-emoji .game-tile span.game-tile-selected {
   color: #00000055;
   text-shadow: 0 0 0.3em yellow, 0 0 0 black, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
-.game-board-emoji span:not(.game-path).game-tile-hint-all {
+.game-board-emoji .game-tile span.game-tile-hint-all {
   color: #000000b0;
   text-shadow: 0 0 0 red, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
-.game-board-emoji span:not(.game-path).game-tile-hint-current {
+.game-board-emoji .game-tile span.game-tile-hint-current {
   color: #000000b0;
   text-shadow: 0 0 0 blue, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
-.game-board-glyph span:not(.game-path):before {
+.game-board-glyph .game-tile span:before {
   content: "\1F02B\FE0E";
   position: absolute;
   z-index: -1;
   font-weight: bolder;
 }
 
-.game-board-glyph span:not(.game-path):before,
-.game-board-glyph span:not(.game-path).game-tile-anim-fadeout:hover:before {
+.game-board-glyph .game-tile span:before {
   color: white;
   text-shadow: 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
-.game-board-glyph span:not(.game-path) {
+.game-board-glyph .game-tile span {
   position: relative;
   z-index: 1;
 }
 
-.game-board-glyph span:not(.game-path),
-.game-board-glyph span:not(.game-path).game-tile-anim-fadeout:hover {
+.game-board-glyph .game-tile span {
   color: black;
   text-shadow: 0 0 0.01em black;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-glyph-red,
-.game-board-glyph span:not(.game-path).game-tile-glyph-red.game-tile-anim-fadeout:hover {
+.game-board-glyph .game-tile span.game-tile-glyph-red {
   color: #aa0000;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-glyph-green,
-.game-board-glyph span:not(.game-path).game-tile-glyph-green.game-tile-anim-fadeout:hover {
+.game-board-glyph .game-tile span.game-tile-glyph-green {
   color: #00aa00;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-glyph-blue,
-.game-board-glyph span:not(.game-path).game-tile-glyph-blue.game-tile-anim-fadeout:hover {
+.game-board-glyph .game-tile span.game-tile-glyph-blue {
   color: #0000aa;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-glyph-flowers,
-.game-board-glyph span:not(.game-path).game-tile-glyph-flowers.game-tile-anim-fadeout:hover {
+.game-board-glyph .game-tile span.game-tile-glyph-flowers {
   color: #00aaaa;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-glyph-seasons,
-.game-board-glyph span:not(.game-path).game-tile-glyph-seasons.game-tile-anim-fadeout:hover {
+.game-board-glyph .game-tile span.game-tile-glyph-seasons {
   color: #aa6600;
 }
 
 @media (hover: hover) {
-  .game-board-glyph span:not(.game-path):hover:before {
+  .game-board-glyph .game-tile span:hover:before {
     color: #fcfcd9;
     text-shadow: 0 0 0.2em yellow, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
   }
 
-  .game-board-glyph span:not(.game-path):hover {
+  .game-board-glyph .game-tile span:hover {
     color: #000000b0;
   }
 
-  .game-board-glyph span:not(.game-path).game-tile-glyph-red:hover {
+  .game-board-glyph .game-tile span.game-tile-glyph-red:hover {
     color: #aa0000b0;
   }
 
-  .game-board-glyph span:not(.game-path).game-tile-glyph-green:hover {
+  .game-board-glyph .game-tile span.game-tile-glyph-green:hover {
     color: #00aa00b0;
   }
 
-  .game-board-glyph span:not(.game-path).game-tile-glyph-blue:hover {
+  .game-board-glyph .game-tile span.game-tile-glyph-blue:hover {
     color: #0000aab0;
   }
 
-  .game-board-glyph span:not(.game-path).game-tile-glyph-flowers:hover {
+  .game-board-glyph .game-tile span.game-tile-glyph-flowers:hover {
     color: #00aaaab0;
   }
 
-  .game-board-glyph span:not(.game-path).game-tile-glyph-seasons:hover {
+  .game-board-glyph .game-tile span.game-tile-glyph-seasons:hover {
     color: #aa6600b0;
   }
 }
 
-.game-board-glyph span:not(.game-path).game-tile-selected:before {
+.game-board-glyph .game-tile span.game-tile-selected:before {
   color: #f5f5a7;
   text-shadow: 0 0 0.2em yellow, 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-hint-all:before {
+.game-board-glyph .game-tile span.game-tile-hint-all:before {
   color: #f5a7a7;
   text-shadow: 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-hint-current:before {
+.game-board-glyph .game-tile span.game-tile-hint-current:before {
   color: #a7a7f5;
   text-shadow: 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-selected,
-.game-board-glyph span:not(.game-path).game-tile-hint-all,
-.game-board-glyph span:not(.game-path).game-tile-hint-current {
+.game-board-glyph .game-tile span.game-tile-selected,
+.game-board-glyph .game-tile span.game-tile-hint-all,
+.game-board-glyph .game-tile span.game-tile-hint-current {
   color: #00000055;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-glyph-red.game-tile-selected,
-.game-board-glyph span:not(.game-path).game-tile-glyph-red.game-tile-hint-all,
-.game-board-glyph span:not(.game-path).game-tile-glyph-red.game-tile-hint-current {
+.game-board-glyph .game-tile span.game-tile-glyph-red.game-tile-selected,
+.game-board-glyph .game-tile span.game-tile-glyph-red.game-tile-hint-all,
+.game-board-glyph .game-tile span.game-tile-glyph-red.game-tile-hint-current {
   color: #aa000055;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-glyph-green.game-tile-selected,
-.game-board-glyph span:not(.game-path).game-tile-glyph-green.game-tile-hint-all,
-.game-board-glyph span:not(.game-path).game-tile-glyph-green.game-tile-hint-current {
+.game-board-glyph .game-tile span.game-tile-glyph-green.game-tile-selected,
+.game-board-glyph .game-tile span.game-tile-glyph-green.game-tile-hint-all,
+.game-board-glyph .game-tile span.game-tile-glyph-green.game-tile-hint-current {
   color: #00aa0055;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-glyph-blue.game-tile-selected,
-.game-board-glyph span:not(.game-path).game-tile-glyph-blue.game-tile-hint-all,
-.game-board-glyph span:not(.game-path).game-tile-glyph-blue.game-tile-hint-current {
+.game-board-glyph .game-tile span.game-tile-glyph-blue.game-tile-selected,
+.game-board-glyph .game-tile span.game-tile-glyph-blue.game-tile-hint-all,
+.game-board-glyph .game-tile span.game-tile-glyph-blue.game-tile-hint-current {
   color: #0000aa55;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-glyph-flowers.game-tile-selected,
-.game-board-glyph span:not(.game-path).game-tile-glyph-flowers.game-tile-hint-all,
-.game-board-glyph span:not(.game-path).game-tile-glyph-flowers.game-tile-hint-current {
+.game-board-glyph .game-tile span.game-tile-glyph-flowers.game-tile-selected,
+.game-board-glyph .game-tile span.game-tile-glyph-flowers.game-tile-hint-all,
+.game-board-glyph .game-tile span.game-tile-glyph-flowers.game-tile-hint-current {
   color: #00aaaa55;
 }
 
-.game-board-glyph span:not(.game-path).game-tile-glyph-seasons.game-tile-selected,
-.game-board-glyph span:not(.game-path).game-tile-glyph-seasons.game-tile-hint-all,
-.game-board-glyph span:not(.game-path).game-tile-glyph-seasons.game-tile-hint-current {
+.game-board-glyph .game-tile span.game-tile-glyph-seasons.game-tile-selected,
+.game-board-glyph .game-tile span.game-tile-glyph-seasons.game-tile-hint-all,
+.game-board-glyph .game-tile span.game-tile-glyph-seasons.game-tile-hint-current {
   color: #aa660055;
 }
 
 .game-tile-empty {
   visibility: hidden;
+  pointer-events: none;
 }
 
 .game-path {
   color: gold;
-  position: absolute;
-  transform: translateX(-100%);
-  z-index: 2;
 }
 
 .game-path-L:after,
@@ -252,6 +263,7 @@
 .game-path-anim-fadeout {
   animation: cubic-bezier(0.47, 0, 0.75, 0.72) 1s fadeout;
   visibility: hidden;
+  pointer-events: none;
 }
 
 @keyframes fadeout {
