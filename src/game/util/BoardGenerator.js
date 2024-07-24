@@ -1,4 +1,5 @@
 import Rand from "rand-seed";
+import { GameTypes } from "./GameTypes";
 
 export const layoutCodeVersionNumber = 1,
   layoutCodeRadix = 32,
@@ -830,8 +831,8 @@ function generateLayoutCodeForRectangle(width, height) {
     return null;
   }
 
-  let layoutCode = layoutCodeVersionNumber.toString(10).padStart(3, "0");
-
+  let layoutCode = GameTypes.TWOCORNER.toString(16).padStart(2, "0");
+  layoutCode += layoutCodeVersionNumber.toString(16).padStart(2, "0");
   layoutCode += parseInt(width).toString(layoutCodeRadix).slice(0, 1);
   layoutCode += parseInt(height).toString(layoutCodeRadix).slice(0, 1);
 
@@ -865,22 +866,27 @@ function generateLayoutCodeForRectangle(width, height) {
 
 // Decode and validate the layout code.
 export function decodeLayoutCode(layoutCode) {
-  if (layoutCode === null || layoutCode.length < 5) {
+  if (
+    layoutCode === null ||
+    layoutCode.length < 6 ||
+    parseInt(layoutCode.slice(0, 2), 16) !== GameTypes.TWOCORNER
+  ) {
     return null;
   }
 
-  const layoutCodeVer = parseInt(layoutCode.slice(0, 3), 10);
+  const layoutCodeVer = parseInt(layoutCode.slice(2, 4), 16);
 
+  // Backwards-compatibility?
   if (layoutCodeVer !== layoutCodeVersionNumber) {
     return null;
   }
 
-  const width = parseInt(layoutCode.slice(3, 4), layoutCodeRadix),
-    height = parseInt(layoutCode.slice(4, 5), layoutCodeRadix);
+  const width = parseInt(layoutCode.slice(4, 5), layoutCodeRadix),
+    height = parseInt(layoutCode.slice(5, 6), layoutCodeRadix);
 
   const digitsPerLine = Math.ceil((width + 1) / layoutCodeRadixBits);
 
-  if (layoutCode.length !== 5 + digitsPerLine * height) {
+  if (layoutCode.length !== 6 + digitsPerLine * height) {
     return null;
   }
 
@@ -888,7 +894,7 @@ export function decodeLayoutCode(layoutCode) {
 
   for (let i = 0; i < height; i++) {
     const nextWidth = parseInt(
-      layoutCode.slice(5 + i * digitsPerLine, 5 + (i + 1) * digitsPerLine),
+      layoutCode.slice(6 + i * digitsPerLine, 6 + (i + 1) * digitsPerLine),
       layoutCodeRadix
     );
 

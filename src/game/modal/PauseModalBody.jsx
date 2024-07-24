@@ -35,7 +35,7 @@ const PauseModalBody = ({
         <button onClick={newBoardModal}>Start New Board</button>
       </div>
       <div>
-        <button onClick={() => resetGameState(seed)}>
+        <button onClick={() => resetGameState({ newSeed: seed })}>
           Reset Current Board
         </button>
       </div>

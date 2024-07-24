@@ -277,22 +277,26 @@ const NewBoardModalBody = ({
         <button
           onClick={() =>
             useSimpleBoard
-              ? handleResetBoard(
-                  useCustomSeed ? parseInt(seed) : null,
-                  useCustomSize ? parseInt(customWidth) : boardWidth,
-                  useCustomSize ? parseInt(customHeight) : boardHeight,
-                  (difficulty & 1) !== 0,
-                  (difficulty & 2) !== 0,
-                  null
-                )
-              : handleResetBoard(
-                  useCustomSeed ? parseInt(seed) : null,
-                  null,
-                  null,
-                  (difficulty & 1) !== 0,
-                  (difficulty & 2) !== 0,
-                  layoutCode
-                )
+              ? handleResetBoard({
+                  newLayoutCode: null,
+                  newSeed: useCustomSeed ? parseInt(seed) : null,
+                  newBoardWidth: useCustomSize
+                    ? parseInt(customWidth)
+                    : boardWidth,
+                  newBoardHeight: useCustomSize
+                    ? parseInt(customHeight)
+                    : boardHeight,
+                  newBlindShuffle: (difficulty & 1) !== 0,
+                  newAllowSinglePairs: (difficulty & 2) !== 0,
+                })
+              : handleResetBoard({
+                  newLayoutCode: layoutCode,
+                  newSeed: useCustomSeed ? parseInt(seed) : null,
+                  newBoardWidth: null,
+                  newBoardHeight: null,
+                  newBlindShuffle: (difficulty & 1) !== 0,
+                  newAllowSinglePairs: (difficulty & 2) !== 0,
+                })
           }
         >
           Start New Board

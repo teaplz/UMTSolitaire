@@ -7,6 +7,8 @@ import {
   decodeLayoutCode,
 } from "../util/BoardGenerator";
 
+import { GameTypes } from "../util/GameTypes";
+
 import "./LayoutEditModalBody.css";
 
 const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
@@ -66,11 +68,9 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
 
   // Generate the layout code from the current layout.
   const generateLayoutCode = () => {
-    let code = layoutCodeVersionNumber.toString(10).padStart(3, "0");
+    let code = GameTypes.TWOCORNER.toString(16).padStart(2, "0");
+    code += layoutCodeVersionNumber.toString(16).padStart(2, "0");
 
-    // First we get the width and height of the layout. The
-
-    // Get inner margins of layout. This crops the layout down to save
     let margins = [0, maxWidth, 0, maxHeight];
 
     // Left
@@ -201,7 +201,11 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
       </div>
       <div>
         <button
-          onClick={() => startNewGame(null, null, null, null, null, layoutCode)}
+          onClick={() =>
+            startNewGame({
+              newLayoutCode: layoutCode,
+            })
+          }
         >
           Play With Layout
         </button>

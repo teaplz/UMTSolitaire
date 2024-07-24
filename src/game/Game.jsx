@@ -10,6 +10,8 @@ import {
   generateRectangularBoardWithPresolvedShuffle,
 } from "./util/BoardGenerator";
 
+import { GameTypes } from "./util/GameTypes";
+
 import GameBoard from "./board/GameBoard";
 
 import GameTimer from "./GameTimer";
@@ -36,36 +38,51 @@ export default function Game({
   setBackgroundColor,
   setBackgroundImage,
 }) {
-  const gameStateVer = 6;
+  const gameStateVer = 7;
 
-  // Settings
+  // ----------------
+  // Begin State List
+  // ----------------
+
+  //
+  // Game Settings and Debug Options
+  //
+
+  // When enabled, use emojis instead of text glyphs for the game tiles.
+  // Automatically determined by the browser capabilities, but can be toggled
+  // manually as a debugging option.
   const [useEmoji, setUseEmoji] = useState(false);
-  const [showMatchingTiles, setShowMatchingTiles] = useState(false);
-  const [showAllValidMatches, setShowAllValidMatches] = useState(false);
+
+  // Replace the Red Dragon tile with another, as some browsers do not support
+  // it correctly.
   const [fixRedDragonBugs, setFixRedDragonBugs] = useState(false);
+
+  // Debug / Cheat: Show all tiles matching the currently selected tile.
+  const [showMatchingTiles, setShowMatchingTiles] = useState(false);
+
+  // Debug / Cheat: Show all valid matches on the board.
+  const [showAllValidMatches, setShowAllValidMatches] = useState(false);
+
+  // Toggles the ability to cycle through a matching pair as a "hint". Currently
+  // not available as an option.
   const [canUseHint, setCanUseHint] = useState(true);
 
+  // Determines when the currently-selected tile would be deselected after
+  // another click, either when clicking another tile, the same tile, or any
+  // tile. Currently not available as an option.
   const DeselectBehavior = {
     ON_ANOTHER_TILE: "ON_ANOTHER_TILE",
     ON_SAME_TILE: "ON_SAME_TILE",
     ON_ANY_TILE: "ON_ANY_TILE",
   };
-
   const [deselectBehavior, setDeselectBehavior] = useState(
     DeselectBehavior.ON_ANY_TILE
   );
 
-  const EmptySpace = {
-    BLANK: "BLANK",
-    TILE_BACK: "TILE_BACK",
-  };
+  //
+  // Modals
+  //
 
-  const [emptySpace, setEmptySpace] = useState(EmptySpace.BLANK);
-
-  // Game State
-  const [gameEnded, setGameEnded] = useState(true);
-
-  // Modal
   const GameModals = {
     HELP: "HELP",
     PAUSE: "PAUSE",
@@ -76,36 +93,89 @@ export default function Game({
     GAME_WON: "GAME_WON",
     GAME_LOST: "GAME_LOST",
   };
+
+  // Determines whether or not the modal is displayed.
   const [modalDisplayed, setModalDisplayed] = useState(false);
+
+  // Current modal.
   const [modalState, setModalState] = useState(null);
+
+  // Modal "history" for pressing the back button.
   const [prevModalState, setPrevModalState] = useState(null);
 
-  // Board Generation Options
+  //
+  // Board Generation
+  //
+
+  // The type of game being played.
+  const [gameType, setGameType] = useState(GameTypes.TWOCORNER);
+
+  // Board dimensions, for use with basic board generation with certain
+  // gametypes.
   const [boardWidth, setBoardWidth] = useState(17);
   const [boardHeight, setBoardHeight] = useState(8);
-  const [seed, setSeed] = useState(1);
+
+  // The code to represent the tile structure.
   const [layoutCode, setLayoutCode] = useState(null);
+
+  // Determines the "seed" for the randomized tile selection.
+  const [seed, setSeed] = useState(1);
+
+  // If enabled, do a faster simple shuffle that does not gaurantee
+  // winnable boards, for an extra challenge.
   const [blindShuffle, setBlindShuffle] = useState(false);
+
+  // If enabled, do not force quads in smaller boards, for an extra challenge.
   const [allowSinglePairs, setAllowSinglePairs] = useState(false);
 
-  // Tile State
+  //
+  // Game and Board State
+  //
+
+  // Whether or not the game ended.
+  const [gameEnded, setGameEnded] = useState(true);
+
+  // The overall tile state. Uses an array of the object
+  // {id, char, inRemovalAnim}
   const [tiles, setTiles] = useState([]);
+
+  // The current selected tile.
   const [selectedTile, setSelectedTile] = useState(null);
+
+  // Shortcut for the number of tiles.
   const [numTiles, setNumTiles] = useState(136);
 
-  // Tile History
+  // The history of each match made in the current game. Uses an array of the
+  // object {char, tile1, tile2}, with tile1 and tile2 being ids.
   const [tileHistory, setTileHistory] = useState([]);
 
-  // Tile Hinting
+  // All tiles matching the same char as the selected tile. Used alongside
+  // showMatchingTiles.
   const [hintedTiles, setHintedTiles] = useState([]);
+
+  // All matching tile pairs. Uses a multi-dimensional array of the structure
+  // [[tile1, tile2], ...], with tile1 and tile2 being ids.
   const [allValidMatchingTiles, setAllValidMatchingTiles] = useState([]);
+
+  // Shuffled version of the above state, for when the player clicks the Hint
+  // button to show a random match.
   const [allValidMatchesAtRandom, setAllValidMatchesAtRandom] = useState([]);
+
+  // Determines which match from the shuffled array to display.
   const [allValidMatchesRandomCycle, setAllValidMatchesRandomCycle] =
     useState(0);
+
+  // Determines if one of the matches from the above state are being displayed.
   const [randomMatchDisplayed, setRandomMatchDisplayed] = useState(false);
 
-  // Pathing Maps
+  // For certain gametypes, this shows the path between two tiles for display as
+  // line segments. Uses an array for each tile location, showing the segment's
+  // direction in a string (with "-start" and "-end" to show the endpoints)
   const [pathingTiles, setPathingTiles] = useState([]);
+
+  // --------------
+  // End State List
+  // --------------
 
   const [searchParams] = useSearchParams();
 
@@ -116,7 +186,7 @@ export default function Game({
     checkFontCompatibility();
 
     const gameState = loadGameState(),
-      layout = searchParams?.get("l"),
+      layout = searchParams?.get("g"),
       seed = searchParams?.get("s"),
       blindShuffle = searchParams?.get("ts") !== null,
       allowSinglePairs = searchParams?.get("sp") !== null;
@@ -125,8 +195,16 @@ export default function Game({
     // - Create from URL search parameters. (Shared hyperlink)
     // - Recreate from the browser's web storage. (Persistence)
     // - Create basic 17x8 board. (Default)
-    if (layout !== null) {
-      resetGameState(seed, null, null, blindShuffle, allowSinglePairs, layout);
+    if (gameType !== null && layout !== null) {
+      resetGameState({
+        newGameType: gameType,
+        newLayoutCode: layout,
+        newSeed: seed,
+        newBoardWidth: null,
+        newBoardHeight: null,
+        newBlindShuffle: blindShuffle,
+        newAllowSinglePairs: allowSinglePairs,
+      });
     } else if (
       gameState !== null &&
       "v" in gameState &&
@@ -140,6 +218,7 @@ export default function Game({
             inRemovalAnim: false,
           }))
         );
+        setGameType(gameState.gameType);
         setBoardWidth(gameState.boardWidth);
         setBoardHeight(gameState.boardHeight);
         setSeed(gameState.seed);
@@ -162,7 +241,7 @@ export default function Game({
 
         setGameEnded(false);
       } catch {
-        resetGameState(null, 17, 8);
+        resetGameState({ newSeed: null, newBoardWidth: 17, newBoardHeight: 8 });
       }
     } else {
       resetGameState();
@@ -214,6 +293,7 @@ export default function Game({
       "gamestate",
       JSON.stringify({
         v: gameStateVer,
+        gameType: gameType,
         tiles: tiles.map((t) => (t.inRemovalAnim ? null : t.char)),
         boardWidth: boardWidth,
         boardHeight: boardHeight,
@@ -292,14 +372,15 @@ export default function Game({
   }
 
   // Resets the game state while generating a new board.
-  function resetGameState(
+  function resetGameState({
+    newGameType = GameTypes.TWOCORNER,
+    newLayoutCode = layoutCode,
     newSeed,
     newBoardWidth = boardWidth,
     newBoardHeight = boardHeight,
     newBlindShuffle = blindShuffle,
     newAllowSinglePairs = allowSinglePairs,
-    newLayoutCode = layoutCode
-  ) {
+  }) {
     let generatedBoard;
 
     if (newLayoutCode != null) {
@@ -567,7 +648,7 @@ export default function Game({
   }
 
   // Revert the board to the previous state.
-  function undoMatch({doHideModal = false}) {
+  function undoMatch({ doHideModal = false }) {
     if (tileHistory.length > 0) {
       const newTiles = tiles.slice();
       const lastMatch = tileHistory.slice(-1)[0];
@@ -620,7 +701,7 @@ export default function Game({
   }
 
   function generateShareUrls() {
-    const layoutUrl = `${window.location.href.split("?")[0]}?l=${layoutCode}`;
+    const layoutUrl = `${window.location.href.split("?")[0]}?g=${layoutCode}`;
 
     return {
       layoutUrl,
@@ -731,7 +812,7 @@ export default function Game({
               layoutCode,
               canUndo: tileHistory.length === 0,
               shareUrls: generateShareUrls(),
-              handleUndoMatch: () => undoMatch({doHideModal: true}),
+              handleUndoMatch: () => undoMatch({ doHideModal: true }),
               handleResetBoard: resetGameState,
               newBoardModal: () => showModal(GameModals.NEW_BOARD),
             }}
@@ -769,16 +850,16 @@ export default function Game({
           onClick={() => showModal(GameModals.PAUSE)}
         >
           <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="7vmin"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#000000"
-              strokeWidth="2"
-            >
-              <rect x="6" y="4" width="4" height="16"></rect>
-              <rect x="14" y="4" width="4" height="16"></rect>
-            </svg>
+            xmlns="http://www.w3.org/2000/svg"
+            width="7vmin"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#000000"
+            strokeWidth="2"
+          >
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
         </button>
         <div>
           <GameTimer ref={timerRef} />

@@ -39,7 +39,7 @@ const GameWinModalBody = ({
         <button onClick={newBoardModal}>Start New Board</button>
       </div>
       <div>
-        <button onClick={() => handleResetBoard(seed)}>
+        <button onClick={() => handleResetBoard({ newSeed: seed })}>
           Reset Current Board
         </button>
       </div>
