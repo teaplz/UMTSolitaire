@@ -32,7 +32,7 @@ export default function GameBoard({
           Array(1).fill({
             id: val.id,
             char: val.char,
-            selectable: val?.char != 0x00 && val?.char != 0x2b,
+            selectable: val.char !== null && val.char !== 0x2b,
             inRemovalAnim: false,
           })
         );
