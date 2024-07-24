@@ -380,7 +380,7 @@ export default function Game({
     newBoardHeight = boardHeight,
     newBlindShuffle = blindShuffle,
     newAllowSinglePairs = allowSinglePairs,
-  }) {
+  } = {}) {
     let generatedBoard;
 
     if (newLayoutCode != null) {
