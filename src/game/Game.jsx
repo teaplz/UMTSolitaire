@@ -136,7 +136,7 @@ export default function Game({
   const [gameEnded, setGameEnded] = useState(true);
 
   // The overall tile state. Uses an array of the object
-  // {id, char, inRemovalAnim}
+  // {id, char}
   const [tiles, setTiles] = useState([]);
 
   // The current selected tile.
@@ -148,6 +148,9 @@ export default function Game({
   // The history of each match made in the current game. Uses an array of the
   // object {char, tile1, tile2}, with tile1 and tile2 being ids.
   const [tileHistory, setTileHistory] = useState([]);
+
+  // List of tiles that are currently in its removal animation.
+  const [tilesInRemovalAnimation, setTilesInRemovalAnimation] = useState([]);
 
   // All tiles matching the same char as the selected tile. Used alongside
   // showMatchingTiles.
@@ -169,8 +172,9 @@ export default function Game({
   const [randomMatchDisplayed, setRandomMatchDisplayed] = useState(false);
 
   // For certain gametypes, this shows the path between two tiles for display as
-  // line segments. Uses an array for each tile location, showing the segment's
-  // direction in a string (with "-start" and "-end" to show the endpoints)
+  // line segments. Uses an array for each tile location, which are arrays showing
+  // the segment's direction in strings (which are concatenasted, with "-start"
+  // and "-end" to show the endpoints)
   const [pathingTiles, setPathingTiles] = useState([]);
 
   // --------------
@@ -211,13 +215,7 @@ export default function Game({
       gameState.v === gameStateVer
     ) {
       try {
-        setTiles(
-          gameState.tiles.map((t, i) => ({
-            id: i,
-            char: t,
-            inRemovalAnim: false,
-          }))
-        );
+        setTiles(gameState.tiles);
         setGameType(gameState.gameType);
         setBoardWidth(gameState.boardWidth);
         setBoardHeight(gameState.boardHeight);
@@ -294,7 +292,7 @@ export default function Game({
       JSON.stringify({
         v: gameStateVer,
         gameType: gameType,
-        tiles: tiles.map((t) => (t.inRemovalAnim ? null : t.char)),
+        tiles: tiles,
         boardWidth: boardWidth,
         boardHeight: boardHeight,
         seed: seed,
@@ -452,6 +450,7 @@ export default function Game({
     setAllValidMatchingTiles([]);
     setAllValidMatchesAtRandom([]);
     setPathingTiles([]);
+    setTilesInRemovalAnimation([]);
     setModalDisplayed(false);
     setGameEnded(false);
     timerRef.current.reset();
@@ -542,7 +541,7 @@ export default function Game({
   }
 
   function handleTileClick(tileId) {
-    if (tiles[tileId].char === null || tiles[tileId].inRemovalAnim === true) {
+    if (tiles[tileId].char === null) {
       // Clicked an empty space.
       return;
     } else if (selectedTile === tileId) {
@@ -571,22 +570,6 @@ export default function Game({
       if (path !== null) {
         // There is a correct path between them. These tiles are matched!
 
-        const newTiles = tiles.slice();
-
-        // Remove tiles that were in their fadeout animation from the board.
-        newTiles.forEach((tile) => {
-          if (tile.inRemovalAnim === true) {
-            tile.inRemovalAnim = false;
-            tile.char = null;
-          }
-        });
-
-        // Change the matched tiles to their fadeout animation.
-        newTiles[tileId].inRemovalAnim = true;
-        newTiles[selectedTile].inRemovalAnim = true;
-
-        setTiles(newTiles);
-
         // Push the match into the tile history stack.
         setTileHistory([
           ...tileHistory,
@@ -596,6 +579,18 @@ export default function Game({
             tile2: selectedTile,
           },
         ]);
+
+        // Put both tiles in their removal animation.
+        setTilesInRemovalAnimation([
+          { ...tiles[tileId] },
+          { ...tiles[selectedTile] },
+        ]);
+
+        // Blank out both tiles.
+        const newTiles = tiles.slice();
+        newTiles[tileId].char = null;
+        newTiles[selectedTile].char = null;
+        setTiles(newTiles);
 
         // Generate the pathing tiles for display.
         const pathingTiles = tiles.map(() => []);
@@ -654,16 +649,14 @@ export default function Game({
       const lastMatch = tileHistory.slice(-1)[0];
 
       newTiles[lastMatch.tile1].char = lastMatch.char;
-      newTiles[lastMatch.tile1].inRemovalAnim = false;
-
       newTiles[lastMatch.tile2].char = lastMatch.char;
-      newTiles[lastMatch.tile2].inRemovalAnim = false;
 
       setTiles(newTiles);
       setTileHistory(tileHistory.slice(0, -1));
       setHintedTiles([]);
       setPathingTiles([]);
       setSelectedTile(null);
+      setTilesInRemovalAnimation([]);
 
       if (gameEnded) timerRef.current.start();
 
@@ -831,6 +824,7 @@ export default function Game({
           boardHeight,
           tiles,
           pathingTiles,
+          tilesInRemovalAnimation,
           hintedTiles,
           wholeMatchingTiles: showAllValidMatches
             ? allValidMatchingTiles

@@ -92,11 +92,11 @@ export function generateBoardWithSimpleShuffle(
 
   // Blank out the top outer edge.
   for (let x = 0; x < layout.width + 2; x++)
-    id = tiles.push({ id: id, char: null, inRemovalAnim: false });
+    id = tiles.push({ id: id, char: null });
 
   for (let y = 0; y < layout.height; y++) {
     // Blank out the left outer edge.
-    id = tiles.push({ id: id, char: null, inRemovalAnim: false });
+    id = tiles.push({ id: id, char: null });
 
     for (let x = 0; x < layout.width; x++) {
       if (layout.layoutMask[tileNum] === "1") {
@@ -108,21 +108,20 @@ export function generateBoardWithSimpleShuffle(
         id = tiles.push({
           id: id,
           char: usedTiles[char],
-          inRemovalAnim: false,
         });
       } else {
-        id = tiles.push({ id: id, char: null, inRemovalAnim: false });
+        id = tiles.push({ id: id, char: null });
       }
       tileNum++;
     }
 
     // Blank out the right outer edge.
-    id = tiles.push({ id: id, char: null, inRemovalAnim: false });
+    id = tiles.push({ id: id, char: null });
   }
 
   // Blank out the bottom outer edge.
   for (let x = 0; x < layout.width + 2; x++)
-    id = tiles.push({ id: id, char: null, inRemovalAnim: false });
+    id = tiles.push({ id: id, char: null });
 
   // If there is an extra tile, remove it.
   if (chardupe % 2 === 0) {
@@ -305,29 +304,29 @@ export function generateBoardWithPresolvedShuffle(
 
   // Blank out the top outer edge.
   for (let x = 0; x < layout.width + 2; x++)
-    id = tiles.push({ id: id, char: null, inRemovalAnim: false });
+    id = tiles.push({ id: id, char: null });
 
   for (let y = 0; y < layout.height; y++) {
     // Blank out the left outer edge.
-    id = tiles.push({ id: id, char: null, inRemovalAnim: false });
+    id = tiles.push({ id: id, char: null });
 
     for (let x = 0; x < layout.width; x++) {
       if (layout.layoutMask[tileNum] === "1") {
-        id = tiles.push({ id: id, char: -1, inRemovalAnim: false });
+        id = tiles.push({ id: id, char: -1 });
       } else {
-        id = tiles.push({ id: id, char: null, inRemovalAnim: false });
+        id = tiles.push({ id: id, char: null });
       }
 
       tileNum++;
     }
 
     // Blank out the right outer edge.
-    id = tiles.push({ id: id, char: null, inRemovalAnim: false });
+    id = tiles.push({ id: id, char: null });
   }
 
   // Blank out the bottom outer edge.
   for (let x = 0; x < layout.width + 2; x++)
-    id = tiles.push({ id: id, char: null, inRemovalAnim: false });
+    id = tiles.push({ id: id, char: null });
 
   let edgeTiles = [];
 

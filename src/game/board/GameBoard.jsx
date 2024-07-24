@@ -10,6 +10,7 @@ export default function GameBoard({
   boardHeight,
   tiles,
   pathingTiles,
+  tilesInRemovalAnimation,
   hintedTiles,
   wholeMatchingTiles,
   selectedTile,
@@ -27,8 +28,28 @@ export default function GameBoard({
     for (let y = 0; y < boardHeight + 2; y++) {
       tileMap[y] = tiles
         .slice(y * (boardWidth + 2), (y + 1) * (boardWidth + 2))
-        .map((val) => Array(1).fill(val));
+        .map((val) =>
+          Array(1).fill({
+            id: val.id,
+            char: val.char,
+            selectable: val?.char != 0x00 && val?.char != 0x2b,
+            inRemovalAnim: false,
+          })
+        );
     }
+
+    tilesInRemovalAnimation.forEach((comparisonTile) =>
+      tileMap.forEach((row) =>
+        row.forEach((coord) =>
+          coord.forEach((tile, index) => {
+            if (tile.id === comparisonTile.id) {
+              coord[index].char = comparisonTile.char;
+              coord[index].inRemovalAnim = true;
+            }
+          })
+        )
+      )
+    );
 
     setTileMap(tileMap);
   }, [tiles]);
@@ -49,27 +70,17 @@ export default function GameBoard({
               <span
                 className={`game-tile${
                   tile.inRemovalAnim ? " game-tile-anim-fadeout" : ""
-                }${
-                  tile.char !== null &&
-                  tile.char !== 0x2B && 
-                  !tile.inRemovalAnim ? " game-tile-selectable" : ""
-                }`}
+                }${tile.selectable ? " game-tile-selectable" : ""}`}
                 style={height > 0 ? { top: height * -0.12 + "em" } : {}}
                 onClick={
-                  tile.char !== null &&
-                  tile.char !== 0x2B && 
-                  !tile.inRemovalAnim
-                    ? () => handleTileClick(tile.id)
-                    : null
+                  tile.selectable ? () => handleTileClick(tile.id) : null
                 }
                 key={height}
               >
                 <Tile
                   char={tile.char}
                   isSelected={tile.id === selectedTile}
-                  canBeMatchedWithSelected={
-                    hintedTiles?.includes(tile) && !tile.inRemovalAnim
-                  }
+                  canBeMatchedWithSelected={hintedTiles?.includes(tile)}
                   canBeMatchedWithOther={wholeMatchingTiles?.includes(tile.id)}
                   isFadingOut={tile.inRemovalAnim}
                   useEmoji={useEmoji}
@@ -78,7 +89,7 @@ export default function GameBoard({
               </span>
             ))}
 
-            {pathingTiles[loc[0].id] && (
+            {pathingTiles[loc[0].id]?.length > 0 && (
               <PathNode key={curPathingKey} node={pathingTiles[loc[0].id]} />
             )}
           </span>

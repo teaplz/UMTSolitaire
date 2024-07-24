@@ -12,7 +12,7 @@
  * to account for the edges.
  * @param {!number} boardWidth Width of the board, excluding the edges.
  * @param {!number} boardHeight Height of the board, excluding the edges.
- * @returns {?{{<segment: number[], dir: string>}}[]} An array of line segments 
+ * @returns {?{{<segment: number[], dir: string>}}[]} An array of line segments
  * showing one of the simplest paths. Segments are list of tile indexes in order.
  * Dir can be the directions from the PathDirection enum.
  */
@@ -105,7 +105,7 @@ export function checkSimplestPath(
         }
 
         // Obstruction in the path. Skip.
-        if (nextTile.char !== null && nextTile.inRemovalAnim !== true) {
+        if (nextTile.char !== null) {
           continue;
         }
 
@@ -177,7 +177,7 @@ export function checkSimplestPath(
         }
 
         // Obstruction in the path. Skip.
-        if (nextTile.char !== null && nextTile.inRemovalAnim !== true) {
+        if (nextTile.char !== null) {
           continue;
         }
 
@@ -249,7 +249,7 @@ export function checkSimplestPath(
         }
 
         // Obstruction in the path. Skip.
-        if (nextTile.char !== null && nextTile.inRemovalAnim !== true) {
+        if (nextTile.char !== null) {
           continue;
         }
 
@@ -321,7 +321,7 @@ export function checkSimplestPath(
         }
 
         // Obstruction in the path. Skip.
-        if (nextTile.char !== null && nextTile.inRemovalAnim !== true) {
+        if (nextTile.char !== null) {
           continue;
         }
 
@@ -410,14 +410,14 @@ export function checkAllPossibleMatches(board, boardWidth, boardHeight) {
   // Throw out a path for each valid tile.
   board.forEach((tile) => {
     // Ignore missing tiles.
-    if (tile.char === null || tile.inRemovalAnim === true) return;
+    if (tile.char === null) return;
 
     // Check each tile for matches against later tiles. We've already checked
     // against earlier tiles in earlier checks.
     let uncheckedMatchingTiles = [];
 
     for (let i = tile.id + 1; i < board.length; i++) {
-      if (board[i].char === tile.char && board[i].inRemovalAnim === false) {
+      if (board[i].char === tile.char) {
         uncheckedMatchingTiles.push(i);
       }
     }
@@ -489,7 +489,7 @@ export function checkAllPossibleMatches(board, boardWidth, boardHeight) {
           }
 
           // Obstruction in the path. Skip.
-          if (nextTile.char !== null && nextTile.inRemovalAnim !== true) {
+          if (nextTile.char !== null) {
             continue;
           }
 
@@ -570,7 +570,7 @@ export function checkAllPossibleMatches(board, boardWidth, boardHeight) {
           }
 
           // Obstruction in the path. Skip.
-          if (nextTile.char !== null && nextTile.inRemovalAnim !== true) {
+          if (nextTile.char !== null) {
             continue;
           }
 
@@ -651,7 +651,7 @@ export function checkAllPossibleMatches(board, boardWidth, boardHeight) {
           }
 
           // Obstruction in the path. Skip.
-          if (nextTile.char !== null && nextTile.inRemovalAnim !== true) {
+          if (nextTile.char !== null) {
             continue;
           }
 
@@ -732,7 +732,7 @@ export function checkAllPossibleMatches(board, boardWidth, boardHeight) {
           }
 
           // Obstruction in the path. Skip.
-          if (nextTile.char !== null && nextTile.inRemovalAnim !== true) {
+          if (nextTile.char !== null) {
             continue;
           }
 
