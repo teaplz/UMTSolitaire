@@ -49,6 +49,10 @@
   cursor: pointer;
 }
 
+.game-tile:not(.game-tile-selectable) {
+  pointer-events: none;
+}
+
 .game-board-emoji .game-tile span {
   color: black;
   text-shadow: 0 0.06em 0 lightgrey, 0 0.12em 0 teal;
@@ -196,7 +200,6 @@
 
 .game-tile-empty {
   visibility: hidden;
-  pointer-events: none;
 }
 
 .game-path {
@@ -257,7 +260,6 @@
 .game-path-anim-fadeout {
   animation: cubic-bezier(0.47, 0, 0.75, 0.72) 1s fadeout;
   visibility: hidden;
-  pointer-events: none;
 }
 
 @keyframes fadeout {
