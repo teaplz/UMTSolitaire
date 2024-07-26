@@ -5,7 +5,7 @@ import {
   layoutCodeRadix,
   layoutCodeRadixBits,
   decodeLayoutCode,
-} from "../util/BoardGenerator";
+} from "../logic/twocorner/BoardGenerator";
 
 import { GameTypes } from "../util/GameTypes";
 

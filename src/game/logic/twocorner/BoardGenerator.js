@@ -1,5 +1,5 @@
 import Rand from "rand-seed";
-import { GameTypes } from "./GameTypes";
+import { GameTypes } from "../../util/GameTypes";
 
 export const layoutCodeVersionNumber = 1,
   layoutCodeRadix = 32,

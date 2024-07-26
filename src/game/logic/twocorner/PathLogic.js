@@ -1,9 +1,9 @@
 /**
- * Check the simplest (i.e. least amount of segments) nikakudori path between
- * two tiles on the provided game board.
+ * Search for the simplest (i.e. least amount of segments) nikakudori path
+ * between two tiles on the provided game board and return it.
  *
- * This utilizes an iterative depth-first search approach, with special modifications
- * to account for the limited amount of line segments.
+ * This utilizes an iterative depth-first search approach, with special 
+ * modifications to account for the limited amount of line segments.
  *
  * @param {!number} firstTile The tile index to start from
  * @param {!number} secondTile The tile index to end up on
@@ -16,7 +16,7 @@
  * showing one of the simplest paths. Segments are list of tile indexes in order.
  * Dir can be the directions from the PathDirection enum.
  */
-export function checkSimplestPath(
+export function searchSimplestValidPath(
   firstTile,
   secondTile,
   board,
@@ -380,12 +380,12 @@ export function checkSimplestPath(
     }
   }
 
-  console.debug("Simplest path in checkSimplestPath" + simplestPath);
+  console.debug("Simplest path in searchSimplestValidPath" + simplestPath);
   return simplestPath;
 }
 
 /**
- * Check all valid matches on the current game board.
+ * Search current game board for all valid matches.
  *
  * This utilizes an depth-first search approach, with special modifications
  * to account for the limited amount of line segments.
@@ -397,7 +397,7 @@ export function checkSimplestPath(
  * @param {!number} boardHeight Height of the board, excluding the edges.
  * @returns {?number[][]} An array of valid matching tile ID pairs.
  */
-export function checkAllPossibleMatches(board, boardWidth, boardHeight) {
+export function searchAllPossibleMatches(board, boardWidth, boardHeight) {
   const boardWidthWithEdges = boardWidth + 2,
     boardHeightWithEdges = boardHeight + 2;
 

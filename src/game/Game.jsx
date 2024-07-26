@@ -2,15 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import ReactModal from "react-modal";
 
-import { checkSimplestPath, checkAllPossibleMatches } from "./util/PathLogic";
-import {
-  generateBoardWithSimpleShuffle,
-  generateBoardWithPresolvedShuffle,
-  generateRectangularBoardWithSimpleShuffle,
-  generateRectangularBoardWithPresolvedShuffle,
-} from "./util/BoardGenerator";
-
 import { GameTypes } from "./util/GameTypes";
+
+import * as TraditionalGameType from "./logic/TraditionalGameType";
+import * as TwoCornerGameType from "./logic/TwoCornerGameType";
 
 import GameBoard from "./board/GameBoard";
 
@@ -379,57 +374,14 @@ export default function Game({
     newBlindShuffle = blindShuffle,
     newAllowSinglePairs = allowSinglePairs,
   } = {}) {
-    let generatedBoard;
-
-    if (newLayoutCode != null) {
-      // Generate the board based on the provided layout code. Fallback to the
-      // default board if it fails.
-
-      if (newBlindShuffle) {
-        generatedBoard = generateBoardWithSimpleShuffle(
-          newSeed,
-          newLayoutCode,
-          newAllowSinglePairs
-        );
-      } else {
-        generatedBoard = generateBoardWithPresolvedShuffle(
-          newSeed,
-          newLayoutCode,
-          newAllowSinglePairs
-        );
-      }
-
-      if (generatedBoard === null) {
-        console.error(
-          "Invalid generated board, switching to default 17x8 board."
-        );
-
-        generatedBoard = generateRectangularBoardWithPresolvedShuffle(
-          null,
-          17,
-          8
-        );
-      }
-    } else {
-      // Generate a basic rectangular board based on the provided width and
-      // height.
-
-      if (newBlindShuffle) {
-        generatedBoard = generateRectangularBoardWithSimpleShuffle(
-          newSeed,
-          newBoardWidth,
-          newBoardHeight,
-          newAllowSinglePairs
-        );
-      } else {
-        generatedBoard = generateRectangularBoardWithPresolvedShuffle(
-          newSeed,
-          newBoardWidth,
-          newBoardHeight,
-          newAllowSinglePairs
-        );
-      }
-    }
+    let generatedBoard = TwoCornerGameType.generateBoard({
+      layoutCode: newLayoutCode,
+      boardWidth: newBoardWidth,
+      boardHeight: newBoardHeight,
+      seed: newSeed,
+      useBlindShuffle: newBlindShuffle,
+      allowSinglePairs: newAllowSinglePairs,
+    });
 
     if (generatedBoard === null) {
       console.log("Failed to generate board! Cancel board reset.");
@@ -468,7 +420,7 @@ export default function Game({
   // Check all possible matches for the current board. Display them in debugging
   // options, and check the game end state when there are no matches remaining.
   function checkAllValidMatches() {
-    const allValidMatches = checkAllPossibleMatches(
+    const allValidMatches = TwoCornerGameType.searchAllPossibleMatches(
       tiles,
       boardWidth,
       boardHeight
@@ -559,7 +511,7 @@ export default function Game({
     ) {
       // Clicked a matching tile.
 
-      const path = checkSimplestPath(
+      const path = TwoCornerGameType.searchSimplestValidPath(
         tileId,
         selectedTile,
         tiles.slice(),
@@ -613,7 +565,6 @@ export default function Game({
         deselectBehavior === DeselectBehavior.ON_ANY_TILE
       ) {
         // There is no correct path. Select it if necessary.
-
         setSelectedTile(tileId);
 
         // Update the hinting system, if it's enabled.
