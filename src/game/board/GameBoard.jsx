@@ -21,22 +21,52 @@ export default function GameBoard({
   // These are stored as arrays of rows of tiles.
   const [tileMap, setTileMap] = useState([]);
 
+  // Determines if the board has half-steps in either the X or Y coordinates. 
+  // This is tracked due to z-indexing, as the default renderer sometimes shows
+  // the 3D portion of a shifted tile over/under an adjacent tile.
+  const [useHalfSteps, setUseHalfSteps] = useState(false);
+
   // Regenerate tile maps every time the tile layout changes.
   useEffect(() => {
     const tileMap = [];
 
+    let useHalfSteps = false;
+
     for (let y = 0; y < boardHeight + 2; y++) {
       tileMap[y] = tiles
         .slice(y * (boardWidth + 2), (y + 1) * (boardWidth + 2))
-        .map((val) =>
-          Array(1).fill({
-            id: val.id,
-            char: val.char,
-            selectable: val.char !== null && val.char !== 0x2b,
-            inRemovalAnim: false,
-          })
-        );
+        .map((coord) => {
+          if (coord.length > 0) {
+            return coord.map((tile) => {
+              if (tile.xhalfstep || tile.yhalfstep) useHalfSteps = true;
+              return {
+                id: tile.id,
+                char: tile.char,
+                selectable: tile.char !== null && tile.char !== 0x2b,
+                xhalfstep: tile.xhalfstep,
+                yhalfstep: tile.yhalfstep,
+                inRemovalAnim: false,
+              };
+            });
+          } else if (coord != null) {
+            return Array(1).fill({
+              id: coord.id,
+              char: coord.char,
+              selectable: coord.char !== null && coord.char !== 0x2b,
+              inRemovalAnim: false,
+            });
+          } else {
+            return Array(1).fill({
+              id: null,
+              char: null,
+              selectable: null,
+              inRemovalAnim: false,
+            });
+          }
+        });
     }
+
+    setUseHalfSteps(useHalfSteps);
 
     tilesInRemovalAnimation.forEach((comparisonTile) =>
       tileMap.forEach((row) =>
@@ -62,16 +92,38 @@ export default function GameBoard({
   useEffect(() => setCurPathingKey(-curPathingKey), [pathingTiles]);
 
   const renderTileMap = () => {
-    return tileMap.map((row, index) => (
-      <div key={index}>
-        {row.map((loc, index) => (
-          <span className="game-board-coord" key={index}>
+    return tileMap.map((row, yindex) => (
+      <div key={yindex}>
+        {row.map((loc, xindex) => (
+          <span className="game-board-coord" key={xindex}>
             {loc.map((tile, height) => (
               <span
                 className={`game-tile${
                   tile.inRemovalAnim ? " game-tile-anim-fadeout" : ""
                 }${tile.selectable ? " game-tile-selectable" : ""}`}
-                style={height > 0 ? { top: height * -0.12 + "em" } : {}}
+                style={
+                  height > 0
+                    ? {
+                        top: height * -0.12 + (tile.yhalfstep ? 0.5 : 0) + "em",
+                        left:
+                          height * -0.12 + (tile.xhalfstep ? 0.5 : 0) + "em",
+                        zIndex: useHalfSteps
+                          ? height
+                          : 2 * (height * (15 + 8) + xindex + yindex) +
+                            (tile.yhalfstep ? 1 : 0) +
+                            (tile.yhalfstep ? 1 : 0),
+                      }
+                    : useHalfSteps && (tile.xhalfstep || tile.yhalfstep)
+                    ? {
+                        top: (tile.yhalfstep ? 0.5 : 0) + "em",
+                        left: (tile.xhalfstep ? 0.5 : 0) + "em",
+                        zIndex:
+                          2 * (xindex + yindex) +
+                          (tile.yhalfstep ? 1 : 0) +
+                          (tile.yhalfstep ? 1 : 0),
+                      }
+                    : { zIndex: useHalfSteps ? 2 * (xindex + yindex) : null }
+                }
                 onClick={
                   tile.selectable ? () => handleTileClick(tile.id) : null
                 }
