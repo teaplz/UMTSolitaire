@@ -1,4 +1,5 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect } from "react";
+import ClassNames from "classnames";
 
 import Tile from "./Tile";
 import PathNode from "./PathNode";
@@ -10,6 +11,7 @@ export default function GameBoard({
   boardHeight,
   tiles,
   pathingTiles,
+  padBoard = false,
   tilesInRemovalAnimation,
   hintedTiles,
   wholeMatchingTiles,
@@ -21,7 +23,7 @@ export default function GameBoard({
   // These are stored as arrays of rows of tiles.
   const [tileMap, setTileMap] = useState([]);
 
-  // Determines if the board has half-steps in either the X or Y coordinates. 
+  // Determines if the board has half-steps in either the X or Y coordinates.
   // This is tracked due to z-indexing, as the default renderer sometimes shows
   // the 3D portion of a shifted tile over/under an adjacent tile.
   const [useHalfSteps, setUseHalfSteps] = useState(false);
@@ -98,9 +100,11 @@ export default function GameBoard({
           <span className="game-board-coord" key={xindex}>
             {loc.map((tile, height) => (
               <span
-                className={`game-tile${
-                  tile.inRemovalAnim ? " game-tile-anim-fadeout" : ""
-                }${tile.selectable ? " game-tile-selectable" : ""}`}
+                className={ClassNames(
+                  "game-tile",
+                  tile.inRemovalAnim ? "game-tile-anim-fadeout" : null,
+                  tile.selectable ? "game-tile-selectable" : null
+                )}
                 style={
                   height > 0
                     ? {
@@ -108,10 +112,10 @@ export default function GameBoard({
                         left:
                           height * -0.12 + (tile.xhalfstep ? 0.5 : 0) + "em",
                         zIndex: useHalfSteps
-                          ? height
-                          : 2 * (height * (15 + 8) + xindex + yindex) +
+                          ? 2 * (height * (15 + 8) + xindex + yindex) +
                             (tile.yhalfstep ? 1 : 0) +
-                            (tile.yhalfstep ? 1 : 0),
+                            (tile.yhalfstep ? 1 : 0)
+                          : height,
                       }
                     : useHalfSteps && (tile.xhalfstep || tile.yhalfstep)
                     ? {
@@ -141,7 +145,7 @@ export default function GameBoard({
               </span>
             ))}
 
-            {pathingTiles[loc[0].id]?.length > 0 && (
+            {pathingTiles != null && pathingTiles[loc[0].id]?.length > 0 && (
               <PathNode key={curPathingKey} node={pathingTiles[loc[0].id]} />
             )}
           </span>
@@ -193,7 +197,12 @@ export default function GameBoard({
   return (
     <div className="game-board" style={horizontalTileStyle}>
       <div className="game-board-v" style={verticalTileStyle}>
-        <div className={useEmoji ? "game-board-emoji" : "game-board-glyph"}>
+        <div
+          className={ClassNames(
+            useEmoji ? "game-board-emoji" : "game-board-glyph",
+            padBoard ? "game-board-pad" : null
+          )}
+        >
           {renderTileMap()}
         </div>
       </div>
