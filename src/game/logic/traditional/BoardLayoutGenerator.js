@@ -204,8 +204,7 @@ export function generateBoardLayout(layoutCode) {
   // Parse tile layout.
   const maxTilesSize = boardWidth * boardHeight;
   let tiles = [],
-    tileStrPointer = 0,
-    numTiles = 0;
+    tileStrPointer = 0;
 
   // For each coordinate with tiles on it, add tiles to the tile layout array.
   while (tileStrPointer < tileLayout.length) {
@@ -234,8 +233,6 @@ export function generateBoardLayout(layoutCode) {
       Array.from({ length: 32 - Math.clz32(tileMask) }, (_, i) => {
         if ((tileMask & (1 << i)) > 0) {
           return {
-            id: numTiles++,
-            char: 0x01,
             xhalfstep: (tileXHS & (1 << i)) > 0,
             yhalfstep: (tileYHS & (1 << i)) > 0,
           };
@@ -251,7 +248,7 @@ export function generateBoardLayout(layoutCode) {
     tiles.push(null);
   }
 
-  return { tiles, width: boardWidth, height: boardHeight, numTiles };
+  return { tiles, width: boardWidth, height: boardHeight };
 }
 
 // Quick-and-dirty checksum generator. Generates a 3-bit base-32 string from
@@ -315,47 +312,42 @@ const layoutCodeVowelSubstitutions = {
 // "Turtle" layout. Not efficient in the slightest. May delete at some point.
 export function generateTurtleBoard() {
   const tiles = Array.from({ length: 15 * 8 }, (_) => []);
-  let id = 0;
 
   // Row 1
-  for (let x = 1; x < 13; x++) tiles[15 * 0 + x].push({ id: id++, char: 0x01 });
+  for (let x = 1; x < 13; x++) tiles[15 * 0 + x].push({});
   // Row 2
-  for (let x = 3; x < 11; x++) tiles[15 * 1 + x].push({ id: id++, char: 0x01 });
-  for (let x = 4; x < 10; x++) tiles[15 * 1 + x].push({ id: id++, char: 0x02 });
+  for (let x = 3; x < 11; x++) tiles[15 * 1 + x].push({});
+  for (let x = 4; x < 10; x++) tiles[15 * 1 + x].push({});
   // Row 3
-  for (let x = 2; x < 12; x++) tiles[15 * 2 + x].push({ id: id++, char: 0x01 });
-  for (let x = 4; x < 10; x++) tiles[15 * 2 + x].push({ id: id++, char: 0x02 });
-  for (let x = 5; x < 9; x++) tiles[15 * 2 + x].push({ id: id++, char: 0x03 });
+  for (let x = 2; x < 12; x++) tiles[15 * 2 + x].push({});
+  for (let x = 4; x < 10; x++) tiles[15 * 2 + x].push({});
+  for (let x = 5; x < 9; x++) tiles[15 * 2 + x].push({});
   // Row 4
-  for (let x = 0; x < 1; x++)
-    tiles[15 * 3 + x].push({ id: id++, char: 0x01, yhalfstep: true });
-  for (let x = 1; x < 13; x++) tiles[15 * 3 + x].push({ id: id++, char: 0x01 });
-  for (let x = 13; x < 15; x++)
-    tiles[15 * 3 + x].push({ id: id++, char: 0x01, yhalfstep: true });
-  for (let x = 4; x < 10; x++) tiles[15 * 3 + x].push({ id: id++, char: 0x02 });
-  for (let x = 5; x < 9; x++) tiles[15 * 3 + x].push({ id: id++, char: 0x03 });
-  for (let x = 6; x < 8; x++) tiles[15 * 3 + x].push({ id: id++, char: 0x04 });
+  for (let x = 0; x < 1; x++) tiles[15 * 3 + x].push({ yhalfstep: true });
+  for (let x = 1; x < 13; x++) tiles[15 * 3 + x].push({});
+  for (let x = 13; x < 15; x++) tiles[15 * 3 + x].push({ yhalfstep: true });
+  for (let x = 4; x < 10; x++) tiles[15 * 3 + x].push({});
+  for (let x = 5; x < 9; x++) tiles[15 * 3 + x].push({});
+  for (let x = 6; x < 8; x++) tiles[15 * 3 + x].push({});
   for (let x = 6; x < 7; x++)
     tiles[15 * 3 + x].push({
-      id: id++,
-      char: 0x05,
       xhalfstep: true,
       yhalfstep: true,
     });
   // Row 5
-  for (let x = 1; x < 13; x++) tiles[15 * 4 + x].push({ id: id++, char: 0x01 });
-  for (let x = 4; x < 10; x++) tiles[15 * 4 + x].push({ id: id++, char: 0x02 });
-  for (let x = 5; x < 9; x++) tiles[15 * 4 + x].push({ id: id++, char: 0x03 });
-  for (let x = 6; x < 8; x++) tiles[15 * 4 + x].push({ id: id++, char: 0x04 });
+  for (let x = 1; x < 13; x++) tiles[15 * 4 + x].push({});
+  for (let x = 4; x < 10; x++) tiles[15 * 4 + x].push({});
+  for (let x = 5; x < 9; x++) tiles[15 * 4 + x].push({});
+  for (let x = 6; x < 8; x++) tiles[15 * 4 + x].push({});
   // Row 6
-  for (let x = 2; x < 12; x++) tiles[15 * 5 + x].push({ id: id++, char: 0x01 });
-  for (let x = 4; x < 10; x++) tiles[15 * 5 + x].push({ id: id++, char: 0x02 });
-  for (let x = 5; x < 9; x++) tiles[15 * 5 + x].push({ id: id++, char: 0x03 });
+  for (let x = 2; x < 12; x++) tiles[15 * 5 + x].push({});
+  for (let x = 4; x < 10; x++) tiles[15 * 5 + x].push({});
+  for (let x = 5; x < 9; x++) tiles[15 * 5 + x].push({});
   // Row 7
-  for (let x = 3; x < 11; x++) tiles[15 * 6 + x].push({ id: id++, char: 0x01 });
-  for (let x = 4; x < 10; x++) tiles[15 * 6 + x].push({ id: id++, char: 0x02 });
+  for (let x = 3; x < 11; x++) tiles[15 * 6 + x].push({});
+  for (let x = 4; x < 10; x++) tiles[15 * 6 + x].push({});
   // Row 8
-  for (let x = 1; x < 13; x++) tiles[15 * 7 + x].push({ id: id++, char: 0x01 });
+  for (let x = 1; x < 13; x++) tiles[15 * 7 + x].push({});
 
   return tiles;
 }

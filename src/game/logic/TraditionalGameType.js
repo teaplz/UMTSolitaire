@@ -1,4 +1,4 @@
-import * as BoardGenerator from "./traditional/BoardGenerator";
+import * as BoardLayoutGenerator from "./traditional/BoardLayoutGenerator";
 
 const LAYOUT_CODE_TURTLE =
   "MJS01f8y2XDHHLRX5GKRX6RQJJQLC4Z8FLRQP2Cg7zCNPQLRC4Z8Z4Z8CXDLQPNNPQLRX4RQJJQLX6GKRX5HHLR";
@@ -8,14 +8,14 @@ const LAYOUT_CODE_TURTLE =
 // For now, just generate the classic "turtle" layout.
 export function generateBoard({ fullTest = false }) {
   const turtleLayoutCode = fullTest
-    ? BoardGenerator.generateLayoutCode({
-        tiles: BoardGenerator.generateTurtleBoard(),
+    ? BoardLayoutGenerator.generateLayoutCode({
+        tiles: BoardLayoutGenerator.generateTurtleBoard(),
         width: 15,
         height: 8,
       })
     : LAYOUT_CODE_TURTLE;
 
-  const board = BoardGenerator.generateBoardLayout(turtleLayoutCode);
+  const board = BoardLayoutGenerator.generateBoardLayout(turtleLayoutCode);
 
   return {
     ...board,
