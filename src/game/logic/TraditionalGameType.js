@@ -1,7 +1,10 @@
+import * as BoardGenerator from "./traditional/BoardGenerator";
 import * as BoardLayoutGenerator from "./traditional/BoardLayoutGenerator";
 
 const LAYOUT_CODE_TURTLE =
   "MJS01f8y2XDHHLRX5GKRX6RQJJQLC4Z8FLRQP2Cg7zCNPQLRC4Z8Z4Z8CXDLQPNNPQLRX4RQJJQLX6GKRX5HHLR";
+  
+export const FLOWER_TILE = 0x22, SEASON_TILE = 0x23;
 
 // Generate a full playable board.
 //
@@ -15,7 +18,9 @@ export function generateBoard({ fullTest = false }) {
       })
     : LAYOUT_CODE_TURTLE;
 
-  const board = BoardLayoutGenerator.generateBoardLayout(turtleLayoutCode);
+  const board = BoardGenerator.generateBoardWithSimpleShuffle({
+    layout: BoardLayoutGenerator.generateBoardLayout(turtleLayoutCode),
+  });
 
   return {
     ...board,
