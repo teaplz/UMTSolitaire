@@ -38,9 +38,18 @@ export default function GameBoard({
       tileMap[y] = tiles
         .slice(y * (boardWidth + 2), (y + 1) * (boardWidth + 2))
         .map((coord) => {
-          if (coord.length > 0) {
+          if (coord?.length > 0) {
             return coord.map((tile) => {
+              if (tile === null)
+                return Array(1).fill({
+                  id: null,
+                  char: null,
+                  selectable: null,
+                  inRemovalAnim: false,
+                });
+
               if (tile.xhalfstep || tile.yhalfstep) useHalfSteps = true;
+
               return {
                 id: tile.id,
                 char: tile.char,
