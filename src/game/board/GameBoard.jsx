@@ -117,9 +117,9 @@ export default function GameBoard({
                 style={
                   height > 0
                     ? {
-                        top: height * -0.12 + (tile.yhalfstep ? 0.5 : 0) + "em",
+                        top: height * -0.16 + (tile.yhalfstep ? 0.5 : 0) + "em",
                         left:
-                          height * -0.12 + (tile.xhalfstep ? 0.5 : 0) + "em",
+                          height * -0.16 + (tile.xhalfstep ? 0.5 : 0) + "em",
                         zIndex: useHalfSteps
                           ? 2 * (height * (15 + 8) + xindex + yindex) +
                             (tile.yhalfstep ? 1 : 0) +
