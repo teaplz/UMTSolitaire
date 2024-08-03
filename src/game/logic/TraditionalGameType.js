@@ -18,7 +18,7 @@ export function generateBoard({ fullTest = false }) {
       })
     : LAYOUT_CODE_TURTLE;
 
-  const board = BoardGenerator.generateBoardWithSimpleShuffle({
+  const board = BoardGenerator.generateBoardWithPresolvedShuffle({
     layout: BoardLayoutGenerator.generateBoardLayout(turtleLayoutCode),
   });
 
