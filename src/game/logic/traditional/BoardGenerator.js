@@ -378,7 +378,7 @@ export function generateBoardWithPresolvedShuffle({
 
 // Generates an array of tiles, regardless of height, and the tiles that either
 // overlap them or are directly adjacent to them horizontally. All resulting
-// tiles are refernces to the tile objects from the tiles parameter.
+// tiles are references to the tile objects from the tiles parameter.
 function calculateObstructedTiles({ tiles, width, height }) {
   if (tiles == null) return null;
 
@@ -394,12 +394,10 @@ function calculateObstructedTiles({ tiles, width, height }) {
       obstructedTiles.push({
         tile,
         overlapping: [
-          // TODO: Manage gaps.
+          // Add the tile directly above it, regardless of half-stepping.
+          coord.length > height ? coord[height + 1] : null,
 
-          // Add all directly above it, regardless of half-stepping.
-          coord.length > height ? coord.slice(height + 1) : null,
-
-          // Add surrounding tiles that are half-stepped above it.
+          // Add surrounding tiles that are half-stepped directly above it.
 
           // Upper-Left
           // - Not at left edge
@@ -409,11 +407,11 @@ function calculateObstructedTiles({ tiles, width, height }) {
           // - Tile is not stepped
           !tile.xhalfstep &&
           !tile.yhalfstep &&
-          // - Other tiles exist and is stepped in both
-          tiles[index - boardWidth - 1]?.length > height
-            ? tiles[index - boardWidth - 1]
-                .slice(height + 1)
-                .filter((t) => t.xhalfstep && t.yhalfstep)
+          // - Other tile exists and is stepped in both
+          tiles[index - boardWidth - 1]?.length > height &&
+          tiles[index - boardWidth - 1][height + 1]?.xhalfstep &&
+          tiles[index - boardWidth - 1][height + 1]?.yhalfstep
+            ? tiles[index - boardWidth - 1][height + 1]
             : null,
 
           // Upper
@@ -421,11 +419,10 @@ function calculateObstructedTiles({ tiles, width, height }) {
           index - boardWidth >= 0 &&
           // - Tile is not y-stepped
           !tile.yhalfstep &&
-          // - Other tiles exist and is y-stepped
-          tiles[index - boardWidth]?.length > height
-            ? tiles[index - boardWidth]
-                .slice(height + 1)
-                .filter((t) => t.yhalfstep)
+          // - Other tile exists and is y-stepped
+          tiles[index - boardWidth]?.length > height &&
+          tiles[index - boardWidth][height + 1]?.yhalfstep
+            ? tiles[index - boardWidth][height + 1]
             : null,
 
           // Upper-Right
@@ -436,11 +433,11 @@ function calculateObstructedTiles({ tiles, width, height }) {
           // - Tile is x-stepped and not y-stepped
           tile.xhalfstep &&
           !tile.yhalfstep &&
-          // - Other tiles exist, is y-stepped, and not x-stepped
-          tiles[index - boardWidth + 1]?.length > height
-            ? tiles[index - boardWidth + 1]
-                .slice(height + 1)
-                .filter((t) => !t.xhalfstep && t.yhalfstep)
+          // - Other tile exists, is y-stepped, and not x-stepped
+          tiles[index - boardWidth + 1]?.length > height &&
+          !tiles[index - boardWidth + 1][height + 1]?.xhalfstep &&
+          tiles[index - boardWidth + 1][height + 1]?.yhalfstep
+            ? tiles[index - boardWidth + 1][height + 1]
             : null,
 
           // Left
@@ -448,9 +445,10 @@ function calculateObstructedTiles({ tiles, width, height }) {
           !(index % boardWidth === 0) &&
           // - Tile is not x-stepped
           !tile.xhalfstep &&
-          // - Other tiles exist and is x-stepped
-          tiles[index - 1]?.length > height
-            ? tiles[index - 1].slice(height + 1).filter((t) => t.xhalfstep)
+          // - Other tile exists and is x-stepped
+          tiles[index - 1]?.length > height &&
+          tiles[index - 1][height + 1]?.xhalfstep
+            ? tiles[index - 1][height + 1]
             : null,
 
           // Right
@@ -458,9 +456,10 @@ function calculateObstructedTiles({ tiles, width, height }) {
           !(index % boardWidth === boardWidth - 1) &&
           // - Tile is x-stepped
           tile.xhalfstep &&
-          // - Other tiles exist and is not x-stepped
-          tiles[index + 1]?.length > height
-            ? tiles[index + 1].slice(height + 1).filter((t) => !t.xhalfstep)
+          // - Other tile exists and is not x-stepped
+          tiles[index + 1]?.length > height &&
+          !tiles[index + 1][height + 1]?.xhalfstep
+            ? tiles[index + 1][height + 1]
             : null,
 
           // Lower-Left
@@ -471,11 +470,11 @@ function calculateObstructedTiles({ tiles, width, height }) {
           // - Tile is y-stepped and not x-stepped
           !tile.xhalfstep &&
           tile.yhalfstep &&
-          // - Other tiles exist, is x-stepped, and not y-stepped
-          tiles[index + boardWidth - 1]?.length > height
-            ? tiles[index + boardWidth - 1]
-                .slice(height + 1)
-                .filter((t) => t.xhalfstep && !t.yhalfstep)
+          // - Other tile exists, is x-stepped, and not y-stepped
+          tiles[index + boardWidth - 1]?.length > height &&
+          tiles[index + boardWidth - 1][height + 1]?.xhalfstep &&
+          !tiles[index + boardWidth - 1][height + 1]?.yhalfstep
+            ? tiles[index + boardWidth - 1][height + 1]
             : null,
 
           // Lower
@@ -483,11 +482,10 @@ function calculateObstructedTiles({ tiles, width, height }) {
           index + boardWidth < boardWidth * boardHeight &&
           // - Tile is y-stepped
           tile.yhalfstep &&
-          // - Other tiles exist and is not y-stepped
-          tiles[index + boardWidth]?.length > height
-            ? tiles[index + boardWidth]
-                .slice(height + 1)
-                .filter((t) => !t.yhalfstep)
+          // - Other tile exists and is not y-stepped
+          tiles[index + boardWidth]?.length > height &&
+          !tiles[index + boardWidth][height + 1]?.yhalfstep
+            ? tiles[index + boardWidth][height + 1]
             : null,
 
           // Lower-Right
@@ -498,15 +496,13 @@ function calculateObstructedTiles({ tiles, width, height }) {
           // - Tile is stepped in both
           tile.xhalfstep &&
           tile.yhalfstep &&
-          // - Other tiles exist and is not stepped
-          tiles[index - boardWidth - 1]?.length > height
-            ? tiles[index - boardWidth - 1]
-                .slice(height + 1)
-                .filter((t) => !t.xhalfstep && !t.yhalfstep)
+          // - Other tile exists and is not stepped
+          tiles[index + boardWidth + 1]?.length > height &&
+          !tiles[index + boardWidth + 1][height + 1]?.xhalfstep &&
+          !tiles[index + boardWidth + 1][height + 1]?.yhalfstep
+            ? tiles[index + boardWidth + 1][height + 1]
             : null,
-        ]
-          .flat()
-          .filter((v) => v),
+        ].filter((v) => v),
 
         leftAdjacent: [
           // Left
