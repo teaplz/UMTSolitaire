@@ -77,7 +77,7 @@ export function generateBoardWithSimpleShuffle({
   // The "tiles" array is the final board output, while "tileRefList" keeps a
   // reference to each tile in the board so we don't have to constantly search
   // while shuffling.
-  const tiles = layout.tiles.slice(),
+  const tiles = JSON.parse(JSON.stringify(layout.tiles)),
     tileRefList = [];
 
   char = 0;
@@ -137,6 +137,11 @@ export function generateBoardWithSimpleShuffle({
     ...layout,
     tiles,
     numTiles: tileRefList.length,
+    obstructedTiles: calculateObstructedTiles({
+      tiles,
+      width: layout.width,
+      height: layout.height,
+    }),
     seed: finalSeed,
   };
 }
@@ -171,231 +176,17 @@ export function generateBoardWithPresolvedShuffle({
     randValue = 0;
 
   // Final board output.
-  const tiles = layout.tiles.slice();
+  const tiles = JSON.parse(JSON.stringify(layout.tiles));
+  let id = 0;
 
   // Keeps track of tiles that are currently unmatched, along with
   // all tiles that are currently overlapping and/or adjacent.
-  let tilesToProcess = [];
-
-  // Populate tilesToProcess while assigning IDs to the tiles.
-  tiles.forEach((coord, index) =>
-    coord?.forEach((tile, height) => {
-      tile.id =
-        tilesToProcess.push({
-          tile,
-          overlapping: [
-            // TODO: Manage gaps.
-
-            // Add all directly above it, regardless of half-stepping.
-            coord.length > height ? coord.slice(height + 1) : null,
-
-            // Add surrounding tiles that are half-stepped above it.
-
-            // Upper-Left
-            // - Not at left edge
-            !(index % layout.width === 0) &&
-            // - Not at top edge
-            index - layout.width >= 0 &&
-            // - Tile is not stepped
-            !tile.xhalfstep &&
-            !tile.yhalfstep &&
-            // - Other tiles exist and is stepped in both
-            tiles[index - layout.width - 1]?.length > height
-              ? tiles[index - layout.width - 1]
-                  .slice(height + 1)
-                  .filter((t) => t.xhalfstep && t.yhalfstep)
-              : null,
-
-            // Upper
-            // - Not at top edge
-            index - layout.width >= 0 &&
-            // - Tile is not y-stepped
-            !tile.yhalfstep &&
-            // - Other tiles exist and is y-stepped
-            tiles[index - layout.width]?.length > height
-              ? tiles[index - layout.width]
-                  .slice(height + 1)
-                  .filter((t) => t.yhalfstep)
-              : null,
-
-            // Upper-Right
-            // - Not at right edge
-            !(index % layout.width === layout.width - 1) &&
-            // - Not at top edge
-            index - layout.width >= 0 &&
-            // - Tile is x-stepped and not y-stepped
-            tile.xhalfstep &&
-            !tile.yhalfstep &&
-            // - Other tiles exist, is y-stepped, and not x-stepped
-            tiles[index - layout.width + 1]?.length > height
-              ? tiles[index - layout.width + 1]
-                  .slice(height + 1)
-                  .filter((t) => !t.xhalfstep && t.yhalfstep)
-              : null,
-
-            // Left
-            // - Not at left edge
-            !(index % layout.width === 0) &&
-            // - Tile is not x-stepped
-            !tile.xhalfstep &&
-            // - Other tiles exist and is x-stepped
-            tiles[index - 1]?.length > height
-              ? tiles[index - 1].slice(height + 1).filter((t) => t.xhalfstep)
-              : null,
-
-            // Right
-            // - Not at right edge
-            !(index % layout.width === layout.width - 1) &&
-            // - Tile is x-stepped
-            tile.xhalfstep &&
-            // - Other tiles exist and is not x-stepped
-            tiles[index + 1]?.length > height
-              ? tiles[index + 1].slice(height + 1).filter((t) => !t.xhalfstep)
-              : null,
-
-            // Lower-Left
-            // - Not at left edge
-            !(index % layout.width === 0) &&
-            // - Not at bottom edge
-            index + layout.width < layout.width * layout.height &&
-            // - Tile is y-stepped and not x-stepped
-            !tile.xhalfstep &&
-            tile.yhalfstep &&
-            // - Other tiles exist, is x-stepped, and not y-stepped
-            tiles[index + layout.width - 1]?.length > height
-              ? tiles[index + layout.width - 1]
-                  .slice(height + 1)
-                  .filter((t) => t.xhalfstep && !t.yhalfstep)
-              : null,
-
-            // Lower
-            // - Not at bottom edge
-            index + layout.width < layout.width * layout.height &&
-            // - Tile is y-stepped
-            tile.yhalfstep &&
-            // - Other tiles exist and is not y-stepped
-            tiles[index + layout.width]?.length > height
-              ? tiles[index + layout.width]
-                  .slice(height + 1)
-                  .filter((t) => !t.yhalfstep)
-              : null,
-
-            // Lower-Right
-            // - Not at right edge
-            !(index % layout.width === layout.width - 1) &&
-            // - Not at bottom edge
-            index + layout.width < layout.width * layout.height &&
-            // - Tile is stepped in both
-            tile.xhalfstep &&
-            tile.yhalfstep &&
-            // - Other tiles exist and is not stepped
-            tiles[index - layout.width - 1]?.length > height
-              ? tiles[index - layout.width - 1]
-                  .slice(height + 1)
-                  .filter((t) => !t.xhalfstep && !t.yhalfstep)
-              : null,
-          ]
-            .flat()
-            .filter((v) => v),
-
-          leftAdjacent: [
-            // Left
-            // - Not at left edge
-            !(index % layout.width === 0) &&
-            // - Other tile exists
-            tiles[index - 1]?.length >= height &&
-            // - Not x-hs away from other tile.
-            !(!tiles[index - 1][height]?.xhalfstep && tile.xhalfstep)
-              ? tiles[index - 1][height]
-              : null,
-
-            // Upper-Left
-            // - Not at left edge
-            !(index % layout.width === 0) &&
-            // - Not at top edge
-            index - layout.width >= 0 &&
-            // - Other tile exists
-            tiles[index - layout.width - 1]?.length >= height &&
-            // - Not x-hs away from other tile.
-            !(
-              !tiles[index - layout.width - 1][height]?.xhalfstep &&
-              tile.xhalfstep
-            ) &&
-            // - Is not y-hs, but other tile is.
-            tiles[index - layout.width - 1][height]?.yhalfstep &&
-            !tile.yhalfstep
-              ? tiles[index - layout.width - 1][height]
-              : null,
-
-            // Lower-Left
-            // - Not at left edge
-            !(index % layout.width === 0) &&
-            // - Not at bottom edge
-            index + layout.width < layout.width * layout.height &&
-            // - Other tile exists
-            tiles[index + layout.width - 1]?.length >= height &&
-            // - Not x-hs away from other tile.
-            !(
-              !tiles[index + layout.width - 1][height]?.xhalfstep &&
-              tile.xhalfstep
-            ) &&
-            // - Is y-hs, but other tile is not.
-            !tiles[index + layout.width - 1][height]?.yhalfstep &&
-            tile.yhalfstep
-              ? tiles[index + layout.width - 1][height]
-              : null,
-          ].filter((v) => v),
-
-          rightAdjacent: [
-            // Right
-            // - Not at right edge
-            !(index % layout.width === layout.width - 1) &&
-            // - Other tile exists
-            tiles[index + 1]?.length >= height &&
-            // - Not x-hs away from other tile.
-            !(tiles[index + 1][height]?.xhalfstep && !tile.xhalfstep)
-              ? tiles[index + 1][height]
-              : null,
-
-            // Upper-Right
-            // - Not at right edge
-            !(index % layout.width === layout.width - 1) &&
-            // - Not at top edge
-            index - layout.width >= 0 &&
-            // - Other tile exists
-            tiles[index - layout.width + 1]?.length >= height &&
-            // - Not x-hs away from other tile.
-            !(
-              tiles[index - layout.width + 1][height]?.xhalfstep &&
-              !tile.xhalfstep
-            ) &&
-            // - Is not y-hs, but other tile is.
-            tiles[index - layout.width + 1][height]?.yhalfstep &&
-            !tile.yhalfstep
-              ? tiles[index - layout.width + 1][height]
-              : null,
-
-            // Lower-Right
-            // - Not at right edge
-            !(index % layout.width === layout.width - 1) &&
-            // - Not at bottom edge
-            index + layout.width < layout.width * layout.height &&
-            // - Other tile exists
-            tiles[index + layout.width + 1]?.length >= height &&
-            // - Not x-hs away from other tile.
-            !(
-              tiles[index + layout.width + 1][height]?.xhalfstep &&
-              !tile.xhalfstep
-            ) &&
-            // - Is y-hs, but other tile is not.
-            !tiles[index + layout.width + 1][height]?.yhalfstep &&
-            tile.yhalfstep
-              ? tiles[index + layout.width + 1][height]
-              : null,
-          ].filter((v) => v),
-        }) - 1;
-    })
-  );
+  const obstructedTiles = calculateObstructedTiles({
+    tiles,
+    width: layout.width,
+    height: layout.height,
+  });
+  let tilesToProcess = obstructedTiles.slice();
 
   let numTiles = tilesToProcess.length;
   const numPairs = numTiles >> 1;
@@ -479,7 +270,7 @@ export function generateBoardWithPresolvedShuffle({
 
   // Flower tiles (0x22) and Season tiles (0x23) are four unique tile designs
   // each, rather than four of the same tile design.
-  //Similar to the above, shuffle the selection.
+  // Similar to the above, shuffle the selection.
   let flowerTiles = [0x22, 0x23, 0x24, 0x25],
     seasonTiles = [0x26, 0x27, 0x28, 0x29],
     nextFlowerTile = 0,
@@ -580,6 +371,237 @@ export function generateBoardWithPresolvedShuffle({
     ...layout,
     tiles,
     numTiles,
+    obstructedTiles,
     seed: finalSeed,
   };
+}
+
+// Generates an array of tiles, regardless of height, and the tiles that either
+// overlap them or are directly adjacent to them horizontally. All resulting
+// tiles are refernces to the tile objects from the tiles parameter.
+function calculateObstructedTiles({ tiles, width, height }) {
+  if (tiles == null) return null;
+
+  const boardWidth = parseInt(width),
+    boardHeight = parseInt(height);
+
+  if (isNaN(boardWidth) || isNaN(boardHeight)) return null;
+
+  const obstructedTiles = [];
+
+  tiles.forEach((coord, index) =>
+    coord?.forEach((tile, height) => {
+      obstructedTiles.push({
+        tile,
+        overlapping: [
+          // TODO: Manage gaps.
+
+          // Add all directly above it, regardless of half-stepping.
+          coord.length > height ? coord.slice(height + 1) : null,
+
+          // Add surrounding tiles that are half-stepped above it.
+
+          // Upper-Left
+          // - Not at left edge
+          !(index % boardWidth === 0) &&
+          // - Not at top edge
+          index - boardWidth >= 0 &&
+          // - Tile is not stepped
+          !tile.xhalfstep &&
+          !tile.yhalfstep &&
+          // - Other tiles exist and is stepped in both
+          tiles[index - boardWidth - 1]?.length > height
+            ? tiles[index - boardWidth - 1]
+                .slice(height + 1)
+                .filter((t) => t.xhalfstep && t.yhalfstep)
+            : null,
+
+          // Upper
+          // - Not at top edge
+          index - boardWidth >= 0 &&
+          // - Tile is not y-stepped
+          !tile.yhalfstep &&
+          // - Other tiles exist and is y-stepped
+          tiles[index - boardWidth]?.length > height
+            ? tiles[index - boardWidth]
+                .slice(height + 1)
+                .filter((t) => t.yhalfstep)
+            : null,
+
+          // Upper-Right
+          // - Not at right edge
+          !(index % boardWidth === boardWidth - 1) &&
+          // - Not at top edge
+          index - boardWidth >= 0 &&
+          // - Tile is x-stepped and not y-stepped
+          tile.xhalfstep &&
+          !tile.yhalfstep &&
+          // - Other tiles exist, is y-stepped, and not x-stepped
+          tiles[index - boardWidth + 1]?.length > height
+            ? tiles[index - boardWidth + 1]
+                .slice(height + 1)
+                .filter((t) => !t.xhalfstep && t.yhalfstep)
+            : null,
+
+          // Left
+          // - Not at left edge
+          !(index % boardWidth === 0) &&
+          // - Tile is not x-stepped
+          !tile.xhalfstep &&
+          // - Other tiles exist and is x-stepped
+          tiles[index - 1]?.length > height
+            ? tiles[index - 1].slice(height + 1).filter((t) => t.xhalfstep)
+            : null,
+
+          // Right
+          // - Not at right edge
+          !(index % boardWidth === boardWidth - 1) &&
+          // - Tile is x-stepped
+          tile.xhalfstep &&
+          // - Other tiles exist and is not x-stepped
+          tiles[index + 1]?.length > height
+            ? tiles[index + 1].slice(height + 1).filter((t) => !t.xhalfstep)
+            : null,
+
+          // Lower-Left
+          // - Not at left edge
+          !(index % boardWidth === 0) &&
+          // - Not at bottom edge
+          index + boardWidth < boardWidth * boardHeight &&
+          // - Tile is y-stepped and not x-stepped
+          !tile.xhalfstep &&
+          tile.yhalfstep &&
+          // - Other tiles exist, is x-stepped, and not y-stepped
+          tiles[index + boardWidth - 1]?.length > height
+            ? tiles[index + boardWidth - 1]
+                .slice(height + 1)
+                .filter((t) => t.xhalfstep && !t.yhalfstep)
+            : null,
+
+          // Lower
+          // - Not at bottom edge
+          index + boardWidth < boardWidth * boardHeight &&
+          // - Tile is y-stepped
+          tile.yhalfstep &&
+          // - Other tiles exist and is not y-stepped
+          tiles[index + boardWidth]?.length > height
+            ? tiles[index + boardWidth]
+                .slice(height + 1)
+                .filter((t) => !t.yhalfstep)
+            : null,
+
+          // Lower-Right
+          // - Not at right edge
+          !(index % boardWidth === boardWidth - 1) &&
+          // - Not at bottom edge
+          index + boardWidth < boardWidth * boardHeight &&
+          // - Tile is stepped in both
+          tile.xhalfstep &&
+          tile.yhalfstep &&
+          // - Other tiles exist and is not stepped
+          tiles[index - boardWidth - 1]?.length > height
+            ? tiles[index - boardWidth - 1]
+                .slice(height + 1)
+                .filter((t) => !t.xhalfstep && !t.yhalfstep)
+            : null,
+        ]
+          .flat()
+          .filter((v) => v),
+
+        leftAdjacent: [
+          // Left
+          // - Not at left edge
+          !(index % boardWidth === 0) &&
+          // - Other tile exists
+          tiles[index - 1]?.length >= height &&
+          // - Not x-hs away from other tile.
+          !(!tiles[index - 1][height]?.xhalfstep && tile.xhalfstep)
+            ? tiles[index - 1][height]
+            : null,
+
+          // Upper-Left
+          // - Not at left edge
+          !(index % boardWidth === 0) &&
+          // - Not at top edge
+          index - boardWidth >= 0 &&
+          // - Other tile exists
+          tiles[index - boardWidth - 1]?.length >= height &&
+          // - Not x-hs away from other tile.
+          !(
+            !tiles[index - boardWidth - 1][height]?.xhalfstep && tile.xhalfstep
+          ) &&
+          // - Is not y-hs, but other tile is.
+          tiles[index - boardWidth - 1][height]?.yhalfstep &&
+          !tile.yhalfstep
+            ? tiles[index - boardWidth - 1][height]
+            : null,
+
+          // Lower-Left
+          // - Not at left edge
+          !(index % boardWidth === 0) &&
+          // - Not at bottom edge
+          index + boardWidth < boardWidth * boardHeight &&
+          // - Other tile exists
+          tiles[index + boardWidth - 1]?.length >= height &&
+          // - Not x-hs away from other tile.
+          !(
+            !tiles[index + boardWidth - 1][height]?.xhalfstep && tile.xhalfstep
+          ) &&
+          // - Is y-hs, but other tile is not.
+          !tiles[index + boardWidth - 1][height]?.yhalfstep &&
+          tile.yhalfstep
+            ? tiles[index + boardWidth - 1][height]
+            : null,
+        ].filter((v) => v),
+
+        rightAdjacent: [
+          // Right
+          // - Not at right edge
+          !(index % boardWidth === boardWidth - 1) &&
+          // - Other tile exists
+          tiles[index + 1]?.length >= height &&
+          // - Not x-hs away from other tile.
+          !(tiles[index + 1][height]?.xhalfstep && !tile.xhalfstep)
+            ? tiles[index + 1][height]
+            : null,
+
+          // Upper-Right
+          // - Not at right edge
+          !(index % boardWidth === boardWidth - 1) &&
+          // - Not at top edge
+          index - boardWidth >= 0 &&
+          // - Other tile exists
+          tiles[index - boardWidth + 1]?.length >= height &&
+          // - Not x-hs away from other tile.
+          !(
+            tiles[index - boardWidth + 1][height]?.xhalfstep && !tile.xhalfstep
+          ) &&
+          // - Is not y-hs, but other tile is.
+          tiles[index - boardWidth + 1][height]?.yhalfstep &&
+          !tile.yhalfstep
+            ? tiles[index - boardWidth + 1][height]
+            : null,
+
+          // Lower-Right
+          // - Not at right edge
+          !(index % boardWidth === boardWidth - 1) &&
+          // - Not at bottom edge
+          index + boardWidth < boardWidth * boardHeight &&
+          // - Other tile exists
+          tiles[index + boardWidth + 1]?.length >= height &&
+          // - Not x-hs away from other tile.
+          !(
+            tiles[index + boardWidth + 1][height]?.xhalfstep && !tile.xhalfstep
+          ) &&
+          // - Is y-hs, but other tile is not.
+          !tiles[index + boardWidth + 1][height]?.yhalfstep &&
+          tile.yhalfstep
+            ? tiles[index + boardWidth + 1][height]
+            : null,
+        ].filter((v) => v),
+      });
+    })
+  );
+
+  return obstructedTiles;
 }
