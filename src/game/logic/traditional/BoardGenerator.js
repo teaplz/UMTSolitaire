@@ -137,7 +137,7 @@ export function generateBoardWithSimpleShuffle({
     ...layout,
     tiles,
     numTiles: tileRefList.length,
-    obstructedTiles: calculateObstructedTiles({
+    ...calculateObstructedTiles({
       tiles,
       width: layout.width,
       height: layout.height,
@@ -172,21 +172,41 @@ export function generateBoardWithPresolvedShuffle({
   const seededRng = new Rand(finalSeed + "");
 
   let char = -1,
-    chardupe = -1,
     randValue = 0;
 
   // Final board output.
   const tiles = JSON.parse(JSON.stringify(layout.tiles));
-  let id = 0;
 
-  // Keeps track of tiles that are currently unmatched, along with
-  // all tiles that are currently overlapping and/or adjacent.
-  const obstructedTiles = calculateObstructedTiles({
+  // Assign ids to all tiles.
+  {
+    let id = 0;
+    tiles.forEach((coord) =>
+      coord?.forEach((t) => {
+        if (t) t.id = id++;
+      })
+    );
+  }
+
+  // Get overlapping and/or adjacent tiles for each tile in the initial
+  // layout.
+  const { obstructedTiles, obstructedTileRegions } = calculateObstructedTiles({
     tiles,
     width: layout.width,
     height: layout.height,
   });
-  let tilesToProcess = obstructedTiles.slice();
+
+  // A semi-shallow copy of the obstructedTiles array for tiles that are
+  // "currently" unmatched in the process. This will shrink as more
+  // matches are made, but will not mutate the obstructedTiles array (only the
+  // final board, for selecting the tile design).
+  let tilesToProcess = obstructedTiles.map((t) => {
+    return {
+      tile: t.tile,
+      overlapping: t.overlapping.slice(),
+      leftAdjacent: t.leftAdjacent.slice(),
+      rightAdjacent: t.rightAdjacent.slice(),
+    };
+  });
 
   let numTiles = tilesToProcess.length;
   const numPairs = numTiles >> 1;
@@ -372,13 +392,40 @@ export function generateBoardWithPresolvedShuffle({
     tiles,
     numTiles,
     obstructedTiles,
+    obstructedTileRegions,
     seed: finalSeed,
   };
 }
 
 // Generates an array of tiles, regardless of height, and the tiles that either
-// overlap them or are directly adjacent to them horizontally. All resulting
-// tiles are references to the tile objects from the tiles parameter.
+// overlap them or are directly adjacent to them horizontally. This is used to
+// determine if they are selectable or hidden from view.
+//
+// Note: Tiles are references to the tiles array and are not copies.
+//
+// Returns the following:
+//
+// obstructedTiles - Array of the following, intended to be mutated.
+// {
+//    tile (tile being obstructed),
+//    overlapping (array of tiles overlapping it),
+//    leftAdjacent (array of tiles touching it from the left),
+//    rightAdjacent (array of tiles touching it from the right)
+// }
+//
+// obstructedTileRegions - Array containing regions of the tile being
+//    overlapped (left, right, top, and bottom), and by which tiles. Intended
+//    to be used with obstructedTiles for determining whether to hide the tile
+//    on the board. Array is indexed by tile ID and is not intended to be
+//    mutated.
+// [
+//  {
+//    tile (tile overlapping it),
+//    region (4-bit number for which region is being obscured, see
+//            OverlappingTileRegions)
+//  }
+// ]
+//
 function calculateObstructedTiles({ tiles, width, height }) {
   if (tiles == null) return null;
 
@@ -395,7 +442,24 @@ function calculateObstructedTiles({ tiles, width, height }) {
         tile,
         overlapping: [
           // Add the tile directly above it, regardless of half-stepping.
-          coord.length > height ? coord[height + 1] : null,
+          coord.length > height && coord[height + 1] != null
+            ? {
+                tile: coord[height + 1],
+                region:
+                  (tile.xhalfstep || !coord[height + 1].xhalfstep
+                    ? OverlappingTileRegions.LEFT
+                    : 0) |
+                  (!tile.xhalfstep || coord[height + 1].xhalfstep
+                    ? OverlappingTileRegions.RIGHT
+                    : 0) |
+                  (tile.yhalfstep || !coord[height + 1].yhalfstep
+                    ? OverlappingTileRegions.TOP
+                    : 0) |
+                  (!tile.yhalfstep || coord[height + 1].yhalfstep
+                    ? OverlappingTileRegions.BOTTOM
+                    : 0),
+              }
+            : null,
 
           // Add surrounding tiles that are half-stepped directly above it.
 
@@ -409,9 +473,14 @@ function calculateObstructedTiles({ tiles, width, height }) {
           !tile.yhalfstep &&
           // - Other tile exists and is stepped in both
           tiles[index - boardWidth - 1]?.length > height &&
-          tiles[index - boardWidth - 1][height + 1]?.xhalfstep &&
-          tiles[index - boardWidth - 1][height + 1]?.yhalfstep
-            ? tiles[index - boardWidth - 1][height + 1]
+          tiles[index - boardWidth - 1][height + 1] != null &&
+          tiles[index - boardWidth - 1][height + 1].xhalfstep &&
+          tiles[index - boardWidth - 1][height + 1].yhalfstep
+            ? {
+                tile: tiles[index - boardWidth - 1][height + 1],
+                region:
+                  OverlappingTileRegions.LEFT | OverlappingTileRegions.TOP,
+              }
             : null,
 
           // Upper
@@ -421,8 +490,25 @@ function calculateObstructedTiles({ tiles, width, height }) {
           !tile.yhalfstep &&
           // - Other tile exists and is y-stepped
           tiles[index - boardWidth]?.length > height &&
-          tiles[index - boardWidth][height + 1]?.yhalfstep
-            ? tiles[index - boardWidth][height + 1]
+          tiles[index - boardWidth][height + 1] != null &&
+          tiles[index - boardWidth][height + 1].yhalfstep
+            ? {
+                tile: tiles[index - boardWidth][height + 1],
+                region:
+                  OverlappingTileRegions.TOP |
+                  (!(
+                    !tile.xhalfstep &&
+                    tiles[index - boardWidth][height + 1].xhalfstep
+                  )
+                    ? OverlappingTileRegions.LEFT
+                    : 0) |
+                  (!(
+                    tile.xhalfstep &&
+                    !tiles[index - boardWidth][height + 1].xhalfstep
+                  )
+                    ? OverlappingTileRegions.RIGHT
+                    : 0),
+              }
             : null,
 
           // Upper-Right
@@ -435,9 +521,14 @@ function calculateObstructedTiles({ tiles, width, height }) {
           !tile.yhalfstep &&
           // - Other tile exists, is y-stepped, and not x-stepped
           tiles[index - boardWidth + 1]?.length > height &&
-          !tiles[index - boardWidth + 1][height + 1]?.xhalfstep &&
-          tiles[index - boardWidth + 1][height + 1]?.yhalfstep
-            ? tiles[index - boardWidth + 1][height + 1]
+          tiles[index - boardWidth + 1][height + 1] != null &&
+          !tiles[index - boardWidth + 1][height + 1].xhalfstep &&
+          tiles[index - boardWidth + 1][height + 1].yhalfstep
+            ? {
+                tile: tiles[index - boardWidth + 1][height + 1],
+                region:
+                  OverlappingTileRegions.RIGHT | OverlappingTileRegions.TOP,
+              }
             : null,
 
           // Left
@@ -447,8 +538,19 @@ function calculateObstructedTiles({ tiles, width, height }) {
           !tile.xhalfstep &&
           // - Other tile exists and is x-stepped
           tiles[index - 1]?.length > height &&
-          tiles[index - 1][height + 1]?.xhalfstep
-            ? tiles[index - 1][height + 1]
+          tiles[index - 1][height + 1] != null &&
+          tiles[index - 1][height + 1].xhalfstep
+            ? {
+                tile: tiles[index - 1][height + 1],
+                region:
+                  OverlappingTileRegions.LEFT |
+                  (!(!tile.yhalfstep && tiles[index - 1][height + 1].yhalfstep)
+                    ? OverlappingTileRegions.TOP
+                    : 0) |
+                  (!(tile.yhalfstep && !tiles[index - 1][height + 1].yhalfstep)
+                    ? OverlappingTileRegions.BOTTOM
+                    : 0),
+              }
             : null,
 
           // Right
@@ -458,8 +560,19 @@ function calculateObstructedTiles({ tiles, width, height }) {
           tile.xhalfstep &&
           // - Other tile exists and is not x-stepped
           tiles[index + 1]?.length > height &&
-          !tiles[index + 1][height + 1]?.xhalfstep
-            ? tiles[index + 1][height + 1]
+          tiles[index + 1][height + 1] != null &&
+          !tiles[index + 1][height + 1].xhalfstep
+            ? {
+                tile: tiles[index + 1][height + 1],
+                region:
+                  OverlappingTileRegions.RIGHT |
+                  (!(!tile.yhalfstep && tiles[index + 1][height + 1].yhalfstep)
+                    ? OverlappingTileRegions.TOP
+                    : 0) |
+                  (!(tile.yhalfstep && !tiles[index + 1][height + 1].yhalfstep)
+                    ? OverlappingTileRegions.BOTTOM
+                    : 0),
+              }
             : null,
 
           // Lower-Left
@@ -472,9 +585,14 @@ function calculateObstructedTiles({ tiles, width, height }) {
           tile.yhalfstep &&
           // - Other tile exists, is x-stepped, and not y-stepped
           tiles[index + boardWidth - 1]?.length > height &&
-          tiles[index + boardWidth - 1][height + 1]?.xhalfstep &&
-          !tiles[index + boardWidth - 1][height + 1]?.yhalfstep
-            ? tiles[index + boardWidth - 1][height + 1]
+          tiles[index + boardWidth - 1][height + 1] != null &&
+          tiles[index + boardWidth - 1][height + 1].xhalfstep &&
+          !tiles[index + boardWidth - 1][height + 1].yhalfstep
+            ? {
+                tile: tiles[index + boardWidth - 1][height + 1],
+                region:
+                  OverlappingTileRegions.LEFT | OverlappingTileRegions.BOTTOM,
+              }
             : null,
 
           // Lower
@@ -484,8 +602,25 @@ function calculateObstructedTiles({ tiles, width, height }) {
           tile.yhalfstep &&
           // - Other tile exists and is not y-stepped
           tiles[index + boardWidth]?.length > height &&
-          !tiles[index + boardWidth][height + 1]?.yhalfstep
-            ? tiles[index + boardWidth][height + 1]
+          tiles[index + boardWidth][height + 1] != null &&
+          !tiles[index + boardWidth][height + 1].yhalfstep
+            ? {
+                tile: tiles[index + boardWidth][height + 1],
+                region:
+                  OverlappingTileRegions.BOTTOM |
+                  (!(
+                    !tile.xhalfstep &&
+                    tiles[index + boardWidth][height + 1].xhalfstep
+                  )
+                    ? OverlappingTileRegions.LEFT
+                    : 0) |
+                  (!(
+                    tile.xhalfstep &&
+                    !tiles[index + boardWidth][height + 1].xhalfstep
+                  )
+                    ? OverlappingTileRegions.RIGHT
+                    : 0),
+              }
             : null,
 
           // Lower-Right
@@ -498,9 +633,14 @@ function calculateObstructedTiles({ tiles, width, height }) {
           tile.yhalfstep &&
           // - Other tile exists and is not stepped
           tiles[index + boardWidth + 1]?.length > height &&
-          !tiles[index + boardWidth + 1][height + 1]?.xhalfstep &&
-          !tiles[index + boardWidth + 1][height + 1]?.yhalfstep
-            ? tiles[index + boardWidth + 1][height + 1]
+          tiles[index + boardWidth + 1][height + 1] != null &&
+          !tiles[index + boardWidth + 1][height + 1].xhalfstep &&
+          !tiles[index + boardWidth + 1][height + 1].yhalfstep
+            ? {
+                tile: tiles[index + boardWidth + 1][height + 1],
+                region:
+                  OverlappingTileRegions.RIGHT | OverlappingTileRegions.BOTTOM,
+              }
             : null,
         ].filter((v) => v),
 
@@ -599,5 +739,21 @@ function calculateObstructedTiles({ tiles, width, height }) {
     })
   );
 
-  return obstructedTiles;
+  // Split tile overlap regions into separate array.
+  const obstructedTileRegions = obstructedTiles.map(
+    ({ overlapping }) => overlapping
+  );
+
+  obstructedTiles.forEach(
+    (t) => (t.overlapping = t.overlapping.map(({ tile }) => tile))
+  );
+
+  return { obstructedTiles, obstructedTileRegions };
 }
+
+export const OverlappingTileRegions = Object.freeze({
+  LEFT: 0b0001,
+  RIGHT: 0b0010,
+  TOP: 0b0100,
+  BOTTOM: 0b1000,
+});
