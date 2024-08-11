@@ -3,6 +3,7 @@
 
 import Rand from "rand-seed";
 import { FLOWER_TILE, SEASON_TILE } from "../TraditionalGameType";
+import { MAX_BOARD_DEPTH } from "./BoardLayoutGenerator";
 
 // Generate a final game board based on the tile layout and optional random
 // seed, using a simple randomized shuffle. These boards can be unwinnable,
@@ -314,14 +315,57 @@ export function generateBoardWithPresolvedShuffle({
     }
   }
 
-  // Form random pairs.
+  // We do not want to end up in a situation where the final set of tiles are
+  // all stacked on top of each-other. There is no easy way to detect this
+  // beforehand, so for this shuffling algorithm, we're going to prioritize
+  // tiles are on top of a deep overlap stack when it becomes close to a problem.
+  let overlapStackDepths =
+    sortTileIDsByHighestOverlapStackDepth(tilesToProcess);
+
+  // Randomize the tiles in the depth array so when we pull from it, it's
+  // already random.
+  overlapStackDepths.forEach((depth) => {
+    for (let i = depth.length - 1; i > 0; i--) {
+      randValue = Math.floor(seededRng.next() * (i + 1));
+
+      let id = depth[i];
+      depth[i] = depth[randValue];
+      depth[randValue] = id;
+    }
+  });
+
+  // Using a blank version of the game baord, make random valid pairs and
+  // change their design to match.
   for (let i = 0; i < numPairs; i++) {
     // Grab all the valid tiles ready to be matched.
-    const validTiles = tilesToProcess.filter(
+    let validTiles = tilesToProcess.filter(
       (t) =>
         t.overlapping.length === 0 &&
         (t.leftAdjacent.length === 0 || t.rightAdjacent.length === 0)
     );
+
+    if (validTiles.length < 2) {
+      // This isn't good. We can't make a match! Just skip all the other tiles.
+      break;
+    }
+
+    // The current algorithm for determining when to trigger the overlap stack
+    // depth check is:
+    //
+    // num of pairs remaining <= current highest stack depth * 2
+    //
+    // There may be a more efficient way to do this.
+
+    if (numPairs - i <= overlapStackDepths.length * 2) {
+      // Prioritize tiles that are highest in an overlap stack.
+      const pickedTiles = overlapStackDepths
+        .map((d) => d.filter((t) => validTiles.some((vt) => vt.tile.id === t)))
+        .reverse()
+        .flat()
+        .splice(0, 2);
+
+      validTiles = validTiles.filter((t) => pickedTiles.includes(t.tile.id));
+    }
 
     // Choose first tile. Remove it from valid tile list so there's no chance
     // of it being picked up by the second tile.
@@ -375,6 +419,14 @@ export function generateBoardWithPresolvedShuffle({
         (t) => t !== firstTile.tile && t !== secondTile.tile
       );
     });
+
+    overlapStackDepths.forEach(
+      (d, i, a) =>
+        (a[i] = d.filter(
+          (t) => t !== firstTile.tile.id && t !== secondTile.tile.id
+        ))
+    );
+    overlapStackDepths = overlapStackDepths.filter((d) => d.length > 0);
   }
 
   // Remove unused or unreachable tiles.
@@ -421,7 +473,7 @@ export function generateBoardWithPresolvedShuffle({
 // [
 //  {
 //    tile (tile overlapping it),
-//    region (4-bit number for which region is being obscured, see
+///    region(4-bit number for which region is being obscured, see
 //            OverlappingTileRegions)
 //  }
 // ]
@@ -757,3 +809,81 @@ export const OverlappingTileRegions = Object.freeze({
   TOP: 0b0100,
   BOTTOM: 0b1000,
 });
+
+// Calculates the highest overlap stack depth for each tile, then return them
+// in an array sorted by depth. It's a bit of a mess.
+function sortTileIDsByHighestOverlapStackDepth(tilesToProcess) {
+  // Array indexed by each tile's ID, showing the tile's highest stack depth.
+  const tileStackDepths = Array.from(
+    { length: tilesToProcess.length },
+    () => null
+  );
+
+  // Mutable copy of the tile array that is to be processed.
+  const tempTilesToProcess = tilesToProcess.map(({ tile, overlapping }) => ({
+    tile,
+    overlapping: overlapping.slice(),
+  }));
+
+  let lastTilePass = null;
+
+  // Get all the highest stack depths of each tile.
+  while (lastTilePass !== tempTilesToProcess.length) {
+    // If no tiles are removed from the temp array, we're done here.
+    lastTilePass = tempTilesToProcess.length;
+
+    // Get the current non-overlapped ("top") tiles, add a
+    // depth of 0 to them, and remove them from the temp array.
+    for (let t = tempTilesToProcess.length - 1; t >= 0; t--) {
+      if (tempTilesToProcess[t].overlapping.length === 0) {
+        tileStackDepths[tempTilesToProcess[t].tile.id] = 0;
+        tempTilesToProcess.splice(t, 1);
+      }
+    }
+
+    // For all remaining tiles in the temp array, check to see if the tiles
+    // that were just removed overlap them. If they are, sever the connection
+    // between them while "pushing up" the depth of all overlapping tiles (and
+    // the tiles overlapping them, and so on).
+
+    const toPushUp = [];
+
+    tempTilesToProcess.forEach((t) => {
+      for (let ot = t.overlapping.length - 1; ot >= 0; ot--) {
+        if (tileStackDepths[t.overlapping[ot].id] !== null) {
+          if (!toPushUp.includes(t.overlapping[ot].id)) {
+            toPushUp.push(t.overlapping[ot].id);
+          }
+          t.overlapping.splice(ot, 1);
+        }
+      }
+    });
+
+    for (let i = 0; i < toPushUp.length; i++) {
+      tileStackDepths[toPushUp[i]]++;
+      tilesToProcess
+        .filter((t2) => t2.tile.id === toPushUp[i])
+        .forEach((t3) => {
+          t3.overlapping.forEach((ot) => {
+            if (!toPushUp.includes(ot.id)) {
+              toPushUp.push(ot.id);
+            }
+          });
+        });
+    }
+  }
+
+  // Reorganize from indexing by tile to indexing by stack depth, to make it
+  // easier to track how many tiles are in each stack depth.
+
+  const res = Array.from(
+    {
+      length: tileStackDepths.reduce((acc, cur) => (acc > cur ? acc : cur)) + 1,
+    },
+    () => []
+  );
+
+  tileStackDepths.forEach((depth, tile) => res[depth].push(tile));
+
+  return res;
+}

@@ -38,7 +38,7 @@ import { GameTypeLayoutCodeIDs } from "../../util/GameTypes";
 
 export const MAX_BOARD_WIDTH = 20,
   MAX_BOARD_HEIGHT = 12,
-  MAX_BOARD_LAYERS = 7;
+  MAX_BOARD_DEPTH = 7;
 
 const LAYOUT_CODE_VERSION_NUMBER = 1;
 
@@ -74,7 +74,7 @@ export function generateLayoutCode({ tiles, width, height }) {
       curSegment = Math.min(curSegment, 255);
 
       v.forEach((t, i) => {
-        if (t !== null && i < MAX_BOARD_LAYERS) {
+        if (t !== null && i < MAX_BOARD_DEPTH) {
           curSegment |= 1 << (i + 8);
           if (t.xhalfstep) curSegment |= 1 << (i + 15);
           if (t.yhalfstep) curSegment |= 1 << (i + 22);
