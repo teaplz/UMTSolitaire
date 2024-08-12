@@ -58,7 +58,7 @@ export function generateLayoutCode({ tiles, width, height }) {
     w > MAX_BOARD_WIDTH ||
     h > MAX_BOARD_HEIGHT
   ) {
-    console.log("generateLayoutCodeFromBoard: Invalid width or height.");
+    console.error("generateLayoutCodeFromBoard: Invalid width or height.");
     return null;
   }
 

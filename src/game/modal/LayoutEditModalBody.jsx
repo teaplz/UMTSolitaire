@@ -24,29 +24,34 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
 
   useEffect(() => {
     if (initialLayout != null) {
-      const decodedLayoutObj = decodeLayoutCode(initialLayout);
+      try {
+        const decodedLayoutObj = decodeLayoutCode(initialLayout);
 
-      const layoutStartX = (maxWidth - decodedLayoutObj.width) >> 1,
-        layoutStartY = (maxHeight - decodedLayoutObj.height) >> 1,
-        layoutStart = layoutStartY * maxWidth,
-        layoutEnd = layoutStart + decodedLayoutObj.height * maxWidth;
+        const layoutStartX = (maxWidth - decodedLayoutObj.width) >> 1,
+          layoutStartY = (maxHeight - decodedLayoutObj.height) >> 1,
+          layoutStart = layoutStartY * maxWidth,
+          layoutEnd = layoutStart + decodedLayoutObj.height * maxWidth;
 
-      let layoutCursor = 0;
+        let layoutCursor = 0;
 
-      setLayout(
-        Array.from({ length: maxHeight * maxWidth }, (_, i) => {
-          if (
-            i < layoutStart ||
-            i >= layoutEnd ||
-            i % maxWidth < layoutStartX ||
-            i % maxWidth >= layoutStartX + decodedLayoutObj.width
-          ) {
-            return 0;
-          } else {
-            return parseInt(decodedLayoutObj.layoutMask[layoutCursor++], 10);
-          }
-        })
-      );
+        setLayout(
+          Array.from({ length: maxHeight * maxWidth }, (_, i) => {
+            if (
+              i < layoutStart ||
+              i >= layoutEnd ||
+              i % maxWidth < layoutStartX ||
+              i % maxWidth >= layoutStartX + decodedLayoutObj.width
+            ) {
+              return 0;
+            } else {
+              return parseInt(decodedLayoutObj.layoutMask[layoutCursor++], 10);
+            }
+          })
+        );
+      } catch (ex) {
+        console.log(ex);
+        resetEditor();
+      }
     } else {
       resetEditor();
     }
@@ -204,6 +209,7 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
           onClick={() =>
             startNewGame({
               newLayoutCode: layoutCode,
+              newGameType: GameTypes.TWOCORNER,
             })
           }
         >

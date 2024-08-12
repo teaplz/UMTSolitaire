@@ -34,9 +34,9 @@ export default function GameBoard({
 
     let useHalfSteps = false;
 
-    for (let y = 0; y < boardHeight + 2; y++) {
+    for (let y = 0; y < boardHeight; y++) {
       tileMap[y] = tiles
-        .slice(y * (boardWidth + 2), (y + 1) * (boardWidth + 2))
+        .slice(y * boardWidth, (y + 1) * boardWidth)
         .map((coord) => {
           if (coord?.length > 0) {
             return coord.map((tile) => {
@@ -52,8 +52,8 @@ export default function GameBoard({
 
               return {
                 id: tile.id,
-                char: tile.char,
-                selectable: tile.char !== null && tile.char !== 0x2b,
+                char: tile.hidden ? 0x2b : tile.char,
+                selectable: tile.selectable,
                 xhalfstep: tile.xhalfstep,
                 yhalfstep: tile.yhalfstep,
                 inRemovalAnim: false,
@@ -177,12 +177,32 @@ export default function GameBoard({
       fontSize:
         "min(" +
         (useEmoji
-          ? emojiFontSizeWidths[Math.min(Math.max(boardWidth, 2), 20) - 2]
-          : glyphFontSizeWidths[Math.min(Math.max(boardWidth, 2), 20) - 2]) +
+          ? emojiFontSizeWidths[
+              Math.min(
+                Math.max(padBoard ? boardWidth : boardWidth - 2, 2),
+                20
+              ) - 2
+            ]
+          : glyphFontSizeWidths[
+              Math.min(
+                Math.max(padBoard ? boardWidth : boardWidth - 2, 2),
+                20
+              ) - 2
+            ]) +
         "vw, " +
         (useEmoji
-          ? emojiFontSizeHeights[Math.min(Math.max(boardHeight, 2), 12) - 2]
-          : glyphFontSizeHeights[Math.min(Math.max(boardHeight, 2), 12) - 2]) +
+          ? emojiFontSizeHeights[
+              Math.min(
+                Math.max(padBoard ? boardHeight : boardHeight - 2, 2),
+                12
+              ) - 2
+            ]
+          : glyphFontSizeHeights[
+              Math.min(
+                Math.max(padBoard ? boardHeight : boardHeight - 2, 2),
+                12
+              ) - 2
+            ]) +
         "vh)",
     });
 
@@ -192,9 +212,18 @@ export default function GameBoard({
     setVerticalTileStyle({
       fontSize:
         (useEmoji
-          ? emojiFontSizeHeights[Math.min(Math.max(boardHeight, 5), 12) - 2] - 1
-          : glyphFontSizeHeights[Math.min(Math.max(boardHeight, 5), 12) - 2] -
-            1) + "vh",
+          ? emojiFontSizeHeights[
+              Math.min(
+                Math.max(padBoard ? boardHeight : boardHeight - 2, 5),
+                12
+              ) - 2
+            ] - 1
+          : glyphFontSizeHeights[
+              Math.min(
+                Math.max(padBoard ? boardHeight : boardHeight - 2, 5),
+                12
+              ) - 2
+            ] - 1) + "vh",
     });
   }, [boardWidth, boardHeight, useEmoji]);
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import ReactModal from "react-modal";
 
-import { GameTypes } from "./util/GameTypes";
+import { GameTypeLayoutCodeIDs, GameTypes } from "./util/GameTypes";
 
 import * as TraditionalGameType from "./logic/TraditionalGameType";
 import * as TwoCornerGameType from "./logic/TwoCornerGameType";
@@ -172,6 +172,14 @@ export default function Game({
   // and "-end" to show the endpoints)
   const [pathingTiles, setPathingTiles] = useState([]);
 
+  // For certain gametpyes, this shows all the initial tile obstructions
+  // (overlapping and x-adjacent).
+  const [tileObstructions, setTileObstructions] = useState([]);
+
+  // For certain gametpyes, this shows all whether or not a tile is obstructed
+  // by other tiles.
+  const [tileOverlapRegions, setTileOverlapRegions] = useState([]);
+
   // --------------
   // End State List
   // --------------
@@ -194,9 +202,9 @@ export default function Game({
     // - Create from URL search parameters. (Shared hyperlink)
     // - Recreate from the browser's web storage. (Persistence)
     // - Create basic 17x8 board. (Default)
-    if (gameType !== null && layout !== null) {
+    if (layout !== null) {
       resetGameState({
-        newGameType: gameType,
+        newGameType: null,
         newLayoutCode: layout,
         newSeed: seed,
         newBoardWidth: null,
@@ -221,6 +229,17 @@ export default function Game({
         setNumTiles(gameState.numTiles);
         setTileHistory(gameState.tileHistory);
 
+        if (gameState.gameType === GameTypes.TRADITIONAL) {
+          const obstructions = TraditionalGameType.calculateObstructedTiles({
+            tiles: gameState.tiles,
+            width: gameState.boardWidth,
+            height: gameState.boardHeight,
+          });
+
+          setTileObstructions(obstructions.obstructedTiles);
+          setTileOverlapRegions(obstructions.obstructedTileRegions);
+        }
+
         const newTimer = new Date();
 
         newTimer.setSeconds(
@@ -233,7 +252,9 @@ export default function Game({
         timerRef.current.reset(newTimer);
 
         setGameEnded(false);
-      } catch {
+      } catch (ex) {
+        console.log(ex);
+
         resetGameState({ newSeed: null, newBoardWidth: 17, newBoardHeight: 8 });
       }
     } else {
@@ -366,7 +387,7 @@ export default function Game({
 
   // Resets the game state while generating a new board.
   function resetGameState({
-    newGameType = GameTypes.TWOCORNER,
+    newGameType = gameType,
     newLayoutCode = layoutCode,
     newSeed,
     newBoardWidth = boardWidth,
@@ -374,20 +395,49 @@ export default function Game({
     newBlindShuffle = blindShuffle,
     newAllowSinglePairs = allowSinglePairs,
   } = {}) {
-    let generatedBoard = TwoCornerGameType.generateBoard({
-      layoutCode: newLayoutCode,
-      boardWidth: newBoardWidth,
-      boardHeight: newBoardHeight,
-      seed: newSeed,
-      useBlindShuffle: newBlindShuffle,
-      allowSinglePairs: newAllowSinglePairs,
-    });
+    let generatedBoard, useGameType;
+
+    // If we're getting the new board from a layout code, base its
+    // gametype on the layout code.
+    if (newLayoutCode !== null && newGameType === null) {
+      switch (newLayoutCode?.slice(0, 3)) {
+        case GameTypeLayoutCodeIDs.TRADITIONAL:
+          useGameType = GameTypes.TRADITIONAL;
+          break;
+
+        case GameTypeLayoutCodeIDs.TWOCORNER:
+        default:
+          useGameType = GameTypes.TWOCORNER;
+          break;
+      }
+    } else {
+      useGameType = newGameType;
+    }
+
+    if (useGameType === GameTypes.TRADITIONAL) {
+      generatedBoard = TraditionalGameType.generateBoard({
+        layoutCode: newLayoutCode,
+        seed: newSeed,
+        useBlindShuffle: newBlindShuffle,
+        fullTest: true,
+      });
+    } else if (useGameType === GameTypes.TWOCORNER) {
+      generatedBoard = TwoCornerGameType.generateBoard({
+        layoutCode: newLayoutCode,
+        boardWidth: newBoardWidth,
+        boardHeight: newBoardHeight,
+        seed: newSeed,
+        useBlindShuffle: newBlindShuffle,
+        allowSinglePairs: newAllowSinglePairs,
+      });
+    }
 
     if (generatedBoard === null) {
       console.log("Failed to generate board! Cancel board reset.");
       return;
     }
 
+    setGameType(useGameType);
     setTiles(generatedBoard.tiles);
     setBoardWidth(generatedBoard.width);
     setBoardHeight(generatedBoard.height);
@@ -401,8 +451,15 @@ export default function Game({
     setHintedTiles([]);
     setAllValidMatchingTiles([]);
     setAllValidMatchesAtRandom([]);
-    setPathingTiles([]);
     setTilesInRemovalAnimation([]);
+
+    if (useGameType === GameTypes.TRADITIONAL) {
+      setTileObstructions(generatedBoard.obstructedTiles);
+      setTileOverlapRegions(generatedBoard.obstructedTileRegions);
+    } else if (useGameType === GameTypes.TWOCORNER) {
+      setPathingTiles([]);
+    }
+
     setModalDisplayed(false);
     setGameEnded(false);
     timerRef.current.reset();
@@ -420,37 +477,43 @@ export default function Game({
   // Check all possible matches for the current board. Display them in debugging
   // options, and check the game end state when there are no matches remaining.
   function checkAllValidMatches() {
-    const allValidMatches = TwoCornerGameType.searchAllPossibleMatches(
-      tiles,
-      boardWidth,
-      boardHeight
-    );
+    let allValidMatches;
+
+    if (gameType === GameTypes.TRADITIONAL) {
+      allValidMatches = TraditionalGameType.searchAllPossibleMatches(tiles);
+    } else if (gameType === GameTypes.TWOCORNER) {
+      allValidMatches = TwoCornerGameType.searchAllPossibleMatches(
+        tiles,
+        boardWidth,
+        boardHeight
+      );
+
+      // Debug: Show all the valid matches in the console.
+      if (showAllValidMatches) {
+        console.log(
+          "Valid Matches: " +
+            allValidMatches.reduce(
+              (a, b) =>
+                a.concat(
+                  `[${String.fromCodePoint(0x1f000 + tiles[b[0]].char)}, ${
+                    (b[0] % (boardWidth + 2)) - 1 + 1
+                  },${
+                    (b[0] - (b[0] % (boardWidth + 2)) - (boardWidth + 2)) /
+                      (boardWidth + 2) +
+                    1
+                  } <-> ${(b[1] % (boardWidth + 2)) - 1 + 1},${
+                    (b[1] - (b[1] % (boardWidth + 2)) - (boardWidth + 2)) /
+                      (boardWidth + 2) +
+                    1
+                  }] `
+                ),
+              ""
+            )
+        );
+      }
+    }
 
     console.log(`Number of Valid Matches: ${allValidMatches.length}`);
-
-    // Debug: Show all the valid matches in the console.
-    if (showAllValidMatches) {
-      console.log(
-        "Valid Matches: " +
-          allValidMatches.reduce(
-            (a, b) =>
-              a.concat(
-                `[${String.fromCodePoint(0x1f000 + tiles[b[0]].char)}, ${
-                  (b[0] % (boardWidth + 2)) - 1 + 1
-                },${
-                  (b[0] - (b[0] % (boardWidth + 2)) - (boardWidth + 2)) /
-                    (boardWidth + 2) +
-                  1
-                } <-> ${(b[1] % (boardWidth + 2)) - 1 + 1},${
-                  (b[1] - (b[1] % (boardWidth + 2)) - (boardWidth + 2)) /
-                    (boardWidth + 2) +
-                  1
-                }] `
-              ),
-            ""
-          )
-      );
-    }
 
     setAllValidMatchingTiles([...new Set(allValidMatches.flat())]);
 
@@ -493,78 +556,183 @@ export default function Game({
   }
 
   function handleTileClick(tileId) {
-    if (tiles[tileId].char === null) {
-      // Clicked an empty space.
-      return;
-    } else if (selectedTile === tileId) {
-      // Clicked the same tile.
-      if (
-        deselectBehavior === DeselectBehavior.ON_SAME_TILE ||
-        deselectBehavior === DeselectBehavior.ON_ANY_TILE
-      ) {
-        setSelectedTile(null);
-        setHintedTiles([]);
-      }
-    } else if (
-      selectedTile !== null &&
-      tiles[tileId].char === tiles[selectedTile].char
-    ) {
-      // Clicked a matching tile.
+    if (gameType === GameTypes.TRADITIONAL) {
+      const tileObj = tiles.flat().find((t) => t?.id === tileId),
+        selectedTileObj = tiles.flat().find((t) => t?.id === selectedTile);
 
-      const path = TwoCornerGameType.searchSimplestValidPath(
-        tileId,
-        selectedTile,
-        tiles.slice(),
-        boardWidth,
-        boardHeight
-      );
-
-      if (path !== null) {
-        // There is a correct path between them. These tiles are matched!
-
-        // Push the match into the tile history stack.
-        setTileHistory([
-          ...tileHistory,
-          {
-            char: tiles[tileId].char,
-            tile1: tileId,
-            tile2: selectedTile,
-          },
-        ]);
-
-        // Put both tiles in their removal animation.
-        setTilesInRemovalAnimation([
-          { ...tiles[tileId] },
-          { ...tiles[selectedTile] },
-        ]);
-
-        // Blank out both tiles.
-        const newTiles = tiles.slice();
-        newTiles[tileId].char = null;
-        newTiles[selectedTile].char = null;
-        setTiles(newTiles);
-
-        // Generate the pathing tiles for display.
-        const pathingTiles = tiles.map(() => []);
-
-        path.forEach((line) => {
-          line.segment.forEach((node) => {
-            pathingTiles[node].push(line.dir);
-          });
-        });
-
-        pathingTiles[tileId].push("-start");
-        pathingTiles[selectedTile].push("-end");
-
-        setPathingTiles(pathingTiles);
-
-        setSelectedTile(null);
-        setHintedTiles([]);
+      if (tileObj == null) {
+        // Clicked an empty space.
+        return;
+      } else if (selectedTile === tileId) {
+        // Clicked the same tile.
+        if (
+          deselectBehavior === DeselectBehavior.ON_SAME_TILE ||
+          deselectBehavior === DeselectBehavior.ON_ANY_TILE
+        ) {
+          setSelectedTile(null);
+          setHintedTiles([]);
+        }
       } else if (
+        selectedTileObj != null &&
+        TraditionalGameType.tileMatches(tileObj, selectedTileObj)
+      ) {
+        // Clicked a matching tile.
+
+        // Sanity check to see if they're both selectable.
+        if (tileObj.selectable && selectedTileObj.selectable) {
+          // Push the match into the tile history stack.
+          setTileHistory([
+            ...tileHistory,
+            {
+              char1: tileObj.char,
+              char2: selectedTileObj.char,
+              tile1: tileId,
+              tile2: selectedTile,
+            },
+          ]);
+
+          // Put both tiles in their removal animation.
+          setTilesInRemovalAnimation([{ ...tileObj }, { ...selectedTileObj }]);
+
+          // Blank out both tiles.
+
+          // Update tile selectability and visibility for board. (TODO: Only
+          // change affected tiles).
+          const newTiles = tiles.slice();
+          tileObj.char = null;
+          selectedTileObj.char = null;
+          setTiles(newTiles);
+
+          TraditionalGameType.updateTileVisibilityAndSelectability(
+            tileObstructions,
+            tileOverlapRegions
+          );
+
+          setSelectedTile(null);
+          setHintedTiles([]);
+        } else if (
+          deselectBehavior === DeselectBehavior.ON_ANOTHER_TILE ||
+          deselectBehavior === DeselectBehavior.ON_ANY_TILE
+        ) {
+          // There is no correct path. Select it if necessary.
+          setSelectedTile(tileId);
+
+          // Update the hinting system, if it's enabled.
+          if (showMatchingTiles === true) {
+            const hintedTiles = tiles.filter(
+              (t) => t.char === tileObj.char && t.selectable
+            );
+
+            setHintedTiles(hintedTiles);
+          }
+        }
+      } else if (
+        selectedTile === null ||
         deselectBehavior === DeselectBehavior.ON_ANOTHER_TILE ||
         deselectBehavior === DeselectBehavior.ON_ANY_TILE
       ) {
-        // There is no correct path. Select it if necessary.
+        // Clicked a non-matching tile.
+        setSelectedTile(tileId);
+
+        // Update the hinting system, if it's enabled.
+        if (showMatchingTiles === true) {
+          const hintedTiles = tiles.filter(
+            (t) => t.char === tileObj.char && t.selectable
+          );
+
+          setHintedTiles(hintedTiles);
+        }
+      }
+    } else if (gameType === GameTypes.TWOCORNER) {
+      if (tiles[tileId].char === null) {
+        // Clicked an empty space.
+        return;
+      } else if (selectedTile === tileId) {
+        // Clicked the same tile.
+        if (
+          deselectBehavior === DeselectBehavior.ON_SAME_TILE ||
+          deselectBehavior === DeselectBehavior.ON_ANY_TILE
+        ) {
+          setSelectedTile(null);
+          setHintedTiles([]);
+        }
+      } else if (
+        selectedTile !== null &&
+        tiles[tileId].char === tiles[selectedTile].char
+      ) {
+        // Clicked a matching tile.
+
+        const path = TwoCornerGameType.searchSimplestValidPath(
+          tileId,
+          selectedTile,
+          tiles.slice(),
+          boardWidth,
+          boardHeight
+        );
+
+        if (path !== null) {
+          // There is a correct path between them. These tiles are matched!
+
+          // Push the match into the tile history stack.
+          setTileHistory([
+            ...tileHistory,
+            {
+              char: tiles[tileId].char,
+              tile1: tileId,
+              tile2: selectedTile,
+            },
+          ]);
+
+          // Put both tiles in their removal animation.
+          setTilesInRemovalAnimation([
+            { ...tiles[tileId] },
+            { ...tiles[selectedTile] },
+          ]);
+
+          // Blank out both tiles.
+          const newTiles = tiles.slice();
+          newTiles[tileId].char = null;
+          newTiles[selectedTile].char = null;
+          setTiles(newTiles);
+
+          // Generate the pathing tiles for display.
+          const pathingTiles = tiles.map(() => []);
+
+          path.forEach((line) => {
+            line.segment.forEach((node) => {
+              pathingTiles[node].push(line.dir);
+            });
+          });
+
+          pathingTiles[tileId].push("-start");
+          pathingTiles[selectedTile].push("-end");
+
+          setPathingTiles(pathingTiles);
+
+          setSelectedTile(null);
+          setHintedTiles([]);
+        } else if (
+          deselectBehavior === DeselectBehavior.ON_ANOTHER_TILE ||
+          deselectBehavior === DeselectBehavior.ON_ANY_TILE
+        ) {
+          // There is no correct path. Select it if necessary.
+          setSelectedTile(tileId);
+
+          // Update the hinting system, if it's enabled.
+          if (showMatchingTiles === true) {
+            const hintedTiles = tiles.filter(
+              (t) => t.char === tiles[tileId].char
+            );
+
+            setHintedTiles(hintedTiles);
+          }
+        }
+      } else if (
+        selectedTile === null ||
+        deselectBehavior === DeselectBehavior.ON_ANOTHER_TILE ||
+        deselectBehavior === DeselectBehavior.ON_ANY_TILE
+      ) {
+        // Clicked a non-matching tile.
         setSelectedTile(tileId);
 
         // Update the hinting system, if it's enabled.
@@ -576,38 +744,47 @@ export default function Game({
           setHintedTiles(hintedTiles);
         }
       }
-    } else if (
-      selectedTile === null ||
-      deselectBehavior === DeselectBehavior.ON_ANOTHER_TILE ||
-      deselectBehavior === DeselectBehavior.ON_ANY_TILE
-    ) {
-      // Clicked a non-matching tile.
-      setSelectedTile(tileId);
-
-      // Update the hinting system, if it's enabled.
-      if (showMatchingTiles === true) {
-        const hintedTiles = tiles.filter((t) => t.char === tiles[tileId].char);
-
-        setHintedTiles(hintedTiles);
-      }
     }
   }
 
   // Revert the board to the previous state.
   function undoMatch({ doHideModal = false }) {
     if (tileHistory.length > 0) {
-      const newTiles = tiles.slice();
-      const lastMatch = tileHistory.slice(-1)[0];
+      if (gameType === GameTypes.TRADITIONAL) {
+        const newTiles = tiles.slice();
+        const lastMatch = tileHistory.slice(-1)[0];
 
-      newTiles[lastMatch.tile1].char = lastMatch.char;
-      newTiles[lastMatch.tile2].char = lastMatch.char;
+        newTiles.flat().find((t) => t?.id === lastMatch.tile1).char =
+          lastMatch.char1;
+        newTiles.flat().find((t) => t?.id === lastMatch.tile2).char =
+          lastMatch.char2;
 
-      setTiles(newTiles);
-      setTileHistory(tileHistory.slice(0, -1));
-      setHintedTiles([]);
-      setPathingTiles([]);
-      setSelectedTile(null);
-      setTilesInRemovalAnimation([]);
+        setTiles(newTiles);
+        setTileHistory(tileHistory.slice(0, -1));
+        setHintedTiles([]);
+        setSelectedTile(null);
+        setTilesInRemovalAnimation([]);
+
+        // Update tile selectability and visibility for board. (TODO: Only
+        // change affected tiles).
+        TraditionalGameType.updateTileVisibilityAndSelectability(
+          tileObstructions,
+          tileOverlapRegions
+        );
+      } else if (gameType === GameTypes.TWOCORNER) {
+        const newTiles = tiles.slice();
+        const lastMatch = tileHistory.slice(-1)[0];
+
+        newTiles[lastMatch.tile1].char = lastMatch.char;
+        newTiles[lastMatch.tile2].char = lastMatch.char;
+
+        setTiles(newTiles);
+        setTileHistory(tileHistory.slice(0, -1));
+        setHintedTiles([]);
+        setPathingTiles([]);
+        setSelectedTile(null);
+        setTilesInRemovalAnimation([]);
+      }
 
       if (gameEnded) timerRef.current.start();
 
@@ -771,10 +948,13 @@ export default function Game({
     <>
       <GameBoard
         {...{
-          boardWidth,
-          boardHeight,
+          boardWidth:
+            gameType === GameTypes.TWOCORNER ? boardWidth + 2 : boardWidth,
+          boardHeight:
+            gameType === GameTypes.TWOCORNER ? boardHeight + 2 : boardHeight,
           tiles,
           pathingTiles,
+          padBoard: gameType !== GameTypes.TWOCORNER,
           tilesInRemovalAnimation,
           hintedTiles,
           wholeMatchingTiles: showAllValidMatches

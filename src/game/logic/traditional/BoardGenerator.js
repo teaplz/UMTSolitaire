@@ -2,8 +2,10 @@
 // (or completely random) generation of the board's tile placement.
 
 import Rand from "rand-seed";
-import { FLOWER_TILE, SEASON_TILE } from "../TraditionalGameType";
-import { MAX_BOARD_DEPTH } from "./BoardLayoutGenerator";
+import { ALL_FLOWER_TILES, ALL_SEASON_TILES } from "../TraditionalGameType";
+
+const FLOWER_TILE = 0x22,
+  SEASON_TILE = 0x23;
 
 // Generate a final game board based on the tile layout and optional random
 // seed, using a simple randomized shuffle. These boards can be unwinnable,
@@ -52,8 +54,8 @@ export function generateBoardWithSimpleShuffle({
   // Flower tiles (0x22 in usedTiles) and Season tiles (0x23 in usedTiles) are
   // four unique tile designs each, rather than four of the same tile design.
   // Similar to the above, randomize the selection.
-  let flowerTiles = [0x22, 0x23, 0x24, 0x25],
-    seasonTiles = [0x26, 0x27, 0x28, 0x29],
+  let flowerTiles = ALL_FLOWER_TILES.slice(),
+    seasonTiles = ALL_SEASON_TILES.slice(),
     nextFlowerTile = 0,
     nextSeasonTile = 0;
 
@@ -292,8 +294,8 @@ export function generateBoardWithPresolvedShuffle({
   // Flower tiles (0x22) and Season tiles (0x23) are four unique tile designs
   // each, rather than four of the same tile design.
   // Similar to the above, shuffle the selection.
-  let flowerTiles = [0x22, 0x23, 0x24, 0x25],
-    seasonTiles = [0x26, 0x27, 0x28, 0x29],
+  let flowerTiles = ALL_FLOWER_TILES.slice(),
+    seasonTiles = ALL_SEASON_TILES.slice(),
     nextFlowerTile = 0,
     nextSeasonTile = 0;
 
@@ -346,6 +348,9 @@ export function generateBoardWithPresolvedShuffle({
 
     if (validTiles.length < 2) {
       // This isn't good. We can't make a match! Just skip all the other tiles.
+      console.error(
+        "Can not fully populate a winning board, likely due to an invalid layout!"
+      );
       break;
     }
 
@@ -478,7 +483,7 @@ export function generateBoardWithPresolvedShuffle({
 //  }
 // ]
 //
-function calculateObstructedTiles({ tiles, width, height }) {
+export function calculateObstructedTiles({ tiles, width, height }) {
   if (tiles == null) return null;
 
   const boardWidth = parseInt(width),

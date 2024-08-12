@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { GameTypes } from "../util/GameTypes";
 
 const NewBoardModalBody = ({
   prevWidth,
@@ -278,6 +279,7 @@ const NewBoardModalBody = ({
           onClick={() =>
             useSimpleBoard
               ? handleResetBoard({
+                  newGameType: GameTypes.TWOCORNER,
                   newLayoutCode: null,
                   newSeed: useCustomSeed ? parseInt(seed) : null,
                   newBoardWidth: useCustomSize
@@ -290,6 +292,7 @@ const NewBoardModalBody = ({
                   newAllowSinglePairs: (difficulty & 2) !== 0,
                 })
               : handleResetBoard({
+                  newGameType: GameTypes.TWOCORNER,
                   newLayoutCode: layoutCode,
                   newSeed: useCustomSeed ? parseInt(seed) : null,
                   newBoardWidth: null,
@@ -300,6 +303,19 @@ const NewBoardModalBody = ({
           }
         >
           Start New Board
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() =>
+            handleResetBoard({
+              newGameType: GameTypes.TRADITIONAL,
+              newSeed: useCustomSeed ? parseInt(seed) : null,
+              newBlindShuffle: (difficulty & 1) !== 0,
+            })
+          }
+        >
+          Start Classic Mahjong Solitaire (Traditional Layout)
         </button>
       </div>
       <div>
