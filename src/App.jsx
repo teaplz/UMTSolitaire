@@ -87,7 +87,7 @@ function App() {
     <div
       className={`App ${
         backgroundOption === BackgroundOptions.BACKGROUND_FANCY
-          ? "animatedBackground"
+          ? "fancyAnimatedBackground"
           : ""
       }`}
       style={{

@@ -16,10 +16,10 @@
   font-size: 7vmin;
   width: 1.2em;
   height: 1.2em;
-  text-align: center;
   line-height: 0;
   border-radius: 50%;
   border: 0;
+  padding: 0;
   box-shadow: 0px 0px 0px 0.75vmin black, 0 0 0.5em 0 black;
   position: fixed;
   background-color: #cdcdcd;
@@ -30,10 +30,10 @@
   font-size: 4vmin;
   width: 2em;
   height: 1.25em;
-  text-align: center;
   line-height: 0;
   border-radius: 50%;
   border: 0.25vmin solid black;
+  padding: 0;
   background-color: #cdcdcd;
   color: black;
   margin: 0.5vmin 1vmin;
@@ -80,6 +80,7 @@
       width: 1.2em;
       height: 1.2em;
       border: 0;
+      padding: 0;
       box-shadow: 0px 0px 0px 0.75vmin black, 0 0 0.5em 0 black;
       margin: 2vmin 2vmin;
   }

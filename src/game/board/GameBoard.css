@@ -1,5 +1,7 @@
 .game-board {
   user-select: none;
+  -webkit-user-drag: none;
+  -webkit-tap-highlight-color: transparent;
   white-space: nowrap;
   width: 100%;
   position: relative;
@@ -91,6 +93,7 @@
   position: absolute;
   z-index: -1;
   font-weight: bolder;
+  -webkit-text-stroke-width: thin;
   color: white;
   text-shadow: 0.09em 0.09em 0 lightgrey, 0.16em 0.16em 0 teal, 0.16em 0.16em 0.32em black;
 }
@@ -155,17 +158,17 @@
 
 .game-board-glyph .game-tile span.game-tile-selected:before {
   color: #f5f5a7;
-  text-shadow: 0 0 0.2em yellow, 0.09em 0.09em 0 lightgrey, 0.16em 0.16em 0 teal, 0.16em 0.16em 0.32em black;
+  text-shadow: 0 0 0.2em yellow, 0.09em 0.09em 0 #d3d3a7, 0.16em 0.16em 0 teal, 0.16em 0.16em 0.32em black;
 }
 
 .game-board-glyph .game-tile span.game-tile-hint-all:before {
   color: #f5a7a7;
-  text-shadow: 0.09em 0.09em 0 lightgrey, 0.16em 0.16em 0 teal, 0.16em 0.16em 0.32em black;
+  text-shadow: 0.09em 0.09em 0 #d3a7a7, 0.16em 0.16em 0 teal, 0.16em 0.16em 0.32em black;
 }
 
 .game-board-glyph .game-tile span.game-tile-hint-current:before {
   color: #a7a7f5;
-  text-shadow: 0.09em 0.09em 0 lightgrey, 0.16em 0.16em 0 teal, 0.16em 0.16em 0.32em black;
+  text-shadow: 0.09em 0.09em 0 #a7a7d3, 0.16em 0.16em 0 teal, 0.16em 0.16em 0.32em black;
 }
 
 .game-board-glyph .game-tile span.game-tile-selected,

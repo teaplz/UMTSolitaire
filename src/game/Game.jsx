@@ -975,7 +975,6 @@ export default function Game({
           onClick={() => showModal(GameModals.PAUSE)}
         >
           <svg
-            xmlns="http://www.w3.org/2000/svg"
             width="7vmin"
             viewBox="0 0 24 24"
             fill="none"
@@ -996,7 +995,6 @@ export default function Game({
             disabled={tileHistory.length === 0}
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
               width="4vmin"
               viewBox="0 0 24 24"
               fill="none"
@@ -1013,7 +1011,6 @@ export default function Game({
             disabled={!canUseHint}
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
               width="4vmin"
               viewBox="0 0 24 24"
               fill="none"
@@ -1029,7 +1026,6 @@ export default function Game({
             onClick={() => showModal(GameModals.HELP)}
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
               width="4vmin"
               viewBox="0 0 24 24"
               fill="none"
@@ -1046,7 +1042,6 @@ export default function Game({
             onClick={() => showModal(GameModals.PAUSE)}
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
               width="4vmin"
               viewBox="0 0 24 24"
               fill="none"

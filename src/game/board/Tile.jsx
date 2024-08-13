@@ -74,7 +74,7 @@ export default function Tile({
 
     return (
       <span className={classNames === "" ? null : classNames}>
-        {String.fromCodePoint(0x1f000 + char)}&#xFE0E;
+        {String.fromCodePoint(0x1F000 + char, 0xFE0E)}
       </span>
     );
   }
