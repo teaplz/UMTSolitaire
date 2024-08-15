@@ -1,9 +1,5 @@
-import {
-  generateBoardWithSimpleShuffle,
-  generateBoardWithPresolvedShuffle,
-  generateRectangularBoardWithSimpleShuffle,
-  generateRectangularBoardWithPresolvedShuffle,
-} from "./twocorner/BoardGenerator";
+import * as BoardGenerator from "./twocorner/BoardGenerator";
+import * as BoardLayoutGenerator from "./twocorner/BoardLayoutGenerator";
 
 export function generateBoard({
   layoutCode,
@@ -12,64 +8,53 @@ export function generateBoard({
   seed,
   useBlindShuffle = false,
   allowSinglePairs = false,
-} = {}) {
+}) {
   let generatedBoard;
 
-  if (layoutCode != null) {
-    // Generate the board based on the provided layout code. Fallback to the
-    // default board if it fails.
+  // Generate the board based on the provided layout code or from a basic rectangular board based on the provided width and
+  // height.
+  let finalLayoutCode =
+    layoutCode != null
+      ? layoutCode
+      : BoardLayoutGenerator.generateLayoutCode({
+          width: boardWidth,
+          height: boardHeight,
+        });
 
-    if (useBlindShuffle) {
-      generatedBoard = generateBoardWithSimpleShuffle(
-        seed,
-        layoutCode,
-        allowSinglePairs
-      );
-    } else {
-      generatedBoard = generateBoardWithPresolvedShuffle(
-        seed,
-        layoutCode,
-        allowSinglePairs
-      );
-    }
+  console.log("Generated layout code: " + finalLayoutCode);
 
-    if (generatedBoard === null) {
-      console.error(
-        "Invalid generated board, switching to default 17x8 board."
-      );
-
-      generatedBoard = generateRectangularBoardWithPresolvedShuffle(
-        null,
-        17,
-        8
-      );
-    }
-  } else {
-    // Generate a basic rectangular board based on the provided width and
-    // height.
-
-    if (useBlindShuffle) {
-      generatedBoard = generateRectangularBoardWithSimpleShuffle(
+  generatedBoard = useBlindShuffle
+    ? BoardGenerator.generateBoardWithSimpleShuffle({
+        ...BoardLayoutGenerator.generateBoardLayout(finalLayoutCode),
         seed,
-        boardWidth,
-        boardHeight,
-        allowSinglePairs
-      );
-    } else {
-      generatedBoard = generateRectangularBoardWithPresolvedShuffle(
+        allowSinglePairs,
+      })
+    : BoardGenerator.generateBoardWithPresolvedShuffle({
+        ...BoardLayoutGenerator.generateBoardLayout(finalLayoutCode),
         seed,
-        boardWidth,
-        boardHeight,
-        allowSinglePairs
-      );
-    }
+        allowSinglePairs,
+      });
+
+  if (generatedBoard === null) {
+    console.error("Invalid generated board, switching to default 17x8 board.");
+
+    finalLayoutCode = BoardLayoutGenerator.generateLayoutCodeForRectangle({
+      width: 17,
+      height: 8,
+    });
+
+    console.log("Generated layout code: " + finalLayoutCode);
+
+    generatedBoard = BoardGenerator.generateBoardWithPresolvedShuffle({
+      ...BoardLayoutGenerator.generateBoardLayout(finalLayoutCode),
+    });
   }
 
-  return generatedBoard;
+  return { ...generatedBoard, layoutCode: finalLayoutCode };
 }
 
 export {
   searchSimplestValidPath,
   searchAllPossibleMatches,
-  PathDirection
+  PathDirection,
 } from "./twocorner/PathLogic";

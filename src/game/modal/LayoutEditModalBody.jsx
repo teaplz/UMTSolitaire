@@ -1,20 +1,17 @@
 import { useState, useEffect } from "react";
 
 import {
-  layoutCodeVersionNumber,
-  layoutCodeRadix,
-  layoutCodeRadixBits,
-  decodeLayoutCode,
-} from "../logic/twocorner/BoardGenerator";
+  MAX_BOARD_HEIGHT,
+  MAX_BOARD_WIDTH,
+} from "../logic/twocorner/BoardLayoutGenerator";
+
+import * as BoardLayoutGenerator from "../logic/twocorner/BoardLayoutGenerator";
 
 import { GameTypes } from "../util/GameTypes";
 
 import "./LayoutEditModalBody.css";
 
 const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
-  const maxHeight = 12,
-    maxWidth = 20;
-
   const numTileTypes = 2;
   const tileColors = ["black", "goldenrod"];
 
@@ -25,22 +22,23 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
   useEffect(() => {
     if (initialLayout != null) {
       try {
-        const decodedLayoutObj = decodeLayoutCode(initialLayout);
+        const decodedLayoutObj =
+          BoardLayoutGenerator.generateBoardLayout(initialLayout);
 
-        const layoutStartX = (maxWidth - decodedLayoutObj.width) >> 1,
-          layoutStartY = (maxHeight - decodedLayoutObj.height) >> 1,
-          layoutStart = layoutStartY * maxWidth,
-          layoutEnd = layoutStart + decodedLayoutObj.height * maxWidth;
+        const layoutStartX = (MAX_BOARD_WIDTH - decodedLayoutObj.width) >> 1,
+          layoutStartY = (MAX_BOARD_HEIGHT - decodedLayoutObj.height) >> 1,
+          layoutStart = layoutStartY * MAX_BOARD_WIDTH,
+          layoutEnd = layoutStart + decodedLayoutObj.height * MAX_BOARD_WIDTH;
 
         let layoutCursor = 0;
 
         setLayout(
-          Array.from({ length: maxHeight * maxWidth }, (_, i) => {
+          Array.from({ length: MAX_BOARD_HEIGHT * MAX_BOARD_WIDTH }, (_, i) => {
             if (
               i < layoutStart ||
               i >= layoutEnd ||
-              i % maxWidth < layoutStartX ||
-              i % maxWidth >= layoutStartX + decodedLayoutObj.width
+              i % MAX_BOARD_WIDTH < layoutStartX ||
+              i % MAX_BOARD_WIDTH >= layoutStartX + decodedLayoutObj.width
             ) {
               return 0;
             } else {
@@ -59,7 +57,9 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
 
   // Reset to the default board.
   const resetEditor = () => {
-    setLayout(Array.from({ length: maxHeight * maxWidth }, () => 0));
+    setLayout(
+      Array.from({ length: MAX_BOARD_HEIGHT * MAX_BOARD_WIDTH }, () => 0)
+    );
   };
 
   // Toggle the chosen tile type.
@@ -73,17 +73,14 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
 
   // Generate the layout code from the current layout.
   const generateLayoutCode = () => {
-    let code = GameTypes.TWOCORNER.toString(16).padStart(2, "0");
-    code += layoutCodeVersionNumber.toString(16).padStart(2, "0");
-
-    let margins = [0, maxWidth, 0, maxHeight];
+    let margins = [0, MAX_BOARD_WIDTH, 0, MAX_BOARD_HEIGHT];
 
     // Left
     let marginPoint = false;
 
-    for (let x = 0; x < maxWidth; x++) {
-      for (let y = 0; y < maxHeight; y++) {
-        if (layout[y * maxWidth + x] !== 0) {
+    for (let x = 0; x < MAX_BOARD_WIDTH; x++) {
+      for (let y = 0; y < MAX_BOARD_HEIGHT; y++) {
+        if (layout[y * MAX_BOARD_WIDTH + x] !== 0) {
           marginPoint = true;
           break;
         }
@@ -97,9 +94,9 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
     // Right
     marginPoint = false;
 
-    for (let x = maxWidth - 1; x >= 0; x--) {
-      for (let y = 0; y < maxHeight; y++) {
-        if (layout[y * maxWidth + x] !== 0) {
+    for (let x = MAX_BOARD_WIDTH - 1; x >= 0; x--) {
+      for (let y = 0; y < MAX_BOARD_HEIGHT; y++) {
+        if (layout[y * MAX_BOARD_WIDTH + x] !== 0) {
           marginPoint = true;
           break;
         }
@@ -113,9 +110,9 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
     // Top
     marginPoint = false;
 
-    for (let y = 0; y < maxHeight; y++) {
-      for (let x = 0; x < maxWidth; x++) {
-        if (layout[y * maxWidth + x] !== 0) {
+    for (let y = 0; y < MAX_BOARD_HEIGHT; y++) {
+      for (let x = 0; x < MAX_BOARD_WIDTH; x++) {
+        if (layout[y * MAX_BOARD_WIDTH + x] !== 0) {
           marginPoint = true;
           break;
         }
@@ -129,9 +126,9 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
     // Bottom
     marginPoint = false;
 
-    for (let y = maxHeight - 1; y >= 0; y--) {
-      for (let x = 0; x < maxWidth; x++) {
-        if (layout[y * maxWidth + x] !== 0) {
+    for (let y = MAX_BOARD_HEIGHT - 1; y >= 0; y--) {
+      for (let x = 0; x < MAX_BOARD_WIDTH; x++) {
+        if (layout[y * MAX_BOARD_WIDTH + x] !== 0) {
           marginPoint = true;
           break;
         }
@@ -145,26 +142,21 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
     const width = margins[1] - margins[0],
       height = margins[3] - margins[2];
 
-    code += width.toString(layoutCodeRadix).slice(0, 1);
-    code += height.toString(layoutCodeRadix).slice(0, 1);
-
-    const digitsPerLine = Math.ceil((width + 1) / layoutCodeRadixBits);
+    let layoutMask = "";
 
     for (let y = margins[2]; y < margins[3]; y++) {
-      let lineMask = "1";
-
       for (let x = margins[0]; x < margins[1]; x++) {
-        if (layout[y * maxWidth + x] === 1) lineMask += "1";
-        else lineMask += "0";
+        layoutMask += layout[y * MAX_BOARD_WIDTH + x];
       }
-
-      code += parseInt(
-        lineMask.padEnd(digitsPerLine * layoutCodeRadixBits, "0"),
-        2
-      ).toString(layoutCodeRadix);
     }
 
-    setLayoutCode(code);
+    setLayoutCode(
+      BoardLayoutGenerator.generateLayoutCode({
+        layoutMask,
+        width,
+        height,
+      })
+    );
   };
 
   useEffect(() => {
@@ -179,16 +171,16 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
 
   // Render the layout.
   const renderLayout = () => {
-    return Array.from({ length: maxHeight }, (_, y) => (
+    return Array.from({ length: MAX_BOARD_HEIGHT }, (_, y) => (
       <div className="row" key={"layoutEditorRow-" + y}>
-        {Array.from({ length: maxWidth }, (_, x) => (
+        {Array.from({ length: MAX_BOARD_WIDTH }, (_, x) => (
           <span
             className="cell"
-            key={"layoutEditorCell-" + y * maxWidth + x}
+            key={"layoutEditorCell-" + y * MAX_BOARD_WIDTH + x}
             style={{
-              backgroundColor: tileColors[layout[y * maxWidth + x]],
+              backgroundColor: tileColors[layout[y * MAX_BOARD_WIDTH + x]],
             }}
-            onClick={() => toggleTile(y * maxWidth + x)}
+            onClick={() => toggleTile(y * MAX_BOARD_WIDTH + x)}
           ></span>
         ))}
       </div>

@@ -128,8 +128,6 @@ export function generateLayoutCode({ tiles, width, height }) {
   // finalize.
   layoutCode = layoutCode.slice(0, 5).concat(layoutCodeWithoutIDs);
 
-  console.log("Generated layout code: " + layoutCode);
-
   return layoutCode;
 }
 

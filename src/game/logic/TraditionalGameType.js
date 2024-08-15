@@ -26,6 +26,8 @@ export function generateBoard({
     ? layoutCode
     : LAYOUT_CODE_TURTLE;
 
+  if (fullTest) console.log("Generated layout code: " + layoutCode);
+
   const board = useBlindShuffle
     ? BoardGenerator.generateBoardWithSimpleShuffle({
         layout: BoardLayoutGenerator.generateBoardLayout(turtleLayoutCode),
