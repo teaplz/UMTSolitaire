@@ -175,6 +175,11 @@ export function generateBoardWithPresolvedShuffle({
     0
   );
 
+  if (numTiles < 2) {
+    console.error("Cannot start with less than 2 tiles on the board.");
+    return null;
+  }
+
   const numPairs = numTiles >> 1;
 
   // Generate the tile matching order for the solving algorithm. This is done
@@ -214,7 +219,7 @@ export function generateBoardWithPresolvedShuffle({
     // numPairs >> 1           -->       (numPairs + 1) >> 1
     allTileValues = allTileValues.slice(
       0,
-      allowSinglePairs ? numPairs : numPairs >> 1
+      allowSinglePairs ? numPairs : Math.max(numPairs >> 1, 1)
     );
   }
 

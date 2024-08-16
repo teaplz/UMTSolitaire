@@ -212,6 +212,12 @@ export function generateBoardWithPresolvedShuffle({
   });
 
   let numTiles = tilesToProcess.length;
+
+  if (numTiles < 2) {
+    console.error("Cannot start with less than 2 tiles on the board.");
+    return null;
+  }
+
   const numPairs = numTiles >> 1;
 
   // Generate which tile designs are used. This is done by listing all
@@ -251,7 +257,7 @@ export function generateBoardWithPresolvedShuffle({
     // numPairs >> 1           -->       (numPairs + 1) >> 1
     allTileValues = allTileValues.slice(
       0,
-      allowSinglePairs ? numPairs : numPairs >> 1
+      allowSinglePairs ? numPairs : Math.max(numPairs >> 1, 1)
     );
   }
 
