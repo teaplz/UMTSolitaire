@@ -513,6 +513,11 @@ export default function Game({
       }
     }
 
+    if (allValidMatches == null)
+    {
+      allValidMatches = [];
+    }
+
     console.log(`Number of Valid Matches: ${allValidMatches.length}`);
 
     setAllValidMatchingTiles([...new Set(allValidMatches.flat())]);

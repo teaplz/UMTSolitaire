@@ -187,6 +187,7 @@ export function generateBoardLayout(layoutCode) {
 
   // Check tile layout with its checksum.
   if (getChecksumForTileLayout(tileLayout) !== tileLayoutChecksum) {
+    console.error("generateBoardLayout: Invalid layout checksum.");
     return null;
   }
 
@@ -219,7 +220,12 @@ export function generateBoardLayout(layoutCode) {
       tileYHS = (curCoord >>> 22) % (1 << 7);
 
     // Malformed layout code, somehow.
-    if (tiles.length + emptySpacesBefore + 1 > maxTilesSize) return null;
+    if (tiles.length + emptySpacesBefore + 1 > maxTilesSize) {
+      console.error(
+        "generateBoardLayout: Layout code attempted to push beyond boundary."
+      );
+      break;
+    }
 
     // Empty spaces prior to this coordinate.
     for (let i = 0; i < emptySpacesBefore; i++) {
@@ -258,7 +264,7 @@ function getChecksumForTileLayout(str) {
     checksum += str.charCodeAt(i);
   }
 
-  return (checksum % 1024).toString(32);
+  return (checksum % 1024).toString(32).padStart(2, "0");
 }
 
 // For subtituting common patterns for compression. Runs top-to-bottom.

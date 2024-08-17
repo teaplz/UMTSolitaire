@@ -26,7 +26,7 @@ export function generateBoard({
     ? layoutCode
     : LAYOUT_CODE_TURTLE;
 
-  if (fullTest) console.log("Generated layout code: " + layoutCode);
+  if (fullTest) console.log("Generated layout code: " + turtleLayoutCode);
 
   const board = useBlindShuffle
     ? BoardGenerator.generateBoardWithSimpleShuffle({
@@ -39,8 +39,8 @@ export function generateBoard({
       });
 
   updateTileVisibilityAndSelectability(
-    board.obstructedTiles,
-    board.obstructedTileRegions
+    board?.obstructedTiles,
+    board?.obstructedTileRegions
   );
 
   return {
@@ -53,9 +53,9 @@ export function updateTileVisibilityAndSelectability(
   obstructedTiles,
   obstructedTileRegions
 ) {
-  obstructedTiles.forEach((t) => {
+  obstructedTiles?.forEach((t) => {
     t.tile.hidden =
-      t.char !== null &&
+      t.char != null &&
       obstructedTileRegions[t.tile.id].reduce(
         (acc, cur) => acc | cur.region,
         0
@@ -63,7 +63,7 @@ export function updateTileVisibilityAndSelectability(
       !t.overlapping.some((t) => t.char === null);
 
     t.tile.selectable =
-      t.tile.char !== null &&
+      t.tile.char != null &&
       (t.overlapping.length === 0 ||
         !t.overlapping.some((t) => t.char !== null)) &&
       (t.leftAdjacent.length === 0 ||
@@ -76,7 +76,9 @@ export function updateTileVisibilityAndSelectability(
 export function searchAllPossibleMatches(tiles) {
   const result = [];
 
-  const selectableTiles = tiles.flat().filter((t) => t?.selectable);
+  const selectableTiles = tiles?.flat().filter((t) => t?.selectable);
+
+  if (selectableTiles == null) return null;
 
   for (let i = 0; i < selectableTiles.length; i++) {
     for (let j = i + 1; j < selectableTiles.length; j++) {

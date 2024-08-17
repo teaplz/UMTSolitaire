@@ -443,7 +443,7 @@ export function generateBoardWithPresolvedShuffle({
   // Remove unused or unreachable tiles.
   tiles.forEach((coord) => {
     coord?.forEach((tile) => {
-      if (tile.char === undefined) {
+      if (tile?.char === undefined) {
         tile = null;
         numTiles--;
       }
@@ -501,304 +501,319 @@ export function calculateObstructedTiles({ tiles, width, height }) {
 
   tiles.forEach((coord, index) =>
     coord?.forEach((tile, height) => {
-      obstructedTiles.push({
-        tile,
-        overlapping: [
-          // Add the tile directly above it, regardless of half-stepping.
-          coord.length > height && coord[height + 1] != null
-            ? {
-                tile: coord[height + 1],
-                region:
-                  (tile.xhalfstep || !coord[height + 1].xhalfstep
-                    ? OverlappingTileRegions.LEFT
-                    : 0) |
-                  (!tile.xhalfstep || coord[height + 1].xhalfstep
-                    ? OverlappingTileRegions.RIGHT
-                    : 0) |
-                  (tile.yhalfstep || !coord[height + 1].yhalfstep
-                    ? OverlappingTileRegions.TOP
-                    : 0) |
-                  (!tile.yhalfstep || coord[height + 1].yhalfstep
-                    ? OverlappingTileRegions.BOTTOM
-                    : 0),
-              }
-            : null,
+      if (tile != null) {
+        obstructedTiles.push({
+          tile,
+          overlapping: [
+            // Add the tile directly above it, regardless of half-stepping.
+            coord.length > height && coord[height + 1] != null
+              ? {
+                  tile: coord[height + 1],
+                  region:
+                    (tile.xhalfstep || !coord[height + 1].xhalfstep
+                      ? OverlappingTileRegions.LEFT
+                      : 0) |
+                    (!tile.xhalfstep || coord[height + 1].xhalfstep
+                      ? OverlappingTileRegions.RIGHT
+                      : 0) |
+                    (tile.yhalfstep || !coord[height + 1].yhalfstep
+                      ? OverlappingTileRegions.TOP
+                      : 0) |
+                    (!tile.yhalfstep || coord[height + 1].yhalfstep
+                      ? OverlappingTileRegions.BOTTOM
+                      : 0),
+                }
+              : null,
 
-          // Add surrounding tiles that are half-stepped directly above it.
+            // Add surrounding tiles that are half-stepped directly above it.
 
-          // Upper-Left
-          // - Not at left edge
-          !(index % boardWidth === 0) &&
-          // - Not at top edge
-          index - boardWidth >= 0 &&
-          // - Tile is not stepped
-          !tile.xhalfstep &&
-          !tile.yhalfstep &&
-          // - Other tile exists and is stepped in both
-          tiles[index - boardWidth - 1]?.length > height &&
-          tiles[index - boardWidth - 1][height + 1] != null &&
-          tiles[index - boardWidth - 1][height + 1].xhalfstep &&
-          tiles[index - boardWidth - 1][height + 1].yhalfstep
-            ? {
-                tile: tiles[index - boardWidth - 1][height + 1],
-                region:
-                  OverlappingTileRegions.LEFT | OverlappingTileRegions.TOP,
-              }
-            : null,
+            // Upper-Left
+            // - Not at left edge
+            !(index % boardWidth === 0) &&
+            // - Not at top edge
+            index - boardWidth >= 0 &&
+            // - Tile is not stepped
+            !tile.xhalfstep &&
+            !tile.yhalfstep &&
+            // - Other tile exists and is stepped in both
+            tiles[index - boardWidth - 1]?.length > height &&
+            tiles[index - boardWidth - 1][height + 1] != null &&
+            tiles[index - boardWidth - 1][height + 1].xhalfstep &&
+            tiles[index - boardWidth - 1][height + 1].yhalfstep
+              ? {
+                  tile: tiles[index - boardWidth - 1][height + 1],
+                  region:
+                    OverlappingTileRegions.LEFT | OverlappingTileRegions.TOP,
+                }
+              : null,
 
-          // Upper
-          // - Not at top edge
-          index - boardWidth >= 0 &&
-          // - Tile is not y-stepped
-          !tile.yhalfstep &&
-          // - Other tile exists and is y-stepped
-          tiles[index - boardWidth]?.length > height &&
-          tiles[index - boardWidth][height + 1] != null &&
-          tiles[index - boardWidth][height + 1].yhalfstep
-            ? {
-                tile: tiles[index - boardWidth][height + 1],
-                region:
-                  OverlappingTileRegions.TOP |
-                  (!(
-                    !tile.xhalfstep &&
-                    tiles[index - boardWidth][height + 1].xhalfstep
-                  )
-                    ? OverlappingTileRegions.LEFT
-                    : 0) |
-                  (!(
-                    tile.xhalfstep &&
-                    !tiles[index - boardWidth][height + 1].xhalfstep
-                  )
-                    ? OverlappingTileRegions.RIGHT
-                    : 0),
-              }
-            : null,
+            // Upper
+            // - Not at top edge
+            index - boardWidth >= 0 &&
+            // - Tile is not y-stepped
+            !tile.yhalfstep &&
+            // - Other tile exists and is y-stepped
+            tiles[index - boardWidth]?.length > height &&
+            tiles[index - boardWidth][height + 1] != null &&
+            tiles[index - boardWidth][height + 1].yhalfstep
+              ? {
+                  tile: tiles[index - boardWidth][height + 1],
+                  region:
+                    OverlappingTileRegions.TOP |
+                    (!(
+                      !tile.xhalfstep &&
+                      tiles[index - boardWidth][height + 1].xhalfstep
+                    )
+                      ? OverlappingTileRegions.LEFT
+                      : 0) |
+                    (!(
+                      tile.xhalfstep &&
+                      !tiles[index - boardWidth][height + 1].xhalfstep
+                    )
+                      ? OverlappingTileRegions.RIGHT
+                      : 0),
+                }
+              : null,
 
-          // Upper-Right
-          // - Not at right edge
-          !(index % boardWidth === boardWidth - 1) &&
-          // - Not at top edge
-          index - boardWidth >= 0 &&
-          // - Tile is x-stepped and not y-stepped
-          tile.xhalfstep &&
-          !tile.yhalfstep &&
-          // - Other tile exists, is y-stepped, and not x-stepped
-          tiles[index - boardWidth + 1]?.length > height &&
-          tiles[index - boardWidth + 1][height + 1] != null &&
-          !tiles[index - boardWidth + 1][height + 1].xhalfstep &&
-          tiles[index - boardWidth + 1][height + 1].yhalfstep
-            ? {
-                tile: tiles[index - boardWidth + 1][height + 1],
-                region:
-                  OverlappingTileRegions.RIGHT | OverlappingTileRegions.TOP,
-              }
-            : null,
+            // Upper-Right
+            // - Not at right edge
+            !(index % boardWidth === boardWidth - 1) &&
+            // - Not at top edge
+            index - boardWidth >= 0 &&
+            // - Tile is x-stepped and not y-stepped
+            tile.xhalfstep &&
+            !tile.yhalfstep &&
+            // - Other tile exists, is y-stepped, and not x-stepped
+            tiles[index - boardWidth + 1]?.length > height &&
+            tiles[index - boardWidth + 1][height + 1] != null &&
+            !tiles[index - boardWidth + 1][height + 1].xhalfstep &&
+            tiles[index - boardWidth + 1][height + 1].yhalfstep
+              ? {
+                  tile: tiles[index - boardWidth + 1][height + 1],
+                  region:
+                    OverlappingTileRegions.RIGHT | OverlappingTileRegions.TOP,
+                }
+              : null,
 
-          // Left
-          // - Not at left edge
-          !(index % boardWidth === 0) &&
-          // - Tile is not x-stepped
-          !tile.xhalfstep &&
-          // - Other tile exists and is x-stepped
-          tiles[index - 1]?.length > height &&
-          tiles[index - 1][height + 1] != null &&
-          tiles[index - 1][height + 1].xhalfstep
-            ? {
-                tile: tiles[index - 1][height + 1],
-                region:
-                  OverlappingTileRegions.LEFT |
-                  (!(!tile.yhalfstep && tiles[index - 1][height + 1].yhalfstep)
-                    ? OverlappingTileRegions.TOP
-                    : 0) |
-                  (!(tile.yhalfstep && !tiles[index - 1][height + 1].yhalfstep)
-                    ? OverlappingTileRegions.BOTTOM
-                    : 0),
-              }
-            : null,
+            // Left
+            // - Not at left edge
+            !(index % boardWidth === 0) &&
+            // - Tile is not x-stepped
+            !tile.xhalfstep &&
+            // - Other tile exists and is x-stepped
+            tiles[index - 1]?.length > height &&
+            tiles[index - 1][height + 1] != null &&
+            tiles[index - 1][height + 1].xhalfstep
+              ? {
+                  tile: tiles[index - 1][height + 1],
+                  region:
+                    OverlappingTileRegions.LEFT |
+                    (!(
+                      !tile.yhalfstep && tiles[index - 1][height + 1].yhalfstep
+                    )
+                      ? OverlappingTileRegions.TOP
+                      : 0) |
+                    (!(
+                      tile.yhalfstep && !tiles[index - 1][height + 1].yhalfstep
+                    )
+                      ? OverlappingTileRegions.BOTTOM
+                      : 0),
+                }
+              : null,
 
-          // Right
-          // - Not at right edge
-          !(index % boardWidth === boardWidth - 1) &&
-          // - Tile is x-stepped
-          tile.xhalfstep &&
-          // - Other tile exists and is not x-stepped
-          tiles[index + 1]?.length > height &&
-          tiles[index + 1][height + 1] != null &&
-          !tiles[index + 1][height + 1].xhalfstep
-            ? {
-                tile: tiles[index + 1][height + 1],
-                region:
-                  OverlappingTileRegions.RIGHT |
-                  (!(!tile.yhalfstep && tiles[index + 1][height + 1].yhalfstep)
-                    ? OverlappingTileRegions.TOP
-                    : 0) |
-                  (!(tile.yhalfstep && !tiles[index + 1][height + 1].yhalfstep)
-                    ? OverlappingTileRegions.BOTTOM
-                    : 0),
-              }
-            : null,
+            // Right
+            // - Not at right edge
+            !(index % boardWidth === boardWidth - 1) &&
+            // - Tile is x-stepped
+            tile.xhalfstep &&
+            // - Other tile exists and is not x-stepped
+            tiles[index + 1]?.length > height &&
+            tiles[index + 1][height + 1] != null &&
+            !tiles[index + 1][height + 1].xhalfstep
+              ? {
+                  tile: tiles[index + 1][height + 1],
+                  region:
+                    OverlappingTileRegions.RIGHT |
+                    (!(
+                      !tile.yhalfstep && tiles[index + 1][height + 1].yhalfstep
+                    )
+                      ? OverlappingTileRegions.TOP
+                      : 0) |
+                    (!(
+                      tile.yhalfstep && !tiles[index + 1][height + 1].yhalfstep
+                    )
+                      ? OverlappingTileRegions.BOTTOM
+                      : 0),
+                }
+              : null,
 
-          // Lower-Left
-          // - Not at left edge
-          !(index % boardWidth === 0) &&
-          // - Not at bottom edge
-          index + boardWidth < boardWidth * boardHeight &&
-          // - Tile is y-stepped and not x-stepped
-          !tile.xhalfstep &&
-          tile.yhalfstep &&
-          // - Other tile exists, is x-stepped, and not y-stepped
-          tiles[index + boardWidth - 1]?.length > height &&
-          tiles[index + boardWidth - 1][height + 1] != null &&
-          tiles[index + boardWidth - 1][height + 1].xhalfstep &&
-          !tiles[index + boardWidth - 1][height + 1].yhalfstep
-            ? {
-                tile: tiles[index + boardWidth - 1][height + 1],
-                region:
-                  OverlappingTileRegions.LEFT | OverlappingTileRegions.BOTTOM,
-              }
-            : null,
+            // Lower-Left
+            // - Not at left edge
+            !(index % boardWidth === 0) &&
+            // - Not at bottom edge
+            index + boardWidth < boardWidth * boardHeight &&
+            // - Tile is y-stepped and not x-stepped
+            !tile.xhalfstep &&
+            tile.yhalfstep &&
+            // - Other tile exists, is x-stepped, and not y-stepped
+            tiles[index + boardWidth - 1]?.length > height &&
+            tiles[index + boardWidth - 1][height + 1] != null &&
+            tiles[index + boardWidth - 1][height + 1].xhalfstep &&
+            !tiles[index + boardWidth - 1][height + 1].yhalfstep
+              ? {
+                  tile: tiles[index + boardWidth - 1][height + 1],
+                  region:
+                    OverlappingTileRegions.LEFT | OverlappingTileRegions.BOTTOM,
+                }
+              : null,
 
-          // Lower
-          // - Not at bottom edge
-          index + boardWidth < boardWidth * boardHeight &&
-          // - Tile is y-stepped
-          tile.yhalfstep &&
-          // - Other tile exists and is not y-stepped
-          tiles[index + boardWidth]?.length > height &&
-          tiles[index + boardWidth][height + 1] != null &&
-          !tiles[index + boardWidth][height + 1].yhalfstep
-            ? {
-                tile: tiles[index + boardWidth][height + 1],
-                region:
-                  OverlappingTileRegions.BOTTOM |
-                  (!(
-                    !tile.xhalfstep &&
-                    tiles[index + boardWidth][height + 1].xhalfstep
-                  )
-                    ? OverlappingTileRegions.LEFT
-                    : 0) |
-                  (!(
-                    tile.xhalfstep &&
-                    !tiles[index + boardWidth][height + 1].xhalfstep
-                  )
-                    ? OverlappingTileRegions.RIGHT
-                    : 0),
-              }
-            : null,
+            // Lower
+            // - Not at bottom edge
+            index + boardWidth < boardWidth * boardHeight &&
+            // - Tile is y-stepped
+            tile.yhalfstep &&
+            // - Other tile exists and is not y-stepped
+            tiles[index + boardWidth]?.length > height &&
+            tiles[index + boardWidth][height + 1] != null &&
+            !tiles[index + boardWidth][height + 1].yhalfstep
+              ? {
+                  tile: tiles[index + boardWidth][height + 1],
+                  region:
+                    OverlappingTileRegions.BOTTOM |
+                    (!(
+                      !tile.xhalfstep &&
+                      tiles[index + boardWidth][height + 1].xhalfstep
+                    )
+                      ? OverlappingTileRegions.LEFT
+                      : 0) |
+                    (!(
+                      tile.xhalfstep &&
+                      !tiles[index + boardWidth][height + 1].xhalfstep
+                    )
+                      ? OverlappingTileRegions.RIGHT
+                      : 0),
+                }
+              : null,
 
-          // Lower-Right
-          // - Not at right edge
-          !(index % boardWidth === boardWidth - 1) &&
-          // - Not at bottom edge
-          index + boardWidth < boardWidth * boardHeight &&
-          // - Tile is stepped in both
-          tile.xhalfstep &&
-          tile.yhalfstep &&
-          // - Other tile exists and is not stepped
-          tiles[index + boardWidth + 1]?.length > height &&
-          tiles[index + boardWidth + 1][height + 1] != null &&
-          !tiles[index + boardWidth + 1][height + 1].xhalfstep &&
-          !tiles[index + boardWidth + 1][height + 1].yhalfstep
-            ? {
-                tile: tiles[index + boardWidth + 1][height + 1],
-                region:
-                  OverlappingTileRegions.RIGHT | OverlappingTileRegions.BOTTOM,
-              }
-            : null,
-        ].filter((v) => v),
+            // Lower-Right
+            // - Not at right edge
+            !(index % boardWidth === boardWidth - 1) &&
+            // - Not at bottom edge
+            index + boardWidth < boardWidth * boardHeight &&
+            // - Tile is stepped in both
+            tile.xhalfstep &&
+            tile.yhalfstep &&
+            // - Other tile exists and is not stepped
+            tiles[index + boardWidth + 1]?.length > height &&
+            tiles[index + boardWidth + 1][height + 1] != null &&
+            !tiles[index + boardWidth + 1][height + 1].xhalfstep &&
+            !tiles[index + boardWidth + 1][height + 1].yhalfstep
+              ? {
+                  tile: tiles[index + boardWidth + 1][height + 1],
+                  region:
+                    OverlappingTileRegions.RIGHT |
+                    OverlappingTileRegions.BOTTOM,
+                }
+              : null,
+          ].filter((v) => v),
 
-        leftAdjacent: [
-          // Left
-          // - Not at left edge
-          !(index % boardWidth === 0) &&
-          // - Other tile exists
-          tiles[index - 1]?.length >= height &&
-          // - Not x-hs away from other tile.
-          !(!tiles[index - 1][height]?.xhalfstep && tile.xhalfstep)
-            ? tiles[index - 1][height]
-            : null,
+          leftAdjacent: [
+            // Left
+            // - Not at left edge
+            !(index % boardWidth === 0) &&
+            // - Other tile exists
+            tiles[index - 1]?.length >= height &&
+            // - Not x-hs away from other tile.
+            !(!tiles[index - 1][height]?.xhalfstep && tile.xhalfstep)
+              ? tiles[index - 1][height]
+              : null,
 
-          // Upper-Left
-          // - Not at left edge
-          !(index % boardWidth === 0) &&
-          // - Not at top edge
-          index - boardWidth >= 0 &&
-          // - Other tile exists
-          tiles[index - boardWidth - 1]?.length >= height &&
-          // - Not x-hs away from other tile.
-          !(
-            !tiles[index - boardWidth - 1][height]?.xhalfstep && tile.xhalfstep
-          ) &&
-          // - Is not y-hs, but other tile is.
-          tiles[index - boardWidth - 1][height]?.yhalfstep &&
-          !tile.yhalfstep
-            ? tiles[index - boardWidth - 1][height]
-            : null,
+            // Upper-Left
+            // - Not at left edge
+            !(index % boardWidth === 0) &&
+            // - Not at top edge
+            index - boardWidth >= 0 &&
+            // - Other tile exists
+            tiles[index - boardWidth - 1]?.length >= height &&
+            // - Not x-hs away from other tile.
+            !(
+              !tiles[index - boardWidth - 1][height]?.xhalfstep &&
+              tile.xhalfstep
+            ) &&
+            // - Is not y-hs, but other tile is.
+            tiles[index - boardWidth - 1][height]?.yhalfstep &&
+            !tile.yhalfstep
+              ? tiles[index - boardWidth - 1][height]
+              : null,
 
-          // Lower-Left
-          // - Not at left edge
-          !(index % boardWidth === 0) &&
-          // - Not at bottom edge
-          index + boardWidth < boardWidth * boardHeight &&
-          // - Other tile exists
-          tiles[index + boardWidth - 1]?.length >= height &&
-          // - Not x-hs away from other tile.
-          !(
-            !tiles[index + boardWidth - 1][height]?.xhalfstep && tile.xhalfstep
-          ) &&
-          // - Is y-hs, but other tile is not.
-          !tiles[index + boardWidth - 1][height]?.yhalfstep &&
-          tile.yhalfstep
-            ? tiles[index + boardWidth - 1][height]
-            : null,
-        ].filter((v) => v),
+            // Lower-Left
+            // - Not at left edge
+            !(index % boardWidth === 0) &&
+            // - Not at bottom edge
+            index + boardWidth < boardWidth * boardHeight &&
+            // - Other tile exists
+            tiles[index + boardWidth - 1]?.length >= height &&
+            // - Not x-hs away from other tile.
+            !(
+              !tiles[index + boardWidth - 1][height]?.xhalfstep &&
+              tile.xhalfstep
+            ) &&
+            // - Is y-hs, but other tile is not.
+            !tiles[index + boardWidth - 1][height]?.yhalfstep &&
+            tile.yhalfstep
+              ? tiles[index + boardWidth - 1][height]
+              : null,
+          ].filter((v) => v),
 
-        rightAdjacent: [
-          // Right
-          // - Not at right edge
-          !(index % boardWidth === boardWidth - 1) &&
-          // - Other tile exists
-          tiles[index + 1]?.length >= height &&
-          // - Not x-hs away from other tile.
-          !(tiles[index + 1][height]?.xhalfstep && !tile.xhalfstep)
-            ? tiles[index + 1][height]
-            : null,
+          rightAdjacent: [
+            // Right
+            // - Not at right edge
+            !(index % boardWidth === boardWidth - 1) &&
+            // - Other tile exists
+            tiles[index + 1]?.length >= height &&
+            // - Not x-hs away from other tile.
+            !(tiles[index + 1][height]?.xhalfstep && !tile.xhalfstep)
+              ? tiles[index + 1][height]
+              : null,
 
-          // Upper-Right
-          // - Not at right edge
-          !(index % boardWidth === boardWidth - 1) &&
-          // - Not at top edge
-          index - boardWidth >= 0 &&
-          // - Other tile exists
-          tiles[index - boardWidth + 1]?.length >= height &&
-          // - Not x-hs away from other tile.
-          !(
-            tiles[index - boardWidth + 1][height]?.xhalfstep && !tile.xhalfstep
-          ) &&
-          // - Is not y-hs, but other tile is.
-          tiles[index - boardWidth + 1][height]?.yhalfstep &&
-          !tile.yhalfstep
-            ? tiles[index - boardWidth + 1][height]
-            : null,
+            // Upper-Right
+            // - Not at right edge
+            !(index % boardWidth === boardWidth - 1) &&
+            // - Not at top edge
+            index - boardWidth >= 0 &&
+            // - Other tile exists
+            tiles[index - boardWidth + 1]?.length >= height &&
+            // - Not x-hs away from other tile.
+            !(
+              tiles[index - boardWidth + 1][height]?.xhalfstep &&
+              !tile.xhalfstep
+            ) &&
+            // - Is not y-hs, but other tile is.
+            tiles[index - boardWidth + 1][height]?.yhalfstep &&
+            !tile.yhalfstep
+              ? tiles[index - boardWidth + 1][height]
+              : null,
 
-          // Lower-Right
-          // - Not at right edge
-          !(index % boardWidth === boardWidth - 1) &&
-          // - Not at bottom edge
-          index + boardWidth < boardWidth * boardHeight &&
-          // - Other tile exists
-          tiles[index + boardWidth + 1]?.length >= height &&
-          // - Not x-hs away from other tile.
-          !(
-            tiles[index + boardWidth + 1][height]?.xhalfstep && !tile.xhalfstep
-          ) &&
-          // - Is y-hs, but other tile is not.
-          !tiles[index + boardWidth + 1][height]?.yhalfstep &&
-          tile.yhalfstep
-            ? tiles[index + boardWidth + 1][height]
-            : null,
-        ].filter((v) => v),
-      });
+            // Lower-Right
+            // - Not at right edge
+            !(index % boardWidth === boardWidth - 1) &&
+            // - Not at bottom edge
+            index + boardWidth < boardWidth * boardHeight &&
+            // - Other tile exists
+            tiles[index + boardWidth + 1]?.length >= height &&
+            // - Not x-hs away from other tile.
+            !(
+              tiles[index + boardWidth + 1][height]?.xhalfstep &&
+              !tile.xhalfstep
+            ) &&
+            // - Is y-hs, but other tile is not.
+            !tiles[index + boardWidth + 1][height]?.yhalfstep &&
+            tile.yhalfstep
+              ? tiles[index + boardWidth + 1][height]
+              : null,
+          ].filter((v) => v),
+        });
+      }
     })
   );
 

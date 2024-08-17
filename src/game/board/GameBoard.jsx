@@ -63,7 +63,7 @@ export default function GameBoard({
             return Array(1).fill({
               id: coord.id,
               char: coord.char,
-              selectable: coord.char !== null && coord.char !== 0x2b,
+              selectable: coord.char != null && coord.char !== 0x2b,
               inRemovalAnim: false,
             });
           } else {
