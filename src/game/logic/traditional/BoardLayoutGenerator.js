@@ -92,14 +92,72 @@ export function generateLayoutCode({ tiles, width, height }) {
   // through multiple substitution passes that utilize uppercase alphabet
   // characters.
   //
-  // (value at array index) => 'F' + (array index)
+  // (value at array index) => 'G' + (array index)
+
+  // Basic substitution (L-Z)
+
   tileLayoutCompressSubstitution.forEach(
     (str, index) =>
       (tileLayout = tileLayout.replaceAll(
         str,
-        String.fromCharCode("G".charCodeAt() + index)
+        String.fromCharCode("L".charCodeAt() + index)
       ))
   );
+
+  // Repeater checks (G-K). Replaces repeating patterns of a certain number
+  // of characters with the following sequence:
+  // {x}{x}{x...}
+  //  |  |  |
+  //  |  |  The pattern.
+  //  |  How many times to repeat. 32-bit number.
+  //  The pattern size. See tileLayoutCompressRepeatingSubstitution array.
+  //
+  // Repeats until no more patterns can be found.
+
+  let doAnotherCycle = true;
+
+  while (doAnotherCycle) {
+    doAnotherCycle = false;
+    let tempTileLayout = "";
+
+    for (let i = 0; i < tileLayout.length; i++) {
+      let repeats = 0,
+        curRepeatSize = 6 + 1;
+
+      while (curRepeatSize > 3 && repeats < 1) {
+        repeats = 0;
+        curRepeatSize--;
+
+        while (
+          repeats < 31 &&
+          i + (repeats + 2) * curRepeatSize <= tileLayout.length &&
+          tileLayout.substring(
+            i + repeats * curRepeatSize,
+            i + (repeats + 1) * curRepeatSize
+          ) ===
+            tileLayout.substring(
+              i + (repeats + 1) * curRepeatSize,
+              i + (repeats + 2) * curRepeatSize
+            )
+        ) {
+          repeats++;
+        }
+      }
+
+      if (repeats > 0) {
+        tempTileLayout +=
+          tileLayoutCompressRepeatingSubstitution[6 - curRepeatSize] +
+          repeats.toString(32) +
+          tileLayout.substring(i, i + curRepeatSize);
+        i += (repeats + 1) * curRepeatSize - 1;
+        doAnotherCycle = true;
+      } else {
+        tempTileLayout += tileLayout[i];
+      }
+    }
+
+    tileLayout = tempTileLayout;
+  }
 
   // Fifth and final parts of the layout code. First is the checksum of the tile
   // layout to prevent random tampering, then it's the tile layout itself.
@@ -192,10 +250,52 @@ export function generateBoardLayout(layoutCode) {
   }
 
   // Decompress tile layout.
+
+  // Repeater checks (G-K). When x (num of characters in sequence) is reached,
+  // replace x + y (num of repeats) + z (sequence) with z * y+1.
+  let doAnotherCycle = true;
+
+  while (doAnotherCycle) {
+    doAnotherCycle = false;
+    let tempTileLayout = "";
+
+    for (let i = 0; i < tileLayout.length; i++) {
+      // Check if this is the first part in a repeat check.
+      let repeatSize = tileLayoutCompressRepeatingSubstitution.findIndex(
+        (sub) => sub === tileLayout[i]
+      );
+
+      if (repeatSize !== -1) {
+        repeatSize = 6 - repeatSize;
+
+        let seq = tileLayout.substring(i + 2, i + 2 + repeatSize);
+
+        // If there is a nested repeat check, wait on this check until the
+        // next cycle.
+        if (
+          Array.from(seq).some((c) =>
+            tileLayoutCompressRepeatingSubstitution.includes(c)
+          )
+        ) {
+          doAnotherCycle = true;
+          tempTileLayout += tileLayout[i];
+        } else {
+          tempTileLayout += seq.repeat(parseInt(tileLayout[i + 1], 32) + 1);
+          i += 1 + repeatSize;
+        }
+      } else {
+        tempTileLayout += tileLayout[i];
+      }
+    }
+
+    tileLayout = tempTileLayout;
+  }
+
+  // Basic substitution (L-Z)
   tileLayoutCompressSubstitution.forEach(
     (str, index) =>
       (tileLayout = tileLayout.replaceAll(
-        String.fromCharCode("G".charCodeAt() + index),
+        String.fromCharCode("L".charCodeAt() + index),
         str
       ))
   );
@@ -268,28 +368,33 @@ function getChecksumForTileLayout(str) {
 }
 
 // For subtituting common patterns for compression. Runs top-to-bottom.
-// Starts at "G" (after vowel subtitution) and ignores vowels.
+// Starts at "L" (after vowel subtitution and repeating checks) and
+// ignores vowels.
 const tileLayoutCompressSubstitution = [
-  "0000o00000o00000o00000o0", // G
-  "000080000080000080000080", // H
-  null, // I
-  "0001o00001o0", // J
-  "0000o00000o0", // K
-  "000080000080", // L
-  "0007o0", // M
-  "0003o0", // N
+  "000000000000", // L
+  "0000o0", // M
+  "000080", // N
   null, // O
-  "0001o0", // P
-  "0000o0", // Q
-  "000080", // R
-  "0007o", // S
-  "0003o", // T
+  "0000", // P
+  "000", // Q
+  "vo", // R
+  "fo", // S
+  "7o", // T
   null, // U
-  "0001o", // V
-  "0000o", // W
-  "00008", // X
-  "000", // Y
+  "3o", // V
+  "1o", // W
+  "0o", // X
+  "08", // Y
   "00", // Z
+];
+
+// For the initial character in repeat check sequences, determining the number
+// of characters in each pattern.
+const tileLayoutCompressRepeatingSubstitution = [
+  "G", // 6
+  "H", // 5
+  "J", // 4
+  "K", // 3
 ];
 
 // For subtitutiting out vowels. It happens at the very end when encoding and at
