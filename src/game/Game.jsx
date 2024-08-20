@@ -192,25 +192,26 @@ export default function Game({
   useEffect(() => {
     checkFontCompatibility();
 
+    // Get game state and URL search parameters.
     const gameState = loadGameState(),
-      layout = searchParams?.get("g"),
-      seed = searchParams?.get("s"),
-      blindShuffle = searchParams?.get("ts") !== null,
-      allowSinglePairs = searchParams?.get("sp") !== null;
+      layoutParam = searchParams?.get("g"),
+      seedParam = searchParams?.get("s"),
+      blindShuffleParam = searchParams?.get("ts") !== null,
+      allowSinglePairsParam = searchParams?.get("sp") !== null;
 
     // Get the initial board, in order of priority:
     // - Create from URL search parameters. (Shared hyperlink)
     // - Recreate from the browser's web storage. (Persistence)
     // - Create basic 17x8 board. (Default)
-    if (layout !== null) {
+    if (layoutParam !== null) {
       resetGameState({
         newGameType: null,
-        newLayoutCode: layout,
-        newSeed: seed,
+        newLayoutCode: layoutParam,
+        newSeed: seedParam,
         newBoardWidth: null,
         newBoardHeight: null,
-        newBlindShuffle: blindShuffle,
-        newAllowSinglePairs: allowSinglePairs,
+        newBlindShuffle: blindShuffleParam,
+        newAllowSinglePairs: allowSinglePairsParam,
       });
     } else if (
       gameState !== null &&
@@ -255,7 +256,12 @@ export default function Game({
       } catch (e) {
         console.log(e);
 
-        resetGameState({ newSeed: null, newBoardWidth: 17, newBoardHeight: 8 });
+        resetGameState({
+          newGameType: "TWOCORNER",
+          newBoardWidth: 17,
+          newBoardHeight: 8,
+          newSeed: null,
+        });
       }
     } else {
       resetGameState();
@@ -272,6 +278,7 @@ export default function Game({
           localStorage.removeItem("test");
         }
       } catch (e) {
+        console.error(e.message);
         return null;
       }
     } else {
@@ -297,6 +304,7 @@ export default function Game({
           localStorage.removeItem("test");
         }
       } catch (e) {
+        console.error(e.message);
         return;
       }
     } else {
@@ -485,30 +493,6 @@ export default function Game({
         boardWidth,
         boardHeight
       );
-
-      // Debug: Show all the valid matches in the console.
-      if (showAllValidMatches) {
-        console.log(
-          "Valid Matches: " +
-            allValidMatches.reduce(
-              (a, b) =>
-                a.concat(
-                  `[${String.fromCodePoint(0x1f000 + tiles[b[0]].char)}, ${
-                    (b[0] % (boardWidth + 2)) - 1 + 1
-                  },${
-                    (b[0] - (b[0] % (boardWidth + 2)) - (boardWidth + 2)) /
-                      (boardWidth + 2) +
-                    1
-                  } <-> ${(b[1] % (boardWidth + 2)) - 1 + 1},${
-                    (b[1] - (b[1] % (boardWidth + 2)) - (boardWidth + 2)) /
-                      (boardWidth + 2) +
-                    1
-                  }] `
-                ),
-              ""
-            )
-        );
-      }
     }
 
     if (allValidMatches == null) {
@@ -519,9 +503,9 @@ export default function Game({
 
     setAllValidMatchingTiles([...new Set(allValidMatches.flat())]);
 
-    // Use Fisher-Yates shuffle to shuffle the valid matches array. That way,
-    // when the player clicks the hint button, it'll display a random match,
-    // with subsequent clicks displaying another random match through the array.
+    // Shuffle the valid matches array sp that when the player clicks the hint 
+    // button, it'll display a random match, with subsequent clicks displaying 
+    // another random match through the array.
     const allValidMatchesAtRandom = allValidMatches.slice();
 
     {
@@ -557,6 +541,7 @@ export default function Game({
     }
   }
 
+  // Logic for clicking on a tile on the board.
   function handleTileClick(tileId) {
     if (gameType === GameTypes.TRADITIONAL) {
       const tileObj = tiles.flat().find((t) => t?.id === tileId),
@@ -796,6 +781,7 @@ export default function Game({
     }
   }
 
+  // Allow the board to display the next valid matching pair.
   function showOneMatch() {
     if (!canUseHint) return;
 
@@ -806,6 +792,7 @@ export default function Game({
     );
   }
 
+  // Display amd/or update the chosen modal.
   function showModal(newState) {
     timerRef.current.pause();
 
@@ -817,12 +804,14 @@ export default function Game({
     }
   }
 
+  // Hide the modal.
   function hideModal() {
     if (!gameEnded) timerRef.current.start();
 
     setModalDisplayed(false);
   }
 
+  // Generate the URL for sharing/bookmarking the current game board.
   function generateShareUrls() {
     const layoutUrl = `${window.location.href.split("?")[0]}?g=${layoutCode}`;
 
@@ -834,6 +823,7 @@ export default function Game({
     };
   }
 
+  // Display the correct modal JSX.
   function renderModalBody(modalState) {
     switch (modalState) {
       case GameModals.HELP:
@@ -949,6 +939,7 @@ export default function Game({
     }
   }
 
+  // Render the game board, game bar, and modal.
   return (
     <>
       <GameBoard

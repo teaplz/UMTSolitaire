@@ -4,7 +4,7 @@ import { MAX_BOARD_WIDTH, MAX_BOARD_HEIGHT } from "./BoardLayoutGenerator";
 
 // Generate a random game board by placing pairs/quadruplets of each random tile
 // on the board in the correct layout and then shuffling all tiles on the board
-// using a simple Fisher-Yates shuffle.
+// using a simple shuffle.
 //
 // Note: It'll generate a width+2 x height+2 board, with the edge row and
 // column being blank.
