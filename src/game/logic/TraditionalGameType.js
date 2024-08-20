@@ -7,6 +7,12 @@ const LAYOUT_CODE_TURTLE =
 export const ALL_FLOWER_TILES = [0x22, 0x23, 0x24, 0x25],
   ALL_SEASON_TILES = [0x26, 0x27, 0x28, 0x29];
 
+export {
+  MAX_BOARD_WIDTH,
+  MAX_BOARD_HEIGHT,
+  MAX_BOARD_DEPTH,
+} from "./traditional/BoardLayoutGenerator";
+
 // Generate a full playable board.
 //
 // For now, just generate the classic "turtle" layout.

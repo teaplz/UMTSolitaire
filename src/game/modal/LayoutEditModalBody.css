@@ -1,3 +1,7 @@
+.layoutEditor {
+  user-select: none;
+}
+
 .layoutEditor .row {
   display: flex;
   justify-content: center;
@@ -7,4 +11,16 @@
   width: 2em;
   height: 2em;
   border: 1px solid gray;
+}
+
+.layoutPalette {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.layoutPalette .cell {
+  width: 2em;
+  height: 2em;
+  display: inline-block;
 }
