@@ -252,8 +252,8 @@ export default function Game({
         timerRef.current.reset(newTimer);
 
         setGameEnded(false);
-      } catch (ex) {
-        console.log(ex);
+      } catch (e) {
+        console.log(e);
 
         resetGameState({ newSeed: null, newBoardWidth: 17, newBoardHeight: 8 });
       }
@@ -414,26 +414,27 @@ export default function Game({
       useGameType = newGameType;
     }
 
-    if (useGameType === GameTypes.TRADITIONAL) {
-      generatedBoard = TraditionalGameType.generateBoard({
-        layoutCode: newLayoutCode,
-        seed: newSeed,
-        useBlindShuffle: newBlindShuffle,
-        fullTest: true,
-      });
-    } else if (useGameType === GameTypes.TWOCORNER) {
-      generatedBoard = TwoCornerGameType.generateBoard({
-        layoutCode: newLayoutCode,
-        boardWidth: newBoardWidth,
-        boardHeight: newBoardHeight,
-        seed: newSeed,
-        useBlindShuffle: newBlindShuffle,
-        allowSinglePairs: newAllowSinglePairs,
-      });
-    }
-
-    if (generatedBoard === null) {
-      console.log("Failed to generate board! Cancel board reset.");
+    try {
+      if (useGameType === GameTypes.TRADITIONAL) {
+        generatedBoard = TraditionalGameType.generateBoard({
+          layoutCode: newLayoutCode,
+          seed: newSeed,
+          useBlindShuffle: newBlindShuffle,
+          fullTest: true,
+        });
+      } else if (useGameType === GameTypes.TWOCORNER) {
+        generatedBoard = TwoCornerGameType.generateBoard({
+          layoutCode: newLayoutCode,
+          boardWidth: newBoardWidth,
+          boardHeight: newBoardHeight,
+          seed: newSeed,
+          useBlindShuffle: newBlindShuffle,
+          allowSinglePairs: newAllowSinglePairs,
+        });
+      }
+    } catch (e) {
+      console.error(e.message);
+      console.error("Failed to generate the board! Cancel the board reset.");
       return;
     }
 
@@ -513,8 +514,7 @@ export default function Game({
       }
     }
 
-    if (allValidMatches == null)
-    {
+    if (allValidMatches == null) {
       allValidMatches = [];
     }
 

@@ -26,10 +26,7 @@ export function generateBoardWithSimpleShuffle({
     width > MAX_BOARD_WIDTH ||
     height > MAX_BOARD_HEIGHT
   ) {
-    console.error(
-      "generateBoardWithSimpleShuffle: Invalid layoutMask, width, or height."
-    );
-    return null;
+    throw new Error("Invalid layoutMask, width, or height.");
   }
 
   const tiles = [],
@@ -149,10 +146,7 @@ export function generateBoardWithPresolvedShuffle({
     width > MAX_BOARD_WIDTH ||
     height > MAX_BOARD_HEIGHT
   ) {
-    console.error(
-      "generateBoardWithPresolvedShuffle: Invalid layoutMask, width, or height."
-    );
-    return null;
+    throw new Error("Invalid layoutMask, width, or height.");
   }
 
   const tiles = [];
@@ -176,8 +170,7 @@ export function generateBoardWithPresolvedShuffle({
   );
 
   if (numTiles < 2) {
-    console.error("Cannot start with less than 2 tiles on the board.");
-    return null;
+    throw new Error("Cannot start with less than 2 tiles on the board.");
   }
 
   const numPairs = numTiles >> 1;

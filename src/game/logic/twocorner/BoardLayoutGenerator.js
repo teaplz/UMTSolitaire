@@ -40,8 +40,7 @@ export function generateLayoutCode({ layoutMask, width, height }) {
     w > MAX_BOARD_WIDTH ||
     h > MAX_BOARD_HEIGHT
   ) {
-    console.error("generateLayoutCode: Invalid width or height.");
-    return null;
+    throw new Error("Invalid width or height.");
   }
 
   // First four parts of the layout code.
@@ -138,7 +137,7 @@ export function generateBoardLayout(layoutCode) {
     layoutCode.length < 6 ||
     layoutCode.slice(0, 3) !== GameTypeLayoutCodeIDs.TWOCORNER
   ) {
-    return null;
+    throw new Error("Invalid layout code.");
   }
 
   const layoutCodeVer = parseInt(layoutCode.slice(3, 5), 32);
@@ -146,7 +145,7 @@ export function generateBoardLayout(layoutCode) {
   // If we want backwards-compatibility support, here would be the place to
   // do it.
   if (layoutCodeVer !== LAYOUT_CODE_VERSION_NUMBER) {
-    return null;
+    throw new Error("Invalid layout code.");
   }
 
   // Unsanitize layout code.
@@ -183,12 +182,12 @@ export function generateBoardLayout(layoutCode) {
     tileLayoutChecksum === "" ||
     tileLayout === ""
   ) {
-    return null;
+    throw new Error("Invalid layout code.");
   }
 
   // Check tile layout with its checksum.
   if (getChecksumForTileLayout(tileLayout) !== tileLayoutChecksum) {
-    return null;
+    throw new Error("Invalid layout code, checksum doesn't match.");
   }
 
   // Decompress tile layout.
@@ -203,7 +202,7 @@ export function generateBoardLayout(layoutCode) {
   const digitsPerLine = Math.ceil((boardWidth + 1) / layoutCodeRadixBits);
 
   if (tileLayout.length !== digitsPerLine * boardHeight) {
-    return null;
+    throw new Error("Invalid layout code.");
   }
 
   let layoutMask = "";
@@ -215,7 +214,7 @@ export function generateBoardLayout(layoutCode) {
     );
 
     if (isNaN(nextWidth)) {
-      return null;
+      throw new Error("Invalid layout code.");
     }
 
     layoutMask += nextWidth.toString(2).slice(1, boardWidth + 1);

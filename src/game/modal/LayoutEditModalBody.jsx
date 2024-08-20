@@ -46,8 +46,8 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
             }
           })
         );
-      } catch (ex) {
-        console.log(ex);
+      } catch (e) {
+        console.log(e.message);
         resetEditor();
       }
     } else {

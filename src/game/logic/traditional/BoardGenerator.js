@@ -17,7 +17,7 @@ export function generateBoardWithSimpleShuffle({
   allowSinglePairs = false,
 }) {
   if (layout == null) {
-    return null;
+    throw new Error("Attempted to create board with no board layout.");
   }
 
   // Determine if we need to generate a random seed
@@ -162,7 +162,7 @@ export function generateBoardWithPresolvedShuffle({
   allowSinglePairs = false,
 }) {
   if (layout == null) {
-    return null;
+    throw new Error("Attempted to create board with no board layout.");
   }
 
   // Determine if we need to generate a random seed
@@ -214,8 +214,7 @@ export function generateBoardWithPresolvedShuffle({
   let numTiles = tilesToProcess.length;
 
   if (numTiles < 2) {
-    console.error("Cannot start with less than 2 tiles on the board.");
-    return null;
+    throw new Error("Cannot start with less than 2 tiles on the board.");
   }
 
   const numPairs = numTiles >> 1;
