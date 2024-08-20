@@ -17,7 +17,7 @@
 // mask for when tiles exist in each area of the grid
 // (min # of digits per line * num of lines)
 
-import { GameTypeLayoutCodeIDs } from "../../util/GameTypes";
+import { GameTypeLayoutCodeIDs, GameTypes } from "../../util/GameTypes";
 
 export const MAX_BOARD_WIDTH = 20,
   MAX_BOARD_HEIGHT = 12;
@@ -45,7 +45,7 @@ export function generateLayoutCode({ layoutMask, width, height }) {
 
   // First four parts of the layout code.
   let layoutCode = "";
-  layoutCode += GameTypeLayoutCodeIDs.TWOCORNER;
+  layoutCode += GameTypeLayoutCodeIDs[GameTypes.TWOCORNER];
   layoutCode += LAYOUT_CODE_VERSION_NUMBER.toString(32).padStart(2, "0");
   layoutCode += w.toString(32).slice(0, 1);
   layoutCode += h.toString(32).slice(0, 1);
@@ -135,7 +135,7 @@ export function generateBoardLayout(layoutCode) {
   if (
     layoutCode === null ||
     layoutCode.length < 6 ||
-    layoutCode.slice(0, 3) !== GameTypeLayoutCodeIDs.TWOCORNER
+    layoutCode.slice(0, 3) !== GameTypeLayoutCodeIDs[GameTypes.TWOCORNER]
   ) {
     throw new Error("Invalid layout code.");
   }

@@ -400,16 +400,10 @@ export default function Game({
     // If we're getting the new board from a layout code, base its
     // gametype on the layout code.
     if (newLayoutCode !== null && newGameType === null) {
-      switch (newLayoutCode?.slice(0, 3)) {
-        case GameTypeLayoutCodeIDs.TRADITIONAL:
-          useGameType = GameTypes.TRADITIONAL;
-          break;
-
-        case GameTypeLayoutCodeIDs.TWOCORNER:
-        default:
-          useGameType = GameTypes.TWOCORNER;
-          break;
-      }
+      const layoutCodeID = newLayoutCode?.slice(0, 3);
+      useGameType = Object.keys(GameTypeLayoutCodeIDs).find(
+        (key) => GameTypeLayoutCodeIDs[key] === layoutCodeID
+      );
     } else {
       useGameType = newGameType;
     }
@@ -431,6 +425,9 @@ export default function Game({
           useBlindShuffle: newBlindShuffle,
           allowSinglePairs: newAllowSinglePairs,
         });
+      } else {
+        console.error("Invalid gametype selection! Cancel the board reset.");
+        return;
       }
     } catch (e) {
       console.error(e.message);
@@ -845,6 +842,7 @@ export default function Game({
         return (
           <PauseModalBody
             {...{
+              gameType,
               seed,
               layoutCode,
               tilesMatchable: allValidMatchingTiles.length,
@@ -921,6 +919,7 @@ export default function Game({
             {...{
               numTiles,
               clearTime: timerRef.current,
+              gameType,
               seed,
               layoutCode,
               shareUrls: generateShareUrls(),
@@ -934,6 +933,7 @@ export default function Game({
           <GameLoseModalBody
             {...{
               remainingTiles: numTiles - tileHistory.length * 2,
+              gameType,
               seed,
               layoutCode,
               canUndo: tileHistory.length === 0,

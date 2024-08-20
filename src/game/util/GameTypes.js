@@ -1,9 +1,19 @@
 export const GameTypes = Object.freeze({
-  TRADITIONAL: 0,
-  TWOCORNER: 1,
+  TRADITIONAL: "TRADITIONAL",
+  TWOCORNER: "TWOCORNER",
 });
 
 export const GameTypeLayoutCodeIDs = Object.freeze({
-  TRADITIONAL: "MJS",
-  TWOCORNER: "2CO",
+  [GameTypes.TRADITIONAL]: "MJS",
+  [GameTypes.TWOCORNER]: "2CO",
+});
+
+export const GameTypeStrings = Object.freeze({
+  [GameTypes.TRADITIONAL]: "Traditional Mahjong Tile Solitaire",
+  [GameTypes.TWOCORNER]: "Two-Corner Mahjong Tile Solitaire"
+});
+
+export const GameTypeShortStrings = Object.freeze({
+  [GameTypes.TRADITIONAL]: "Traditional",
+  [GameTypes.TWOCORNER]: "Two-Corner"
 });

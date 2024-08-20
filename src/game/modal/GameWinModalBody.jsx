@@ -1,6 +1,9 @@
+import { GameTypeStrings } from "../util/GameTypes";
+
 const GameWinModalBody = ({
   numTiles,
   clearTime,
+  gameType,
   seed,
   layoutCode,
   shareUrls,
@@ -26,9 +29,11 @@ const GameWinModalBody = ({
         !
       </div>
       <div>
+        {GameTypeStrings[gameType]}GameTypeStrings.
+        <br />
         Board #{seed}
         <br />
-        Layout Code: {layoutCode}
+        Layout Code: <input value={layoutCode} readOnly />
       </div>
       <div>
         <button onClick={handleResetBoard}>

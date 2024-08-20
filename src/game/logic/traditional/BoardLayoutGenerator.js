@@ -34,7 +34,7 @@
 // substitution passes to avoid accidentally forming profanity that might
 // trip social media checks when shared.
 
-import { GameTypeLayoutCodeIDs } from "../../util/GameTypes";
+import { GameTypeLayoutCodeIDs, GameTypes } from "../../util/GameTypes";
 
 export const MAX_BOARD_WIDTH = 20,
   MAX_BOARD_HEIGHT = 12,
@@ -62,7 +62,7 @@ export function generateLayoutCode({ tiles, width, height }) {
   }
 
   // First four parts of the layout code.
-  layoutCode = GameTypeLayoutCodeIDs.TRADITIONAL;
+  layoutCode = GameTypeLayoutCodeIDs[GameTypes.TRADITIONAL];
   layoutCode += LAYOUT_CODE_VERSION_NUMBER.toString(32).padStart(2, "0");
   layoutCode += w.toString(32).slice(0, 1);
   layoutCode += h.toString(32).slice(0, 1);
@@ -192,7 +192,7 @@ export function generateBoardLayout(layoutCode) {
   if (
     layoutCode === null ||
     layoutCode.length < 6 ||
-    layoutCode.slice(0, 3) !== GameTypeLayoutCodeIDs.TRADITIONAL
+    layoutCode.slice(0, 3) !== GameTypeLayoutCodeIDs[GameTypes.TRADITIONAL]
   ) {
     throw new Error("Invalid layout code.");
   }

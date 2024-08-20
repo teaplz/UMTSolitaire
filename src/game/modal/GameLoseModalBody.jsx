@@ -1,5 +1,8 @@
+import { GameTypeStrings } from "../util/GameTypes";
+
 const GameLoseModalBody = ({
   remainingTiles,
+  gameType,
   seed,
   layoutCode,
   canUndo,
@@ -16,9 +19,11 @@ const GameLoseModalBody = ({
         more tiles!
       </div>
       <div>
+        {GameTypeStrings[gameType]}
+        <br />
         Board #{seed}
         <br />
-        Layout Code: {layoutCode}
+        Layout Code: <input value={layoutCode} readOnly />
       </div>
       <div>
         <button onClick={handleUndoMatch} disabled={canUndo}>
