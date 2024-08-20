@@ -26,10 +26,8 @@ import "./GameBar.css";
 ReactModal.setAppElement(document.getElementById("root"));
 
 export default function Game({
-  backgroundOption,
   backgroundColor,
   backgroundImage,
-  setBackgroundOption,
   setBackgroundColor,
   setBackgroundImage,
 }) {
@@ -503,8 +501,8 @@ export default function Game({
 
     setAllValidMatchingTiles([...new Set(allValidMatches.flat())]);
 
-    // Shuffle the valid matches array sp that when the player clicks the hint 
-    // button, it'll display a random match, with subsequent clicks displaying 
+    // Shuffle the valid matches array sp that when the player clicks the hint
+    // button, it'll display a random match, with subsequent clicks displaying
     // another random match through the array.
     const allValidMatchesAtRandom = allValidMatches.slice();
 
@@ -868,10 +866,8 @@ export default function Game({
         return (
           <BackgroundColorModalBody
             {...{
-              backgroundOption,
               backgroundColor,
               backgroundImage,
-              setBackgroundOption,
               setBackgroundColor,
               setBackgroundImage,
               backModal: () => showModal(prevModalState),

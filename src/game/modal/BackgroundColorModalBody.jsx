@@ -1,13 +1,11 @@
 import { HexColorPicker } from "react-colorful";
 
-import { BackgroundOptions, BACKGROUND_COLOR_DEFAULT } from "../../App";
+import { BACKGROUND_COLOR_DEFAULT } from "../../App";
 import { useState } from "react";
 
 const BackgroundColorModalBody = ({
-  backgroundOption,
   backgroundColor,
   backgroundImage,
-  setBackgroundOption,
   setBackgroundColor,
   setBackgroundImage,
   backModal,
@@ -16,8 +14,6 @@ const BackgroundColorModalBody = ({
   const [newBackgroundImage, setNewBackgroundImage] = useState(
     backgroundImage || ""
   );
-  const [newBackgroundOption, setNewBackgroundOption] =
-    useState(backgroundOption);
 
   const [displayAdvanced, setDisplayAdvanced] = useState(false);
 
@@ -53,7 +49,6 @@ const BackgroundColorModalBody = ({
           onClick={() => {
             setNewBackgroundColor(BACKGROUND_COLOR_DEFAULT);
             setNewBackgroundImage("");
-            setNewBackgroundOption(BackgroundOptions.BACKGROUND_NORMAL);
           }}
         >
           Reset Background
@@ -84,33 +79,12 @@ const BackgroundColorModalBody = ({
               </label>
             </div>
           </div>
-          <div style={{ marginTop: "2em" }}>
-            <input
-              type="checkbox"
-              id="optAnimatedBg"
-              checked={
-                newBackgroundOption === BackgroundOptions.BACKGROUND_FANCY
-              }
-              onChange={() =>
-                setNewBackgroundOption(
-                  newBackgroundOption === BackgroundOptions.BACKGROUND_FANCY
-                    ? BackgroundOptions.BACKGROUND_NORMAL
-                    : BackgroundOptions.BACKGROUND_FANCY
-                )
-              }
-            ></input>
-            <label htmlFor="optAnimatedBg">
-              Enable Fancy Animated Background (ignores all of the above, may
-              decrease performance and battery life)
-            </label>
-          </div>
         </>
       )}
       <hr />
       <div>
         <button
           onClick={() => {
-            setBackgroundOption(newBackgroundOption);
             setBackgroundColor(newBackgroundColor);
             setBackgroundImage(
               newBackgroundImage != "" ? newBackgroundImage : null
