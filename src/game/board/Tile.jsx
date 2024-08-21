@@ -9,13 +9,22 @@ export default function Tile({
   canBeMatchedWithOther,
   useEmoji,
   fixRedDragonBugs,
+  className,
+  style,
+  onClick,
 }) {
   // Check if tile is valid to display. They should be sent in the "char"
   // property from 0 (U+1F000) to 43 (U+1F02B).
 
   if (typeof char !== "number" || char < 0x00 || char > 0x2b) {
     return (
-      <span className="game-tile-empty">&#x1F02B;{!useEmoji && "\uFE0E"}</span>
+      <span
+        className={ClassNames(className, "game-tile-empty")}
+        style={style}
+        onClick={onClick}
+      >
+        &#x1F02B;{!useEmoji && "\uFE0E"}
+      </span>
     );
   }
 
@@ -36,7 +45,11 @@ export default function Tile({
 
     // If we're using the non-standard emoji variant, just display them normally.
     return (
-      <span className={tileStatusClass}>
+      <span
+        className={ClassNames(className, tileStatusClass)}
+        style={style}
+        onClick={onClick}
+      >
         {String.fromCodePoint(0x1f000 + char)}
       </span>
     );
@@ -69,12 +82,13 @@ export default function Tile({
       tileColorClass = "game-tile-glyph-seasons";
     }
 
-    // Don't render an empty class attribute if both values are empty.
-    const classNames = ClassNames(tileColorClass, tileStatusClass);
-
     return (
-      <span className={classNames === "" ? null : classNames}>
-        {String.fromCodePoint(0x1F000 + char, 0xFE0E)}
+      <span
+        className={ClassNames(className, tileColorClass, tileStatusClass)}
+        style={style}
+        onClick={onClick}
+      >
+        {String.fromCodePoint(0x1f000 + char, 0xfe0e)}
       </span>
     );
   }

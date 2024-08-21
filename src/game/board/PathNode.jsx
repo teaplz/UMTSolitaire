@@ -1,3 +1,5 @@
+import ClassNames from "classnames";
+
 export default function PathNode({ node, fadeout = true }) {
   if (node?.length > 0) {
     let nodeClass = "";
@@ -9,9 +11,11 @@ export default function PathNode({ node, fadeout = true }) {
 
     return (
       <span
-        className={`game-path ${nodeClass} ${
-          fadeout ? "game-path-anim-fadeout" : ""
-        }`}
+        className={ClassNames(
+          "game-path",
+          nodeClass,
+          fadeout ? "game-path-anim-fadeout" : null
+        )}
       />
     );
   }

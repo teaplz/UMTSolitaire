@@ -108,7 +108,14 @@ export default function GameBoard({
         {row.map((loc, xindex) => (
           <span className="game-board-coord" key={xindex}>
             {loc.map((tile, height) => (
-              <span
+              <Tile
+                char={tile.char}
+                isSelected={tile.id === selectedTile}
+                canBeMatchedWithSelected={hintedTiles?.includes(tile)}
+                canBeMatchedWithOther={wholeMatchingTiles?.includes(tile.id)}
+                isFadingOut={tile.inRemovalAnim}
+                useEmoji={useEmoji}
+                fixRedDragonBugs={fixRedDragonBugs}
                 className={ClassNames(
                   "game-tile",
                   tile.inRemovalAnim ? "game-tile-anim-fadeout" : null,
@@ -121,7 +128,10 @@ export default function GameBoard({
                         left:
                           height * -0.16 + (tile.xhalfstep ? 0.5 : 0) + "em",
                         zIndex: useHalfSteps
-                          ? 2 * (height * (15 + 8) + xindex + yindex) +
+                          ? 2 *
+                              (height * (boardWidth + boardHeight) +
+                                xindex +
+                                yindex) +
                             (tile.yhalfstep ? 1 : 0) +
                             (tile.yhalfstep ? 1 : 0)
                           : height,
@@ -141,17 +151,7 @@ export default function GameBoard({
                   tile.selectable ? () => handleTileClick(tile.id) : null
                 }
                 key={height}
-              >
-                <Tile
-                  char={tile.char}
-                  isSelected={tile.id === selectedTile}
-                  canBeMatchedWithSelected={hintedTiles?.includes(tile)}
-                  canBeMatchedWithOther={wholeMatchingTiles?.includes(tile.id)}
-                  isFadingOut={tile.inRemovalAnim}
-                  useEmoji={useEmoji}
-                  fixRedDragonBugs={fixRedDragonBugs}
-                />
-              </span>
+              />
             ))}
 
             {pathingTiles != null && pathingTiles[loc[0].id]?.length > 0 && (
