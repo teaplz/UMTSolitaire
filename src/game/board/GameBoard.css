@@ -232,6 +232,8 @@
 .game-path {
   color: gold;
   z-index: 2;
+  overflow: hidden;
+  text-overflow: clip;
 }
 
 .game-path-L:after,
