@@ -1,7 +1,8 @@
 import * as BoardGenerator from "./traditional/BoardGenerator";
 import * as BoardLayoutGenerator from "./traditional/BoardLayoutGenerator";
+export * as BoardLayoutGenerator from "./traditional/BoardLayoutGenerator";
 
-const LAYOUT_CODE_TURTLE =
+export const LAYOUT_CODE_TURTLE =
   "MJS01f8nmP8DHDKDNNNP85KDMMMNP86NMQWPWPWPWCMNNC4CYFNNNMQWC2CgTPVPWCMNNNC4CYZ4CYPYDNNMQWPVPVPWCMNNNP84NMQWPWPWPWCMNNP86KDMMMNP85HDKDNNN";
 
 export const ALL_FLOWER_TILES = [0x22, 0x23, 0x24, 0x25],

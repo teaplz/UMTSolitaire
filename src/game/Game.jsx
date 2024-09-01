@@ -420,7 +420,6 @@ export default function Game({
           layoutCode: newLayoutCode,
           seed: newSeed,
           useBlindShuffle: newBlindShuffle,
-          fullTest: true,
         });
       } else if (useGameType === GameTypes.TWOCORNER) {
         generatedBoard = TwoCornerGameType.generateBoard({
@@ -911,6 +910,7 @@ export default function Game({
               shareUrls: generateShareUrls(),
               handleResetBoard: resetGameState,
               newBoardModal: () => showModal(GameModals.NEW_BOARD),
+              layoutEditModal: () => showModal(GameModals.LAYOUT_EDIT),
             }}
           />
         );
@@ -927,6 +927,7 @@ export default function Game({
               handleUndoMatch: () => undoMatch({ doHideModal: true }),
               handleResetBoard: resetGameState,
               newBoardModal: () => showModal(GameModals.NEW_BOARD),
+              layoutEditModal: () => showModal(GameModals.LAYOUT_EDIT),
             }}
           />
         );

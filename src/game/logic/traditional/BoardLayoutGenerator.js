@@ -123,7 +123,7 @@ export function generateLayoutCode({ tiles, width, height }) {
       let repeats = 0,
         curRepeatSize = 6 + 1;
 
-      while (curRepeatSize > 3 && repeats < 1) {
+      while (curRepeatSize > 3 + 1 && repeats < 1) {
         repeats = 0;
         curRepeatSize--;
 

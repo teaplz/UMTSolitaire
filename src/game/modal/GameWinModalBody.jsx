@@ -9,6 +9,7 @@ const GameWinModalBody = ({
   shareUrls,
   handleResetBoard,
   newBoardModal,
+  layoutEditModal,
 }) => {
   return (
     <div>
@@ -29,7 +30,7 @@ const GameWinModalBody = ({
         !
       </div>
       <div>
-        {GameTypeStrings[gameType]}GameTypeStrings.
+        {GameTypeStrings[gameType]}
         <br />
         Board #{seed}
         <br />
@@ -47,6 +48,9 @@ const GameWinModalBody = ({
         <button onClick={() => handleResetBoard({ newSeed: seed })}>
           Reset Current Board
         </button>
+      </div>
+      <div>
+        <button onClick={layoutEditModal}>Edit Puzzle Layout</button>
       </div>
       <div>
         <button

@@ -1,5 +1,6 @@
 import * as BoardGenerator from "./twocorner/BoardGenerator";
 import * as BoardLayoutGenerator from "./twocorner/BoardLayoutGenerator";
+export * as BoardLayoutGenerator from "./twocorner/BoardLayoutGenerator";
 
 export {
   MAX_BOARD_WIDTH,

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { GameTypes } from "../util/GameTypes";
 
+import * as TraditionalGameType from "../logic/TraditionalGameType";
+
 const NewBoardModalBody = ({
   prevWidth,
   prevHeight,
@@ -311,6 +313,7 @@ const NewBoardModalBody = ({
             handleResetBoard({
               newGameType: GameTypes.TRADITIONAL,
               newSeed: useCustomSeed ? parseInt(seed) : null,
+              newLayoutCode: TraditionalGameType.LAYOUT_CODE_TURTLE,
               newBlindShuffle: (difficulty & 1) !== 0,
             })
           }

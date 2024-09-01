@@ -420,13 +420,13 @@ export function generateBoardWithPresolvedShuffle({
 
     tilesToProcess.forEach((t) => {
       t.overlapping = t.overlapping.filter(
-        (t) => t !== firstTile.tile && t !== secondTile.tile
+        (ot) => ot !== firstTile.tile && ot !== secondTile.tile
       );
       t.leftAdjacent = t.leftAdjacent.filter(
-        (t) => t !== firstTile.tile && t !== secondTile.tile
+        (ot) => ot !== firstTile.tile && ot !== secondTile.tile
       );
       t.rightAdjacent = t.rightAdjacent.filter(
-        (t) => t !== firstTile.tile && t !== secondTile.tile
+        (ot) => ot !== firstTile.tile && ot !== secondTile.tile
       );
     });
 
@@ -441,9 +441,20 @@ export function generateBoardWithPresolvedShuffle({
 
   // Remove unused or unreachable tiles.
   tiles.forEach((coord) => {
-    coord?.forEach((tile) => {
-      if (tile?.char === undefined) {
-        tile = null;
+    coord?.forEach((tile, i) => {
+      if (tile && !("char" in tile)) {
+        obstructedTiles.forEach((t) => {
+          t.overlapping = t.overlapping.filter((ot) => ot !== tile);
+          t.leftAdjacent = t.leftAdjacent.filter((ot) => ot !== tile);
+          t.rightAdjacent = t.rightAdjacent.filter((ot) => ot !== tile);
+        });
+
+        obstructedTileRegions.forEach((t) => {
+          t = t.filter((ot) => ot !== tile);
+        });
+
+        coord[i] = null;
+
         numTiles--;
       }
     });

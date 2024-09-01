@@ -10,6 +10,7 @@ const GameLoseModalBody = ({
   handleUndoMatch,
   handleResetBoard,
   newBoardModal,
+  layoutEditModal,
 }) => {
   return (
     <div>
@@ -42,6 +43,9 @@ const GameLoseModalBody = ({
       </div>
       <div>
         <button onClick={newBoardModal}>Start New Board</button>
+      </div>
+      <div>
+        <button onClick={layoutEditModal}>Edit Puzzle Layout</button>
       </div>
       <div>
         <button
