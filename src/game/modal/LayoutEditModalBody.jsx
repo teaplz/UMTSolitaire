@@ -363,6 +363,7 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
         className="layoutEditor"
         onPointerDown={() => setIsDrawing(true)}
         onPointerUp={() => setIsDrawing(false)}
+        onPointerLeave={() => setIsDrawing(false)}
       >
         {Array.from({ length: editorHeight }, (_, y) => (
           <div className="row" key={y}>
