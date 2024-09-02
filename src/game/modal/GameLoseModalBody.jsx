@@ -23,8 +23,6 @@ const GameLoseModalBody = ({
         {GameTypeStrings[gameType]}
         <br />
         Board #{seed}
-        <br />
-        Layout Code: <input value={layoutCode} readOnly />
       </div>
       <div>
         <button onClick={handleUndoMatch} disabled={canUndo}>
@@ -57,6 +55,9 @@ const GameLoseModalBody = ({
           onClick={() => navigator.clipboard.writeText(shareUrls.layoutUrl)}
         >
           Copy Game Link
+        </button>
+        <button onClick={() => navigator.clipboard.writeText(layoutCode)}>
+          Copy Layout Code
         </button>
       </div>
     </div>

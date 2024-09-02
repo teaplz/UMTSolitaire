@@ -431,7 +431,6 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
           Lower Layer
         </button>
       </div>
-      <div>Layout Code: {layoutCode}</div>
       <div>Number of Tiles: {numTiles}</div>
       <div>
         <button onClick={() => resetEditor(GameTypes.TRADITIONAL)}>
