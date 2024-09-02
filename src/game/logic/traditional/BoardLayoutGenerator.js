@@ -109,54 +109,60 @@ export function generateLayoutCode({ tiles, width, height }) {
   //  |  |  |
   //  |  |  The pattern.
   //  |  How many times to repeat. 32-bit number.
-  //  The pattern size. See tileLayoutCompressRepeatingSubstitution array.
-  //
-  // Repeats until no more patterns can be found.
+  //  The pattern size. See tileLayoutRepeatCompressSubstitution array.
 
-  let doAnotherCycle = true;
+  let tempTileLayout = "";
 
-  while (doAnotherCycle) {
-    doAnotherCycle = false;
-    let tempTileLayout = "";
+  for (let i = 0; i < tileLayout.length; i++) {
+    let repeats = 0,
+      curRepeatSize = tileLayoutRepeatCompressLargestSequence + 1;
 
-    for (let i = 0; i < tileLayout.length; i++) {
-      let repeats = 0,
-        curRepeatSize = 6 + 1;
+    while (
+      curRepeatSize >
+        tileLayoutRepeatCompressLargestSequence -
+          tileLayoutRepeatCompressSubstitution.length +
+          1 &&
+      repeats < 1
+    ) {
+      repeats = 0;
+      curRepeatSize--;
 
-      while (curRepeatSize > 3 + 1 && repeats < 1) {
-        repeats = 0;
-        curRepeatSize--;
-
-        while (
-          repeats < 31 &&
-          i + (repeats + 2) * curRepeatSize <= tileLayout.length &&
-          tileLayout.substring(
-            i + repeats * curRepeatSize,
-            i + (repeats + 1) * curRepeatSize
-          ) ===
-            tileLayout.substring(
-              i + (repeats + 1) * curRepeatSize,
-              i + (repeats + 2) * curRepeatSize
-            )
-        ) {
-          repeats++;
-        }
+      // Ignore at edge of string.
+      if (i + 2 * curRepeatSize >= tileLayout.length) {
+        continue;
       }
 
-      if (repeats > 0) {
-        tempTileLayout +=
-          tileLayoutCompressRepeatingSubstitution[6 - curRepeatSize] +
-          repeats.toString(32) +
-          tileLayout.substring(i, i + curRepeatSize);
-        i += (repeats + 1) * curRepeatSize - 1;
-        doAnotherCycle = true;
-      } else {
-        tempTileLayout += tileLayout[i];
+      while (
+        repeats < 31 &&
+        i + (repeats + 2) * curRepeatSize < tileLayout.length &&
+        tileLayout.substring(
+          i + repeats * curRepeatSize,
+          i + (repeats + 1) * curRepeatSize
+        ) ===
+          tileLayout.substring(
+            i + (repeats + 1) * curRepeatSize,
+            i + (repeats + 2) * curRepeatSize
+          )
+      ) {
+        repeats++;
       }
     }
 
-    tileLayout = tempTileLayout;
+    if (repeats > 0) {
+      tempTileLayout +=
+        tileLayoutRepeatCompressSubstitution[
+          tileLayoutRepeatCompressLargestSequence - curRepeatSize
+        ] +
+        repeats.toString(32) +
+        tileLayout.substring(i, i + curRepeatSize);
+
+      i += (repeats + 1) * curRepeatSize - 1;
+    } else {
+      tempTileLayout += tileLayout[i];
+    }
   }
+
+  tileLayout = tempTileLayout;
 
   // Fifth and final parts of the layout code. First is the checksum of the tile
   // layout to prevent random tampering, then it's the tile layout itself.
@@ -252,33 +258,39 @@ export function generateBoardLayout(layoutCode) {
   // Repeater checks (G-K). When x (num of characters in sequence) is reached,
   // replace x + y (num of repeats) + z (sequence) with z * y+1.
   let doAnotherCycle = true;
+  let cycle = 0;
 
   while (doAnotherCycle) {
+    cycle++;
+
+    if (cycle === 5) {
+      throw new Error("Invalid layout code.");
+    }
+
     doAnotherCycle = false;
     let tempTileLayout = "";
 
     for (let i = 0; i < tileLayout.length; i++) {
       // Check if this is the first part in a repeat check.
-      let repeatSize = tileLayoutCompressRepeatingSubstitution.findIndex(
+      let repeatSize = tileLayoutRepeatCompressSubstitution.findIndex(
         (sub) => sub === tileLayout[i]
       );
 
       if (repeatSize !== -1) {
-        repeatSize = 6 - repeatSize;
+        repeatSize = tileLayoutRepeatCompressLargestSequence - repeatSize;
 
-        let seq = tileLayout.substring(i + 2, i + 2 + repeatSize);
-
-        // If there is a nested repeat check, wait on this check until the
-        // next cycle.
+        // If there is a nested repeat check, there will be a next cycle.
         if (
-          Array.from(seq).some((c) =>
-            tileLayoutCompressRepeatingSubstitution.includes(c)
+          Array.from(tileLayout.substring(i + 1, i + 2 + repeatSize)).some(
+            (c) => tileLayoutRepeatCompressSubstitution.includes(c)
           )
         ) {
           doAnotherCycle = true;
           tempTileLayout += tileLayout[i];
         } else {
-          tempTileLayout += seq.repeat(parseInt(tileLayout[i + 1], 32) + 1);
+          tempTileLayout += tileLayout
+            .substring(i + 2, i + 2 + repeatSize)
+            .repeat(parseInt(tileLayout[i + 1], 32) + 1);
           i += 1 + repeatSize;
         }
       } else {
@@ -386,7 +398,8 @@ const tileLayoutCompressSubstitution = [
 
 // For the initial character in repeat check sequences, determining the number
 // of characters in each pattern.
-const tileLayoutCompressRepeatingSubstitution = [
+const tileLayoutRepeatCompressLargestSequence = 6;
+const tileLayoutRepeatCompressSubstitution = [
   "G", // 6
   "H", // 5
   "J", // 4
