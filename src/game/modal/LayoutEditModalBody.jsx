@@ -8,10 +8,32 @@ import { GameTypeLayoutCodeIDs, GameTypes } from "../util/GameTypes";
 import "./LayoutEditModalBody.css";
 
 const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
-  const numTileTypes = 2;
-  const tileColors = ["black", "goldenrod"];
-  const tileUnderLayerColors = ["black", "#6a5110"]; // -25% lum
-  const tileString = ["Empty", "Tile"];
+  const editorGameTypeSettings = {
+    [GameTypes.TRADITIONAL]: {
+      numTileTypes: 5,
+      tileColors: [
+        "black",
+        "goldenrod",
+        "indianred",
+        "deepskyblue",
+        "mediumslateblue",
+      ],
+      tileUnderLayerColors: [
+        "black",
+        "#6a5110",
+        "#812828",
+        "#006080",
+        "#2f15c1",
+      ], // -25% lum
+      tileString: ["Empty", "Tile", "Tile ½↓", "Tile ½→", "Tile ½↘"],
+    },
+    [GameTypes.TWOCORNER]: {
+      numTileTypes: 2,
+      tileColors: ["black", "goldenrod"],
+      tileUnderLayerColors: ["black", "#6a5110"], // -25% lum
+      tileString: ["Empty", "Tile"],
+    },
+  };
 
   const [layout, setLayout] = useState([]);
   const [curLayer, setCurLayer] = useState(0);
@@ -76,7 +98,7 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
             ((TraditionalGameType.MAX_BOARD_WIDTH - decodedLayoutObj.width) >>
               1);
 
-          // Run through the layout and change to 1 when appropriate.
+          // Run through the layout and change to the appropriate value.
           decodedLayoutObj.tiles?.forEach((coord, i) => {
             coord?.forEach((t, h) => {
               if (t !== null && h < TraditionalGameType.MAX_BOARD_DEPTH) {
@@ -86,7 +108,7 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
                     Math.floor(i / decodedLayoutObj.width) *
                       (TraditionalGameType.MAX_BOARD_WIDTH -
                         decodedLayoutObj.width)
-                ] = 1;
+                ] = 1 + (t.yhalfstep ? 1 : 0) + (t.xhalfstep ? 2 : 0);
               }
             });
           });
@@ -179,6 +201,7 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
     setEditorHeight(newHeight);
     setEditorLayers(newDepth);
     setEditorGameType(newGameType);
+    setEditorPaintState(1);
     setCurLayer(0);
     setLayout(
       Array.from(
@@ -284,8 +307,15 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
         for (let x = margins[0]; x < margins[1]; x++) {
           let coord = [];
           for (let z = 0; z < editorLayers; z++) {
-            if (layout[z][y * editorWidth + x] === 1) {
-              coord.push({});
+            if (layout[z][y * editorWidth + x] >= 1) {
+              coord.push({
+                xhalfstep:
+                  layout[z][y * editorWidth + x] === 3 ||
+                  layout[z][y * editorWidth + x] === 4,
+                yhalfstep:
+                  layout[z][y * editorWidth + x] === 2 ||
+                  layout[z][y * editorWidth + x] === 4,
+              });
             } else {
               coord.push(null);
             }
@@ -374,10 +404,13 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
                 style={{
                   backgroundColor:
                     curLayer > 0 && layout[curLayer][y * editorWidth + x] === 0
-                      ? tileUnderLayerColors[
+                      ? editorGameTypeSettings[editorGameType]
+                          .tileUnderLayerColors[
                           layout[curLayer - 1][y * editorWidth + x]
                         ]
-                      : tileColors[layout[curLayer][y * editorWidth + x]],
+                      : editorGameTypeSettings[editorGameType].tileColors[
+                          layout[curLayer][y * editorWidth + x]
+                        ],
                 }}
                 onPointerEnter={() => paintTile(y * editorWidth + x, false)}
                 onPointerDown={() => paintTile(y * editorWidth + x, true)}
@@ -395,18 +428,24 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
         <span
           className="cell"
           style={{
-            backgroundColor: tileColors[editorPaintState],
+            backgroundColor:
+              editorGameTypeSettings[editorGameType].tileColors[
+                editorPaintState
+              ],
           }}
         ></span>
-        {Array.from({ length: numTileTypes }, (_, i) => (
-          <button
-            onClick={() => setEditorPaintState(i)}
-            key={i}
-            disabled={editorPaintState === i}
-          >
-            {tileString[i]}
-          </button>
-        ))}
+        {Array.from(
+          { length: editorGameTypeSettings[editorGameType].numTileTypes },
+          (_, i) => (
+            <button
+              onClick={() => setEditorPaintState(i)}
+              key={i}
+              disabled={editorPaintState === i}
+            >
+              {editorGameTypeSettings[editorGameType].tileString[i]}
+            </button>
+          )
+        )}
       </div>
     );
   };
