@@ -7,6 +7,13 @@ import { GameTypeLayoutCodeIDs, GameTypes } from "../util/GameTypes";
 
 import "./LayoutEditModalBody.css";
 
+const shiftDir = {
+  UP: "UP",
+  DOWN: "DOWN",
+  LEFT: "LEFT",
+  RIGHT: "RIGHT",
+};
+
 const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
   const editorGameTypeSettings = {
     [GameTypes.TRADITIONAL]: {
@@ -363,7 +370,7 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
         return (
           acc +
           layer.reduce((acc, val) => {
-            return acc + (val === 1 ? 1 : 0);
+            return acc + (val !== 0 ? 1 : 0);
           }, 0)
         );
       }, 0)
@@ -381,6 +388,93 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
       updatedLayout[curLayer][id] = editorPaintState;
 
       setLayout(updatedLayout);
+    }
+  };
+
+  const shiftTiles = (dir) => {
+    switch (dir) {
+      case shiftDir.UP:
+        // Check if there are no tiles in the upmost row.
+        if (
+          !layout.reduce(
+            (acc, layer) =>
+              acc ||
+              layer.reduce(
+                (acc, val, i) => acc || (i < editorWidth && val !== 0),
+                false
+              ),
+            false
+          )
+        ) {
+          setLayout(
+            layout.map((layer) =>
+              layer.slice(editorWidth).concat(Array(editorWidth).fill(0))
+            )
+          );
+        }
+        break;
+      case shiftDir.DOWN:
+        // Check if there are no tiles in the bottommost row.
+        if (
+          !layout.reduce(
+            (acc, layer) =>
+              acc ||
+              layer.reduce(
+                (acc, val, i) =>
+                  acc || (i >= editorWidth * (editorHeight - 1) && val !== 0),
+                false
+              ),
+            false
+          )
+        ) {
+          setLayout(
+            layout.map((layer) =>
+              Array(editorWidth).fill(0).concat(layer.slice(0, -editorWidth))
+            )
+          );
+        }
+        break;
+      case shiftDir.LEFT:
+        // Check if there are no tiles in the leftmost column.
+        if (
+          !layout.reduce(
+            (acc, layer) =>
+              acc ||
+              layer.reduce(
+                (acc, val, i) => acc || (i % editorWidth === 0 && val !== 0),
+                false
+              ),
+            false
+          )
+        ) {
+          // Push all columns left. Since this can only be done when the
+          // leftmost column is empty, we just reverse wrap it. If we want to
+          // do this regardless of the column, it needs to be done differently.
+          setLayout(layout.map((layer) => layer.slice(1).concat([0])));
+        }
+        break;
+      case shiftDir.RIGHT:
+        // Check if there are no tiles in the rightmost column.
+        if (
+          !layout.reduce(
+            (acc, layer) =>
+              acc ||
+              layer.reduce(
+                (acc, val, i) =>
+                  acc || (i % editorWidth === editorWidth - 1 && val !== 0),
+                false
+              ),
+            false
+          )
+        ) {
+          // Push all columns right. Since this can only be done when the
+          // rightmost column is empty, we just wrap it. If we want to
+          // do this regardless of the column, it needs to be done differently.
+          setLayout(layout.map((layer) => [0].concat(layer.slice(0, -1))));
+        }
+        break;
+      default:
+        console.error("Invalid shift direction.");
     }
   };
 
@@ -469,6 +563,13 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
         >
           Lower Layer
         </button>
+      </div>
+      <div>
+        <span>Shift All Tiles:</span>
+        <button onClick={() => shiftTiles(shiftDir.LEFT)}>Left</button>
+        <button onClick={() => shiftTiles(shiftDir.UP)}>Up</button>
+        <button onClick={() => shiftTiles(shiftDir.DOWN)}>Down</button>
+        <button onClick={() => shiftTiles(shiftDir.RIGHT)}>Right</button>
       </div>
       <div>Number of Tiles: {numTiles}</div>
       <div>
