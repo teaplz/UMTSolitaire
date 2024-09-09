@@ -5,7 +5,7 @@ const AdvancedSettingsModalBody = ({
   toggleHighlightAllMatches,
   toggleHighlightMatchesForTile,
   toggleEmojiMode,
-  backModal,
+  prevModal,
 }) => {
   return (
     <div>
@@ -34,7 +34,7 @@ const AdvancedSettingsModalBody = ({
         Click if tiles aren't displaying correctly.
       </div>
       <div>
-        <button onClick={backModal}>Back to Settings</button>
+        <button onClick={prevModal}>Back to Settings</button>
       </div>
     </div>
   );

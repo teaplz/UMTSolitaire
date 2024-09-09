@@ -14,7 +14,7 @@ const shiftDir = {
   RIGHT: "RIGHT",
 };
 
-const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
+const LayoutEditModalBody = ({ initialLayout, startNewGame, prevModal }) => {
   const editorGameTypeSettings = {
     [GameTypes.TRADITIONAL]: {
       numTileTypes: 5,
@@ -593,7 +593,7 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, backModal }) => {
         </button>
       </div>
       <div>
-        <button onClick={backModal}>Cancel</button>
+        <button onClick={prevModal}>Cancel</button>
       </div>
     </div>
   );

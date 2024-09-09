@@ -11,7 +11,7 @@ const NewBoardModalBody = ({
   prevSeed,
   layoutCode,
   handleResetBoard,
-  backModal,
+  prevModal,
 }) => {
   const [boardWidth, setBoardWidth] = useState(prevWidth);
   const [boardHeight, setBoardHeight] = useState(prevHeight);
@@ -322,7 +322,7 @@ const NewBoardModalBody = ({
         </button>
       </div>
       <div>
-        <button onClick={backModal}>Go Back</button>
+        <button onClick={prevModal}>Go Back</button>
       </div>
     </div>
   );

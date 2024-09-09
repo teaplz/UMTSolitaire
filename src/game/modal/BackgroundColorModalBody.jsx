@@ -8,7 +8,7 @@ const BackgroundColorModalBody = ({
   backgroundImage,
   setBackgroundColor,
   setBackgroundImage,
-  backModal,
+  prevModal,
 }) => {
   const [newBackgroundColor, setNewBackgroundColor] = useState(backgroundColor);
   const [newBackgroundImage, setNewBackgroundImage] = useState(
@@ -89,13 +89,13 @@ const BackgroundColorModalBody = ({
             setBackgroundImage(
               newBackgroundImage != "" ? newBackgroundImage : null
             );
-            backModal();
+            prevModal();
           }}
           className="large-button"
         >
           Accept Changes
         </button>
-        <button onClick={backModal} className="large-button">
+        <button onClick={prevModal} className="large-button">
           Cancel Changes
         </button>
       </div>

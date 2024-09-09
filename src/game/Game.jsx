@@ -93,8 +93,8 @@ export default function Game({
   // Current modal.
   const [modalState, setModalState] = useState(null);
 
-  // Modal "history" for pressing the back button.
-  const [prevModalState, setPrevModalState] = useState(null);
+  // Stack to keep track of modal history.
+  const [modalHistory, setModalHistory] = useState([]);
 
   //
   // Board Generation
@@ -796,7 +796,7 @@ export default function Game({
     setModalDisplayed(true);
 
     if (newState) {
-      setPrevModalState(modalState);
+      setModalHistory(modalHistory.concat(modalState));
       setModalState(newState);
     }
   }
@@ -806,7 +806,17 @@ export default function Game({
     if (!gameEnded) timerRef.current.start();
 
     setModalDisplayed(false);
+    setModalHistory([]);
   }
+
+  // Go to the previous modal in the history.
+  const prevModal = () => {
+    if (modalHistory.length === 0) hideModal();
+    else {
+      setModalState(modalHistory[modalHistory.length - 1]);
+      setModalHistory(modalHistory.slice(0, -1));
+    }
+  };
 
   // Generate the URL for sharing/bookmarking the current game board.
   function generateShareUrls() {
@@ -857,7 +867,7 @@ export default function Game({
               toggleHighlightMatchesForTile: () =>
                 setShowMatchingTiles((prevState) => !prevState),
               toggleEmojiMode: () => setUseEmoji((prevState) => !prevState),
-              backModal: () => showModal(prevModalState),
+              prevModal,
             }}
           />
         );
@@ -869,7 +879,7 @@ export default function Game({
               backgroundImage,
               setBackgroundColor,
               setBackgroundImage,
-              backModal: () => showModal(prevModalState),
+              prevModal,
             }}
           />
         );
@@ -879,7 +889,7 @@ export default function Game({
             {...{
               initialLayout: layoutCode,
               startNewGame: resetGameState,
-              backModal: () => showModal(prevModalState),
+              prevModal,
             }}
           />
         );
@@ -894,7 +904,7 @@ export default function Game({
               prevSeed: seed,
               layoutCode,
               handleResetBoard: resetGameState,
-              backModal: () => showModal(prevModalState),
+              prevModal,
             }}
           />
         );
