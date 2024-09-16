@@ -451,7 +451,7 @@ export function generateBoardWithPresolvedShuffle({
     // Assign the next tile character to our matching pair.
     if (tileDistribution === TileDistributionOptions.RANDOM) {
       tiles[tileValue].char = tiles[matchingTile].char =
-        orderedTilePairChars[Math.floor(seededRng.next() * tileCharSet.length)];
+        tileCharSet[Math.floor(seededRng.next() * tileCharSet.length)];
     } else {
       tiles[tileValue].char = tiles[matchingTile].char =
         orderedTilePairChars[i];
