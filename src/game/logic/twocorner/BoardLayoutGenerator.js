@@ -232,7 +232,7 @@ function getChecksumForTileLayout(str) {
     checksum += str.charCodeAt(i);
   }
 
-  return (checksum % 1024).toString(32);
+  return (checksum % 1024).toString(32).padStart(2, "0");
 }
 
 // For subtituting common patterns for compression. Runs top-to-bottom.
