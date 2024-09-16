@@ -7,7 +7,7 @@ const NewBoardModalBody = ({
   prevWidth,
   prevHeight,
   prevBlindShuffle,
-  prevAllowSinglePairs,
+  prevTileDistribution,
   prevSeed,
   layoutCode,
   handleResetBoard,
@@ -27,7 +27,7 @@ const NewBoardModalBody = ({
     (prevBlindShuffle != null && prevBlindShuffle
       ? DifficultySettingsBits.USE_HARD_SHUFFLE
       : 0) +
-      (prevAllowSinglePairs != null && prevAllowSinglePairs
+      (prevTileDistribution != null && prevTileDistribution === 0
         ? DifficultySettingsBits.ALLOW_SINGLE_PAIRS
         : 0)
   );
@@ -291,7 +291,7 @@ const NewBoardModalBody = ({
                     ? parseInt(customHeight)
                     : boardHeight,
                   newBlindShuffle: (difficulty & 1) !== 0,
-                  newAllowSinglePairs: (difficulty & 2) !== 0,
+                  newTileDistribution: (difficulty & 2) !== 0 ? 0 : 1,
                 })
               : handleResetBoard({
                   newGameType: GameTypes.TWOCORNER,
@@ -300,7 +300,7 @@ const NewBoardModalBody = ({
                   newBoardWidth: null,
                   newBoardHeight: null,
                   newBlindShuffle: (difficulty & 1) !== 0,
-                  newAllowSinglePairs: (difficulty & 2) !== 0,
+                  newTileDistribution: (difficulty & 2) !== 0 ? 0 : 1,
                 })
           }
         >

@@ -21,6 +21,7 @@ export function generateBoard({
   layoutCode,
   seed,
   useBlindShuffle = false,
+  tileDistribution,
   fullTest = false,
 }) {
   const turtleLayoutCode = fullTest
@@ -33,19 +34,28 @@ export function generateBoard({
     ? layoutCode
     : LAYOUT_CODE_TURTLE;
 
-  if (fullTest)
-    console.log(
-      "Attempting to create board using layout code: " + turtleLayoutCode
-    );
+  console.log(
+    "Attempting to create Traditional board with layout code '" +
+      layoutCode +
+      "' and seed '" +
+      seed +
+      "' and Shuffle Type '" +
+      (useBlindShuffle ? "Simple" : "Presolved") +
+      "' and Tile Dist Option '" +
+      tileDistribution +
+      "'"
+  );
 
   const board = useBlindShuffle
     ? BoardGenerator.generateBoardWithSimpleShuffle({
         layout: BoardLayoutGenerator.generateBoardLayout(turtleLayoutCode),
         seed,
+        tileDistribution,
       })
     : BoardGenerator.generateBoardWithPresolvedShuffle({
         layout: BoardLayoutGenerator.generateBoardLayout(turtleLayoutCode),
         seed,
+        tileDistribution,
       });
 
   updateTileVisibilityAndSelectability(

@@ -13,7 +13,7 @@ export function generateBoard({
   boardHeight,
   seed,
   useBlindShuffle = false,
-  allowSinglePairs = false,
+  tileDistribution,
 }) {
   let generatedBoard, finalLayoutCode;
 
@@ -29,19 +29,27 @@ export function generateBoard({
           });
 
     console.log(
-      "Attempting to create board using layout code: " + finalLayoutCode
+      "Attempting to create Two-Corner board with layout code '" +
+        finalLayoutCode +
+        "' and seed '" +
+        seed +
+        "' and Shuffle Type '" +
+        (useBlindShuffle ? "Simple" : "Presolved") +
+        "' and Tile Dist Option '" +
+        tileDistribution +
+        "'"
     );
 
     generatedBoard = useBlindShuffle
       ? BoardGenerator.generateBoardWithSimpleShuffle({
           ...BoardLayoutGenerator.generateBoardLayout(finalLayoutCode),
           seed,
-          allowSinglePairs,
+          tileDistribution,
         })
       : BoardGenerator.generateBoardWithPresolvedShuffle({
           ...BoardLayoutGenerator.generateBoardLayout(finalLayoutCode),
           seed,
-          allowSinglePairs,
+          tileDistribution,
         });
   } catch (e) {
     console.error(e.message);
@@ -51,10 +59,6 @@ export function generateBoard({
       width: 17,
       height: 8,
     });
-
-    console.log(
-      "Attempting to create board using layout code: " + finalLayoutCode
-    );
 
     generatedBoard = BoardGenerator.generateBoardWithPresolvedShuffle({
       ...BoardLayoutGenerator.generateBoardLayout(finalLayoutCode),

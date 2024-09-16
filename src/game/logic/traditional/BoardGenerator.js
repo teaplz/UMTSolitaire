@@ -4,6 +4,8 @@
 import Rand from "rand-seed";
 import { ALL_FLOWER_TILES, ALL_SEASON_TILES } from "../TraditionalGameType";
 
+import { TileDistributionOptions } from "../shared/TileDistributionOptions";
+
 const FLOWER_TILE = 0x22,
   SEASON_TILE = 0x23;
 
@@ -14,11 +16,13 @@ export function generateBoardWithSimpleShuffle({
   layout,
   seed,
   flowersAndSeasons = true,
-  allowSinglePairs = false,
+  tileDistribution = TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS,
 }) {
-  if (layout == null) {
+  if (layout == null)
     throw new Error("Attempted to create board with no board layout.");
-  }
+
+  if (!Object.values(TileDistributionOptions).includes(tileDistribution))
+    throw new Error("Invalid tile distribution option.");
 
   // Determine if we need to generate a random seed
   // or use a pre-determined one from the seed argument.
@@ -29,51 +33,62 @@ export function generateBoardWithSimpleShuffle({
 
   const seededRng = new Rand(finalSeed + "");
 
-  let char = -1,
-    chardupe = -1,
-    randValue = 0;
-
-  // Generate which tile designs are used. This is done by listing all
-  // possible tile designs (without duplicates), then shuffling it.
+  // Generate the tile distribution. This is done by listing all possible tile
+  // designs, then randomly choosing which ones are used.
   //
-  // The values correspond with the character cdoes in the Mahjong Tiles
+  // The values correspond with the character codes in the Mahjong Tiles
   // unicode block.
-  let usedTiles = [...Array(flowersAndSeasons ? 0x23 + 1 : 0x21 + 1).keys()];
+  let tileChars = [...Array(flowersAndSeasons ? 0x23 + 1 : 0x21 + 1).keys()];
 
-  // Randomize tile design selection. While this does not matter much for
-  // 100% boards, it ensures that the selection for smaller and larger boards
-  // use a random assortment.
-  for (let i = usedTiles.length - 1; i > 0; i--) {
-    randValue = Math.floor(seededRng.next() * (i + 1));
-
-    char = usedTiles[i];
-    usedTiles[i] = usedTiles[randValue];
-    usedTiles[randValue] = char;
-  }
-
-  // Flower tiles (0x22 in usedTiles) and Season tiles (0x23 in usedTiles) are
-  // four unique tile designs each, rather than four of the same tile design.
-  // Similar to the above, randomize the selection.
+  // Flower tiles (0x22) and Season tiles (0x23) are four unique tile designs
+  // each, rather than four of the same tile design.
   let flowerTiles = ALL_FLOWER_TILES.slice(),
     seasonTiles = ALL_SEASON_TILES.slice(),
     nextFlowerTile = 0,
     nextSeasonTile = 0;
 
-  if (flowersAndSeasons) {
-    for (let i = flowerTiles.length - 1; i > 0; i--) {
-      randValue = Math.floor(seededRng.next() * (i + 1));
-
-      char = flowerTiles[i];
-      flowerTiles[i] = flowerTiles[randValue];
-      flowerTiles[randValue] = char;
+  // Shuffle the the tile selection, including the flower and season tiles. This
+  // does not matter for boards that use the exact amount of tiles, but it gives
+  // all tile designs the chance of appearing evenly in both smaller and larger
+  // boards.
+  //
+  // For larger boards, we don't need to shuffle each full set (as all tiles
+  // will appear), only the final set.
+  //
+  // If we're using RANDOM, we don't need to shuffle this set, as it
+  // grabs from the set at random.
+  if (tileDistribution !== TileDistributionOptions.RANDOM) {
+    // For RANDOM_PER_SET, we'll distribute the set per pair, rather than per
+    // tile design. As the set uses two pairs per tile design, we'll simply
+    // double the selection.
+    if (tileDistribution === TileDistributionOptions.RANDOM_PER_SET) {
+      tileChars = tileChars.concat(tileChars);
     }
 
-    for (let i = seasonTiles.length - 1; i > 0; i--) {
-      randValue = Math.floor(seededRng.next() * (i + 1));
+    for (let i = tileChars.length - 1; i > 0; i--) {
+      const randValue = Math.floor(seededRng.next() * (i + 1));
 
-      char = seasonTiles[i];
-      seasonTiles[i] = seasonTiles[randValue];
-      seasonTiles[randValue] = char;
+      const char = tileChars[i];
+      tileChars[i] = tileChars[randValue];
+      tileChars[randValue] = char;
+    }
+
+    if (flowersAndSeasons) {
+      for (let i = flowerTiles.length - 1; i > 0; i--) {
+        const randValue = Math.floor(seededRng.next() * (i + 1));
+
+        const char = flowerTiles[i];
+        flowerTiles[i] = flowerTiles[randValue];
+        flowerTiles[randValue] = char;
+      }
+
+      for (let i = seasonTiles.length - 1; i > 0; i--) {
+        const randValue = Math.floor(seededRng.next() * (i + 1));
+
+        const char = seasonTiles[i];
+        seasonTiles[i] = seasonTiles[randValue];
+        seasonTiles[randValue] = char;
+      }
     }
   }
 
@@ -83,41 +98,102 @@ export function generateBoardWithSimpleShuffle({
   const tiles = JSON.parse(JSON.stringify(layout.tiles)),
     tileRefList = [];
 
-  char = 0;
+  let charIndex =
+      tileDistribution === TileDistributionOptions.RANDOM
+        ? Math.floor(seededRng.next() * tileChars.length)
+        : -1,
+    chardupe = -1;
+
+  // On PRIORITIZE_BOTH_PAIRS, change to distributing each pair once a full set
+  // is used.
+  let fullSetUsed = false;
 
   // Generate the initial unshuffled layout of tiles.
   tiles.forEach((coord) =>
     coord?.forEach((tile) => {
       if (tile == null) return;
 
-      if ((chardupe = (chardupe + 1) % (allowSinglePairs ? 2 : 4)) === 0) {
-        char = (char + 1) % usedTiles.length;
-      }
+      if (tileDistribution === TileDistributionOptions.RANDOM) {
+        // Random tile selection.
+        if ((chardupe = (chardupe + 1) % 2) === 0) {
+          charIndex = Math.floor(seededRng.next() * tileChars.length);
+        }
 
-      if (flowersAndSeasons) {
-        if (usedTiles[char] === FLOWER_TILE) {
-          tile.char =
-            flowerTiles[
-              (nextFlowerTile = (nextFlowerTile + 1) % flowerTiles.length)
-            ];
-        } else if (usedTiles[char] === SEASON_TILE) {
-          tile.char =
-            seasonTiles[
-              (nextSeasonTile = (nextSeasonTile + 1) % seasonTiles.length)
-            ];
+        if (flowersAndSeasons) {
+          if (tileChars[charIndex] === FLOWER_TILE) {
+            tile.char =
+              flowerTiles[Math.floor(seededRng.next() * flowerTiles.length)];
+          } else if (tileChars[charIndex] === SEASON_TILE) {
+            tile.char =
+              seasonTiles[Math.floor(seededRng.next() * seasonTiles.length)];
+          } else {
+            tile.char = tileChars[charIndex];
+          }
         } else {
-          tile.char = usedTiles[char];
+          tile.char = tileChars[charIndex];
         }
       } else {
-        tile.char = usedTiles[char];
+        // Determines when to move on to the next tile selection, either after
+        // a single pair for a half-set (on PRIORITIZE_SINGLE_PAIRS or
+        // PRIORITIZE_BOTH_PAIRS after a full set), a single pair for a full set
+        // (on RANDOM_PER_SET), or a double pair for a full set
+        // (on ALWAYS_BOTH_PAIRS or PRIORITIZE_BOTH_PAIRS before a full set).
+        if (
+          (chardupe =
+            (chardupe + 1) %
+            (tileDistribution ===
+              TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS ||
+            (tileDistribution ===
+              TileDistributionOptions.PRIORITIZE_BOTH_PAIRS &&
+              fullSetUsed) ||
+            tileDistribution === TileDistributionOptions.RANDOM_PER_SET
+              ? 2
+              : 4)) === 0
+        ) {
+          if (++charIndex === tileChars.length) {
+            charIndex = 0;
+            fullSetUsed = true;
+          }
+        }
+
+        if (flowersAndSeasons) {
+          if (tileChars[charIndex] === FLOWER_TILE) {
+            tile.char =
+              flowerTiles[
+                (nextFlowerTile = (nextFlowerTile + 1) % flowerTiles.length)
+              ];
+          } else if (tileChars[charIndex] === SEASON_TILE) {
+            tile.char =
+              seasonTiles[
+                (nextSeasonTile = (nextSeasonTile + 1) % seasonTiles.length)
+              ];
+          } else {
+            tile.char = tileChars[charIndex];
+          }
+        } else {
+          tile.char = tileChars[charIndex];
+        }
       }
 
       tile.id = tileRefList.push(tile) - 1;
     })
   );
 
-  // If there is an extra tile, remove it.
-  if (chardupe % 2 === 0) {
+  // If there are extra tiles, remove them.
+  if (
+    tileDistribution === TileDistributionOptions.ALWAYS_BOTH_PAIRS &&
+    chardupe < 3
+  ) {
+    for (let i = 0; i < chardupe + 1; i++) {
+      const delTile = tileRefList.pop();
+
+      tiles.forEach((coord) =>
+        coord?.forEach((tile, index) => {
+          if (tile === delTile) coord[index] = null;
+        })
+      );
+    }
+  } else if (chardupe % 2 === 0) {
     const delTile = tileRefList.pop();
 
     tiles.forEach((coord) =>
@@ -129,9 +205,9 @@ export function generateBoardWithSimpleShuffle({
 
   // Shuffle the board.
   for (let i = tileRefList.length - 1; i > 0; i--) {
-    randValue = Math.floor(seededRng.next() * (i + 1));
+    const randValue = Math.floor(seededRng.next() * (i + 1));
 
-    char = tileRefList[i].char;
+    const char = tileRefList[i].char;
     tileRefList[i].char = tileRefList[randValue].char;
     tileRefList[randValue].char = char;
   }
@@ -159,11 +235,13 @@ export function generateBoardWithPresolvedShuffle({
   layout,
   seed,
   flowersAndSeasons = true,
-  allowSinglePairs = false,
+  tileDistribution = TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS,
 }) {
-  if (layout == null) {
+  if (layout == null)
     throw new Error("Attempted to create board with no board layout.");
-  }
+
+  if (!Object.values(TileDistributionOptions).includes(tileDistribution))
+    throw new Error("Invalid tile distribution option.");
 
   // Determine if we need to generate a random seed
   // or use a pre-determined one from the seed argument.
@@ -173,9 +251,6 @@ export function generateBoardWithPresolvedShuffle({
     : parseInt(seed, 10) >>> 0;
 
   const seededRng = new Rand(finalSeed + "");
-
-  let char = -1,
-    randValue = 0;
 
   // Final board output.
   const tiles = JSON.parse(JSON.stringify(layout.tiles));
@@ -217,108 +292,142 @@ export function generateBoardWithPresolvedShuffle({
     throw new Error("Cannot start with less than 2 tiles on the board.");
   }
 
-  const numPairs = numTiles >> 1;
+  let numPairs = numTiles >> 1;
 
-  // Generate which tile designs are used. This is done by listing all
-  // possible tile designs (without duplicates), then shuffling it.
+  // Generate the tile distribution. This is done by listing all possible tile
+  // designs, then randomly choosing which ones are used. Unlike the simple
+  // shuffle algorithm, this algorithm takes into account the distribution
+  // order.
   //
-  // The values correspond with the character cdoes in the Mahjong Tiles
+  // The values correspond with the character codes in the Mahjong Tiles
   // unicode block.
-  let allTileValues = [
+  const tileCharSet = [
     ...Array(flowersAndSeasons ? 0x23 + 1 : 0x21 + 1).keys(),
   ];
-
-  // Each value in this array is a representation of a tile pair, based on its
-  // tile value. If "allowSinglePairs" is false, then there are at least two pairs
-  // of a tile on a given board for an easier difficulty on smaller boards.
-  let orderedTilePairs;
-
-  // If our board cannot fit pairs/quads of all tiles, we choose which of the
-  // tiles we use at random.
-  if (
-    numPairs <
-    (allowSinglePairs ? allTileValues.length : allTileValues.length << 1)
-  ) {
-    for (let i = allTileValues.length - 1; i > 0; i--) {
-      randValue = Math.floor(seededRng.next() * (i + 1));
-
-      char = allTileValues[i];
-      allTileValues[i] = allTileValues[randValue];
-      allTileValues[randValue] = char;
-    }
-
-    // Trim the number of tiles used.
-    //
-    // NOTE: If "allowSinglePairs" is false and we have one extra pair unaccounted
-    // for, we'll keep with the name and have the extra pair be from one of
-    // the chosen tiles (which means there will be 6 instead of 4). If we'd
-    // rather have it be a single pair of an unused tile, replace the following:
-    // numPairs >> 1           -->       (numPairs + 1) >> 1
-    allTileValues = allTileValues.slice(
-      0,
-      allowSinglePairs ? numPairs : Math.max(numPairs >> 1, 1)
-    );
-  }
-
-  // Pre-fill part of the tile pair array, all the way up to one pair/quad of
-  // each tile value.
-  orderedTilePairs = allowSinglePairs
-    ? allTileValues.slice()
-    : allTileValues.concat(allTileValues);
-
-  orderedTilePairs.sort((a, b) => a - b);
-
-  // If the board is too big for the amount of pairs, we add more pairs in a
-  // random order.
-  while (orderedTilePairs.length < numPairs) {
-    let shuffledTilePairs = allTileValues.slice();
-
-    for (let i = shuffledTilePairs.length - 1; i > 0; i--) {
-      randValue = Math.floor(seededRng.next() * (i + 1));
-
-      char = shuffledTilePairs[i];
-      shuffledTilePairs[i] = shuffledTilePairs[randValue];
-      shuffledTilePairs[randValue] = char;
-    }
-
-    orderedTilePairs = orderedTilePairs.concat(shuffledTilePairs);
-  }
-
-  // Crop the number of pairs to fit the target total amount.
-  orderedTilePairs = orderedTilePairs.slice(0, numPairs);
-
-  // Shuffle.
-  for (let i = orderedTilePairs.length - 1; i > 0; i--) {
-    randValue = Math.floor(seededRng.next() * (i + 1));
-
-    char = orderedTilePairs[i];
-    orderedTilePairs[i] = orderedTilePairs[randValue];
-    orderedTilePairs[randValue] = char;
-  }
+  let orderedTilePairChars = [];
 
   // Flower tiles (0x22) and Season tiles (0x23) are four unique tile designs
   // each, rather than four of the same tile design.
-  // Similar to the above, shuffle the selection.
   let flowerTiles = ALL_FLOWER_TILES.slice(),
     seasonTiles = ALL_SEASON_TILES.slice(),
     nextFlowerTile = 0,
     nextSeasonTile = 0;
 
-  if (flowersAndSeasons) {
-    for (let i = flowerTiles.length - 1; i > 0; i--) {
-      randValue = Math.floor(seededRng.next() * (i + 1));
-
-      char = flowerTiles[i];
-      flowerTiles[i] = flowerTiles[randValue];
-      flowerTiles[randValue] = char;
+  // Shuffle the the tile selection, including the flower and season tiles. This
+  // does not matter for boards that use the exact amount of tiles, but it gives
+  // all tile designs the chance of appearing evenly in both smaller and larger
+  // boards.
+  //
+  // For larger boards, we don't need to shuffle each full set (as all tiles
+  // will appear), only the final set.
+  //
+  // If we're using RANDOM, we don't need to shuffle this set, as it
+  // grabs from the set at random.
+  if (tileDistribution !== TileDistributionOptions.RANDOM) {
+    // Include both pairs of all full tile sets.
+    for (let i = 0; i < Math.floor(numPairs / (tileCharSet.length << 1)); i++) {
+      orderedTilePairChars = [
+        ...orderedTilePairChars,
+        ...tileCharSet,
+        ...tileCharSet,
+      ];
     }
 
-    for (let i = seasonTiles.length - 1; i > 0; i--) {
-      randValue = Math.floor(seededRng.next() * (i + 1));
+    // Get a random selection of the remaining tile set.
+    if (numPairs % (tileCharSet.length << 1) > 0) {
+      let shuffledTilePairChars = tileCharSet.slice();
 
-      char = seasonTiles[i];
-      seasonTiles[i] = seasonTiles[randValue];
-      seasonTiles[randValue] = char;
+      if (
+        tileDistribution === TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS ||
+        tileDistribution === TileDistributionOptions.PRIORITIZE_BOTH_PAIRS ||
+        tileDistribution === TileDistributionOptions.ALWAYS_BOTH_PAIRS
+      ) {
+        // Shuffle tiles used used for this tile set.
+        for (let i = shuffledTilePairChars.length - 1; i > 0; i--) {
+          const randValue = Math.floor(seededRng.next() * (i + 1));
+
+          const char = shuffledTilePairChars[i];
+          shuffledTilePairChars[i] = shuffledTilePairChars[randValue];
+          shuffledTilePairChars[randValue] = char;
+        }
+
+        if (
+          tileDistribution ===
+            TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS ||
+          (tileDistribution === TileDistributionOptions.PRIORITIZE_BOTH_PAIRS &&
+            Math.floor(numPairs / (tileCharSet.length << 1)) > 0)
+        ) {
+          // Split into available pairs.
+
+          shuffledTilePairChars = shuffledTilePairChars.concat(
+            shuffledTilePairChars
+          );
+        } else {
+          // Split into available quads, make into pairs.
+
+          if (tileDistribution === TileDistributionOptions.ALWAYS_BOTH_PAIRS) {
+            // If we're only going to be using quads, we need to remove single
+            // pairs.
+            numPairs = (numPairs >> 1) << 1;
+          }
+
+          shuffledTilePairChars = shuffledTilePairChars.slice(
+            0,
+            ((numPairs + 1) >> 1) % tileCharSet.length
+          );
+
+          shuffledTilePairChars = shuffledTilePairChars.concat(
+            shuffledTilePairChars
+          );
+        }
+      } else if (tileDistribution === TileDistributionOptions.RANDOM_PER_SET) {
+        // Split into pairs.
+        shuffledTilePairChars = shuffledTilePairChars.concat(
+          shuffledTilePairChars
+        );
+
+        // Shuffle.
+        for (let i = shuffledTilePairChars.length - 1; i > 0; i--) {
+          const randValue = Math.floor(seededRng.next() * (i + 1));
+
+          const char = shuffledTilePairChars[i];
+          shuffledTilePairChars[i] = shuffledTilePairChars[randValue];
+          shuffledTilePairChars[randValue] = char;
+        }
+      }
+
+      // Add the remaining tiles and trim.
+      orderedTilePairChars = orderedTilePairChars
+        .concat(shuffledTilePairChars)
+        .slice(0, numPairs);
+    }
+
+    // Shuffle the overall tile distribution.
+    for (let i = orderedTilePairChars.length - 1; i > 0; i--) {
+      const randValue = Math.floor(seededRng.next() * (i + 1));
+
+      const char = orderedTilePairChars[i];
+      orderedTilePairChars[i] = orderedTilePairChars[randValue];
+      orderedTilePairChars[randValue] = char;
+    }
+
+    // Shuffle Flower and Season tiles.
+    if (flowersAndSeasons) {
+      for (let i = flowerTiles.length - 1; i > 0; i--) {
+        const randValue = Math.floor(seededRng.next() * (i + 1));
+
+        const char = flowerTiles[i];
+        flowerTiles[i] = flowerTiles[randValue];
+        flowerTiles[randValue] = char;
+      }
+
+      for (let i = seasonTiles.length - 1; i > 0; i--) {
+        const randValue = Math.floor(seededRng.next() * (i + 1));
+
+        const char = seasonTiles[i];
+        seasonTiles[i] = seasonTiles[randValue];
+        seasonTiles[randValue] = char;
+      }
     }
   }
 
@@ -333,15 +442,15 @@ export function generateBoardWithPresolvedShuffle({
   // already random.
   overlapStackDepths.forEach((depth) => {
     for (let i = depth.length - 1; i > 0; i--) {
-      randValue = Math.floor(seededRng.next() * (i + 1));
+      const randValue = Math.floor(seededRng.next() * (i + 1));
 
-      let id = depth[i];
+      const id = depth[i];
       depth[i] = depth[randValue];
       depth[randValue] = id;
     }
   });
 
-  // Using a blank version of the game baord, make random valid pairs and
+  // Using a blank version of the game board, make random valid pairs and
   // change their design to match.
   for (let i = 0; i < numPairs; i++) {
     // Grab all the valid tiles ready to be matched.
@@ -389,7 +498,23 @@ export function generateBoardWithPresolvedShuffle({
     let secondTile = validTiles[secondTileIndex];
 
     // Assign the next tile character.
-    if (orderedTilePairs[i] === FLOWER_TILE) {
+    if (tileDistribution === TileDistributionOptions.RANDOM) {
+      const randValue = Math.floor(seededRng.next() * tileCharSet.length);
+
+      if (tileCharSet[randValue] === FLOWER_TILE) {
+        firstTile.tile.char =
+          flowerTiles[Math.floor(seededRng.next() * flowerTiles.length)];
+        secondTile.tile.char =
+          flowerTiles[Math.floor(seededRng.next() * flowerTiles.length)];
+      } else if (tileCharSet[randValue] === SEASON_TILE) {
+        firstTile.tile.char =
+          seasonTiles[Math.floor(seededRng.next() * seasonTiles.length)];
+        secondTile.tile.char =
+          seasonTiles[Math.floor(seededRng.next() * seasonTiles.length)];
+      } else {
+        firstTile.tile.char = secondTile.tile.char = tileCharSet[randValue];
+      }
+    } else if (orderedTilePairChars[i] === FLOWER_TILE) {
       firstTile.tile.char =
         flowerTiles[
           (nextFlowerTile = (nextFlowerTile + 1) % flowerTiles.length)
@@ -398,7 +523,7 @@ export function generateBoardWithPresolvedShuffle({
         flowerTiles[
           (nextFlowerTile = (nextFlowerTile + 1) % flowerTiles.length)
         ];
-    } else if (orderedTilePairs[i] === SEASON_TILE) {
+    } else if (orderedTilePairChars[i] === SEASON_TILE) {
       firstTile.tile.char =
         seasonTiles[
           (nextSeasonTile = (nextSeasonTile + 1) % seasonTiles.length)
@@ -408,8 +533,7 @@ export function generateBoardWithPresolvedShuffle({
           (nextSeasonTile = (nextSeasonTile + 1) % seasonTiles.length)
         ];
     } else {
-      firstTile.tile.char = orderedTilePairs[i];
-      secondTile.tile.char = orderedTilePairs[i];
+      firstTile.tile.char = secondTile.tile.char = orderedTilePairChars[i];
     }
 
     // Filter both of these tiles out of the "to process" list, then out of the

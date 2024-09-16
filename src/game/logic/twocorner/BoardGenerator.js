@@ -2,6 +2,8 @@ import Rand from "rand-seed";
 
 import { MAX_BOARD_WIDTH, MAX_BOARD_HEIGHT } from "./BoardLayoutGenerator";
 
+import { TileDistributionOptions } from "../shared/TileDistributionOptions";
+
 // Generate a random game board by placing pairs/quadruplets of each random tile
 // on the board in the correct layout and then shuffling all tiles on the board
 // using a simple shuffle.
@@ -15,7 +17,7 @@ export function generateBoardWithSimpleShuffle({
   width,
   height,
   seed,
-  allowSinglePairs = false,
+  tileDistribution = TileDistributionOptions.PRIORITIZE_BOTH_PAIRS,
 }) {
   if (
     layoutMask == null ||
@@ -29,13 +31,8 @@ export function generateBoardWithSimpleShuffle({
     throw new Error("Invalid layoutMask, width, or height.");
   }
 
-  const tiles = [],
-    allValidTiles = [];
-
-  let id = 0,
-    char = -1,
-    chardupe = -1,
-    randValue = 0;
+  if (!Object.values(TileDistributionOptions).includes(tileDistribution))
+    throw new Error("Invalid tile distribution option.");
 
   // Determine if we need to generate a random seed
   // or use a pre-determined one from the seed argument.
@@ -51,21 +48,56 @@ export function generateBoardWithSimpleShuffle({
     0
   );
 
-  // Generate which tiles are used. This is done by listing all
-  // possible tiles (without duplicates), then shuffling it.
-  let usedTiles = [...Array(34).keys()];
+  // Generate the tile distribution. This is done by listing all possible tile
+  // designs, then randomly choosing which ones are used.
+  //
+  // The values correspond with the character codes in the Mahjong Tiles
+  // unicode block.
+  let tileChars = [...Array(0x21 + 1).keys()];
 
-  // Shuffle.
-  for (let i = usedTiles.length - 1; i > 0; i--) {
-    randValue = Math.floor(seededRng.next() * (i + 1));
+  // Shuffle the the tile selection. This does not matter for boards that use
+  // the exact amount of tiles, but it gives all tile designs the chance of
+  // appearing evenly in both smaller and larger boards.
+  //
+  // For larger boards, we don't need to shuffle each full set (as all tiles
+  // will appear), only the final set.
+  //
+  // If we're using RANDOM, we don't need to shuffle this set, as it
+  // grabs from the set at random.
+  if (tileDistribution != TileDistributionOptions.RANDOM) {
+    // For RANDOM_PER_SET, we'll distribute the set per pair, rather than per
+    // tile design. As the set uses two pairs per tile design, we'll simply
+    // double the selection.
+    if (tileDistribution == TileDistributionOptions.RANDOM_PER_SET) {
+      tileChars = tileChars.concat(tileChars);
+    }
 
-    char = usedTiles[i];
-    usedTiles[i] = usedTiles[randValue];
-    usedTiles[randValue] = char;
+    // Shuffle.
+    for (let i = tileChars.length - 1; i > 0; i--) {
+      const randValue = Math.floor(seededRng.next() * (i + 1));
+
+      const char = tileChars[i];
+      tileChars[i] = tileChars[randValue];
+      tileChars[randValue] = char;
+    }
   }
 
+  const tiles = [],
+    allValidTiles = [];
+
+  let charIndex =
+      tileDistribution == TileDistributionOptions.RANDOM
+        ? Math.floor(seededRng.next() * tileChars.length)
+        : -1,
+    chardupe = -1;
+
+  // On PRIORITIZE_BOTH_PAIRS, change to distributing each pair once a full set
+  // is used.
+  let fullSetUsed = false;
+
   // Generate the initial unshuffled layout of tiles.
-  let tileNum = 0;
+  let tileNum = 0,
+    id = 0;
 
   // Blank out the top outer edge.
   for (let x = 0; x < width + 2; x++) id = tiles.push({ id: id, char: null });
@@ -76,14 +108,40 @@ export function generateBoardWithSimpleShuffle({
 
     for (let x = 0; x < width; x++) {
       if (layoutMask[tileNum] === "1") {
-        if ((chardupe = (chardupe + 1) % (allowSinglePairs ? 2 : 4)) === 0) {
-          char = (char + 1) % usedTiles.length;
+        if (tileDistribution == TileDistributionOptions.RANDOM) {
+          // Random tile selection.
+          if ((chardupe = (chardupe + 1) % 2) === 0) {
+            charIndex = Math.floor(seededRng.next() * tileChars.length);
+          }
+        } else {
+          // Determines when to move on to the next tile selection, either after
+          // a single pair for a half-set (on PRIORITIZE_SINGLE_PAIRS or
+          // PRIORITIZE_BOTH_PAIRS after a full set), a single pair for a full set
+          // (on RANDOM_PER_SET), or a double pair for a full set
+          // (on ALWAYS_BOTH_PAIRS or PRIORITIZE_BOTH_PAIRS before a full set).
+          if (
+            (chardupe =
+              (chardupe + 1) %
+              (tileDistribution ==
+                TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS ||
+              (tileDistribution ==
+                TileDistributionOptions.PRIORITIZE_BOTH_PAIRS &&
+                fullSetUsed) ||
+              tileDistribution == TileDistributionOptions.RANDOM_PER_SET
+                ? 2
+                : 4)) === 0
+          ) {
+            if (++charIndex === tileChars.length) {
+              charIndex = 0;
+              fullSetUsed = true;
+            }
+          }
         }
 
         allValidTiles.push(id);
         id = tiles.push({
           id: id,
-          char: usedTiles[char],
+          char: tileChars[charIndex],
         });
       } else {
         id = tiles.push({ id: id, char: null });
@@ -99,14 +157,22 @@ export function generateBoardWithSimpleShuffle({
   for (let x = 0; x < width + 2; x++) id = tiles.push({ id: id, char: null });
 
   // If there is an extra tile, remove it.
-  if (chardupe % 2 === 0) {
+  if (
+    tileDistribution == TileDistributionOptions.ALWAYS_BOTH_PAIRS &&
+    chardupe < 3
+  ) {
+    for (let i = 0; i < chardupe + 1; i++) {
+      tiles[allValidTiles.pop()].char = null;
+      numTiles--;
+    }
+  } else if (chardupe % 2 === 0) {
     tiles[allValidTiles.pop()].char = null;
     numTiles--;
   }
 
   // Shuffle the board.
   for (let i = allValidTiles.length - 1; i > 0; i--) {
-    randValue = Math.floor(seededRng.next() * (i + 1));
+    const randValue = Math.floor(seededRng.next() * (i + 1));
 
     char = tiles[allValidTiles[i]].char;
     tiles[allValidTiles[i]].char = tiles[allValidTiles[randValue]].char;
@@ -135,7 +201,7 @@ export function generateBoardWithPresolvedShuffle({
   width,
   height,
   seed,
-  allowSinglePairs = false,
+  tileDistribution = TileDistributionOptions.PRIORITIZE_BOTH_PAIRS,
 }) {
   if (
     layoutMask == null ||
@@ -149,11 +215,8 @@ export function generateBoardWithPresolvedShuffle({
     throw new Error("Invalid layoutMask, width, or height.");
   }
 
-  const tiles = [];
-
-  let id = 0,
-    char = -1,
-    randValue = 0;
+  if (!Object.values(TileDistributionOptions).includes(tileDistribution))
+    throw new Error("Invalid tile distribution option.");
 
   // Determine if we need to generate a random seed
   // or use a pre-determined one from the seed argument.
@@ -173,88 +236,120 @@ export function generateBoardWithPresolvedShuffle({
     throw new Error("Cannot start with less than 2 tiles on the board.");
   }
 
-  const numPairs = numTiles >> 1;
+  let numPairs = numTiles >> 1;
 
-  // Generate the tile matching order for the solving algorithm. This is done
-  // by getting a list of valid tile pairs, then adjusting it to fit the
-  // layout, then shuffling it.
+  // Generate the tile distribution. This is done by listing all possible tile
+  // designs, then randomly choosing which ones are used. Unlike the simple
+  // shuffle algorithm, this algorithm takes into account the distribution
+  // order.
+  //
+  // The values correspond with the character codes in the Mahjong Tiles
+  // unicode block.
+  const tileCharSet = [...Array(0x21 + 1).keys()];
+  let orderedTilePairChars = [];
 
-  // For this, we are only using 34 mahjong tile values (winds, dragons,
-  // characters, bamboo, circles). At the moment, flowers and seasons are not
-  // used.
-  let allTileValues = [...Array(34).keys()];
-
-  // Each value in this array is a representation of a tile pair, based on its
-  // tile value. If "allowSinglePairs" is false, then there are at least two pairs
-  // of a tile on a given board for an easier difficulty on smaller boards.
-  let orderedTilePairs;
-
-  // If our board cannot fit pairs/quads of all tiles, we choose which of the
-  // tiles we use at random.
-  if (
-    numPairs <
-    (allowSinglePairs ? allTileValues.length : allTileValues.length << 1)
-  ) {
-    for (let i = allTileValues.length - 1; i > 0; i--) {
-      randValue = Math.floor(seededRng.next() * (i + 1));
-
-      char = allTileValues[i];
-      allTileValues[i] = allTileValues[randValue];
-      allTileValues[randValue] = char;
+  // Shuffle the the tile selection. This does not matter for boards that use
+  // the exact amount of tiles, but it gives all tile designs the chance of
+  // appearing evenly in both smaller and larger boards.
+  //
+  // For larger boards, we don't need to shuffle each full set (as all tiles
+  // will appear), only the final set.
+  //
+  // If we're using RANDOM, we don't need to shuffle this set, as it
+  // grabs from the set at random.
+  if (tileDistribution !== TileDistributionOptions.RANDOM) {
+    // Include both pairs of all full tile sets.
+    for (let i = 0; i < Math.floor(numPairs / (tileCharSet.length << 1)); i++) {
+      orderedTilePairChars = [
+        ...orderedTilePairChars,
+        ...tileCharSet,
+        ...tileCharSet,
+      ];
     }
 
-    // Trim the number of tiles used.
-    //
-    // NOTE: If "allowSinglePairs" is false and we have one extra pair unaccounted
-    // for, we'll keep with the name and have the extra pair be from one of
-    // the chosen tiles (which means there will be 6 instead of 4). If we'd
-    // rather have it be a single pair of an unused tile, replace the following:
-    // numPairs >> 1           -->       (numPairs + 1) >> 1
-    allTileValues = allTileValues.slice(
-      0,
-      allowSinglePairs ? numPairs : Math.max(numPairs >> 1, 1)
-    );
-  }
+    // Get a random selection of the remaining tile set.
+    if (numPairs % (tileCharSet.length << 1) > 0) {
+      let shuffledTilePairChars = tileCharSet.slice();
 
-  // Pre-fill part of the tile pair array, all the way up to one pair/quad of
-  // each tile value.
-  orderedTilePairs = allowSinglePairs
-    ? allTileValues.slice()
-    : allTileValues.concat(allTileValues);
+      if (
+        tileDistribution === TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS ||
+        tileDistribution === TileDistributionOptions.PRIORITIZE_BOTH_PAIRS ||
+        tileDistribution === TileDistributionOptions.ALWAYS_BOTH_PAIRS
+      ) {
+        // Shuffle tiles used used for this tile set.
+        for (let i = shuffledTilePairChars.length - 1; i > 0; i--) {
+          const randValue = Math.floor(seededRng.next() * (i + 1));
 
-  orderedTilePairs.sort((a, b) => a - b);
+          const char = shuffledTilePairChars[i];
+          shuffledTilePairChars[i] = shuffledTilePairChars[randValue];
+          shuffledTilePairChars[randValue] = char;
+        }
 
-  // If the board is too big for the amount of pairs, we add more pairs in a
-  // random order.
-  while (orderedTilePairs.length < numPairs) {
-    let shuffledTilePairs = allTileValues.slice();
+        if (
+          tileDistribution ===
+            TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS ||
+          (tileDistribution === TileDistributionOptions.PRIORITIZE_BOTH_PAIRS &&
+            Math.floor(numPairs / (tileCharSet.length << 1)) > 0)
+        ) {
+          // Split into available pairs.
 
-    for (let i = shuffledTilePairs.length - 1; i > 0; i--) {
-      randValue = Math.floor(seededRng.next() * (i + 1));
+          shuffledTilePairChars = shuffledTilePairChars.concat(
+            shuffledTilePairChars
+          );
+        } else {
+          // Split into available quads, make into pairs.
 
-      char = shuffledTilePairs[i];
-      shuffledTilePairs[i] = shuffledTilePairs[randValue];
-      shuffledTilePairs[randValue] = char;
+          if (tileDistribution === TileDistributionOptions.ALWAYS_BOTH_PAIRS) {
+            // If we're only going to be using quads, we need to remove single
+            // pairs.
+            numPairs = (numPairs >> 1) << 1;
+          }
+
+          shuffledTilePairChars = shuffledTilePairChars.slice(
+            0,
+            ((numPairs + 1) >> 1) % tileCharSet.length
+          );
+
+          shuffledTilePairChars = shuffledTilePairChars.concat(
+            shuffledTilePairChars
+          );
+        }
+      } else if (tileDistribution === TileDistributionOptions.RANDOM_PER_SET) {
+        // Split into pairs.
+        shuffledTilePairChars = shuffledTilePairChars.concat(
+          shuffledTilePairChars
+        );
+
+        // Shuffle.
+        for (let i = shuffledTilePairChars.length - 1; i > 0; i--) {
+          const randValue = Math.floor(seededRng.next() * (i + 1));
+
+          const char = shuffledTilePairChars[i];
+          shuffledTilePairChars[i] = shuffledTilePairChars[randValue];
+          shuffledTilePairChars[randValue] = char;
+        }
+      }
+
+      // Add the remaining tiles and trim.
+      orderedTilePairChars = orderedTilePairChars
+        .concat(shuffledTilePairChars)
+        .slice(0, numPairs);
     }
 
-    orderedTilePairs = orderedTilePairs.concat(shuffledTilePairs);
-  }
+    // Shuffle the overall tile distribution.
+    for (let i = orderedTilePairChars.length - 1; i > 0; i--) {
+      const randValue = Math.floor(seededRng.next() * (i + 1));
 
-  // Crop the number of pairs to fit the target total amount.
-  orderedTilePairs = orderedTilePairs.slice(0, numPairs);
-
-  // Shuffle.
-  for (let i = orderedTilePairs.length - 1; i > 0; i--) {
-    randValue = Math.floor(seededRng.next() * (i + 1));
-
-    char = orderedTilePairs[i];
-    orderedTilePairs[i] = orderedTilePairs[randValue];
-    orderedTilePairs[randValue] = char;
+      const char = orderedTilePairChars[i];
+      orderedTilePairChars[i] = orderedTilePairChars[randValue];
+      orderedTilePairChars[randValue] = char;
+    }
   }
 
   // Generate the initial unshuffled layout of tiles.
-
-  let tileNum = 0;
+  const tiles = [];
+  let tileNum = 0,
+    id = 0;
 
   // Blank out the top outer edge.
   for (let x = 0; x < width + 2; x++) id = tiles.push({ id: id, char: null });
@@ -353,9 +448,14 @@ export function generateBoardWithPresolvedShuffle({
         : possibleMatches[Math.floor(seededRng.next() * possibleMatches.length)]
             .tile;
 
-    // We found our pair!
-    tiles[tileValue].char = orderedTilePairs[i];
-    tiles[matchingTile].char = orderedTilePairs[i];
+    // Assign the next tile character to our matching pair.
+    if (tileDistribution === TileDistributionOptions.RANDOM) {
+      tiles[tileValue].char = tiles[matchingTile].char =
+        orderedTilePairChars[Math.floor(seededRng.next() * tileCharSet.length)];
+    } else {
+      tiles[tileValue].char = tiles[matchingTile].char =
+        orderedTilePairChars[i];
+    }
 
     // Add unvisited surrounding tiles of the matched tile to the open edge list.
     if (

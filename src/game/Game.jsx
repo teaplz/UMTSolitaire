@@ -22,6 +22,7 @@ import LayoutEditModalBody from "./modal/LayoutEditModalBody";
 
 import "./modal/Modal.css";
 import "./GameBar.css";
+import { TileDistributionOptions } from "./logic/shared/TileDistributionOptions";
 
 ReactModal.setAppElement(document.getElementById("root"));
 
@@ -118,8 +119,10 @@ export default function Game({
   // winnable boards, for an extra challenge.
   const [blindShuffle, setBlindShuffle] = useState(false);
 
-  // If enabled, do not force quads in smaller boards, for an extra challenge.
-  const [allowSinglePairs, setAllowSinglePairs] = useState(false);
+  // Determines how the tiles are distributed on the board.
+  const [tileDistribution, setTileDistribution] = useState(
+    TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS
+  );
 
   //
   // Game and Board State
@@ -195,7 +198,7 @@ export default function Game({
       layoutParam = searchParams?.get("g"),
       seedParam = searchParams?.get("s"),
       blindShuffleParam = searchParams?.get("ts") !== null,
-      allowSinglePairsParam = searchParams?.get("sp") !== null;
+      tileDistributionParam = searchParams?.get("td");
 
     // Get the initial board, in order of priority:
     // - Create from URL search parameters. (Shared hyperlink)
@@ -209,7 +212,7 @@ export default function Game({
         newBoardWidth: null,
         newBoardHeight: null,
         newBlindShuffle: blindShuffleParam,
-        newAllowSinglePairs: allowSinglePairsParam,
+        newTileDistribution: tileDistributionParam,
       });
     } else if (
       gameState !== null &&
@@ -224,7 +227,7 @@ export default function Game({
         setSeed(gameState.seed);
         setLayoutCode(gameState.layoutCode);
         setBlindShuffle(gameState.blindShuffle);
-        setAllowSinglePairs(gameState.allowSinglePairs);
+        setTileDistribution(gameState.tileDistribution);
         setNumTiles(gameState.numTiles);
         setTileHistory(gameState.tileHistory);
 
@@ -320,7 +323,7 @@ export default function Game({
         seed: seed,
         layoutCode: layoutCode,
         blindShuffle: blindShuffle,
-        allowSinglePairs: allowSinglePairs,
+        tileDistribution: tileDistribution,
         numTiles: numTiles,
         tileHistory: tileHistory,
         timer: {
@@ -399,7 +402,7 @@ export default function Game({
     newBoardWidth = boardWidth,
     newBoardHeight = boardHeight,
     newBlindShuffle = blindShuffle,
-    newAllowSinglePairs = allowSinglePairs,
+    newTileDistribution = tileDistribution,
   } = {}) {
     let generatedBoard, useGameType;
 
@@ -420,6 +423,7 @@ export default function Game({
           layoutCode: newLayoutCode,
           seed: newSeed,
           useBlindShuffle: newBlindShuffle,
+          tileDistribution: parseInt(newTileDistribution ?? 0),
         });
       } else if (useGameType === GameTypes.TWOCORNER) {
         generatedBoard = TwoCornerGameType.generateBoard({
@@ -428,7 +432,7 @@ export default function Game({
           boardHeight: newBoardHeight,
           seed: newSeed,
           useBlindShuffle: newBlindShuffle,
-          allowSinglePairs: newAllowSinglePairs,
+          tileDistribution: parseInt(newTileDistribution ?? 0),
         });
       } else {
         console.error("Invalid gametype selection! Cancel the board reset.");
@@ -447,7 +451,7 @@ export default function Game({
     setSeed(generatedBoard.seed);
     setLayoutCode(generatedBoard.layoutCode);
     setBlindShuffle(newBlindShuffle);
-    setAllowSinglePairs(newAllowSinglePairs);
+    setTileDistribution(newTileDistribution);
     setNumTiles(generatedBoard.numTiles);
     setSelectedTile(null);
     setTileHistory([]);
@@ -825,7 +829,9 @@ export default function Game({
     return {
       layoutUrl,
       gameUrl: `${layoutUrl}&s=${seed}${blindShuffle ? "&ts" : ""}${
-        allowSinglePairs ? "&sp" : ""
+        tileDistribution != TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS
+          ? `&td=${tileDistribution}`
+          : ""
       }`,
     };
   }
@@ -900,7 +906,7 @@ export default function Game({
               prevWidth: boardWidth,
               prevHeight: boardHeight,
               prevBlindShuffle: blindShuffle,
-              prevAllowSinglePairs: allowSinglePairs,
+              prevTileDistribution: tileDistribution,
               prevSeed: seed,
               layoutCode,
               handleResetBoard: resetGameState,
