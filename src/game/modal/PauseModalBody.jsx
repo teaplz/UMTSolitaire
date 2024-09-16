@@ -1,4 +1,4 @@
-import { GameTypeStrings } from "../util/GameTypes";
+import { GameTypeStrings } from "../GameTypes";
 
 const PauseModalBody = ({
   gameType,

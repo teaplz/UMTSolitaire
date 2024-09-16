@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GameTypes } from "../util/GameTypes";
+import { GameTypes } from "../GameTypes";
 
 import * as TraditionalGameType from "../logic/TraditionalGameType";
 

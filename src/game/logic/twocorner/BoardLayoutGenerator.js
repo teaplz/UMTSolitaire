@@ -17,7 +17,7 @@
 // mask for when tiles exist in each area of the grid
 // (min # of digits per line * num of lines)
 
-import { GameTypeLayoutCodeIDs, GameTypes } from "../../util/GameTypes";
+import { GameTypeLayoutCodeIDs, GameTypes } from "../../GameTypes";
 
 export const MAX_BOARD_WIDTH = 20,
   MAX_BOARD_HEIGHT = 12;

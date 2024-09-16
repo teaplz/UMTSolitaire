@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import ReactModal from "react-modal";
 
-import { GameTypeLayoutCodeIDs, GameTypes } from "./util/GameTypes";
+import { GameTypeLayoutCodeIDs, GameTypes } from "./GameTypes";
 
 import * as TraditionalGameType from "./logic/TraditionalGameType";
 import * as TwoCornerGameType from "./logic/TwoCornerGameType";

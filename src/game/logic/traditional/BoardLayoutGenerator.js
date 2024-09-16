@@ -34,7 +34,7 @@
 // substitution passes to avoid accidentally forming profanity that might
 // trip social media checks when shared.
 
-import { GameTypeLayoutCodeIDs, GameTypes } from "../../util/GameTypes";
+import { GameTypeLayoutCodeIDs, GameTypes } from "../../GameTypes";
 
 export const MAX_BOARD_WIDTH = 20,
   MAX_BOARD_HEIGHT = 12,

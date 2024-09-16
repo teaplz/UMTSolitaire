@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import * as TraditionalGameType from "../logic/TraditionalGameType";
 import * as TwoCornerGameType from "../logic/TwoCornerGameType";
 
-import { GameTypeLayoutCodeIDs, GameTypes } from "../util/GameTypes";
+import { GameTypeLayoutCodeIDs, GameTypes } from "../GameTypes";
 
 import "./LayoutEditModalBody.css";
 
