@@ -50,7 +50,7 @@ The game will not display correctly in earlier browsers and may not display corr
 </p>
 
 <p align="center">
-    <a href="./readme/desktop-glyph.png?raw=true"><img src="./readme/desktop-glyph.png" width="50%" title="A game board rendered using non-standard emojis"></a><br/>
+    <a href="./readme/desktop-glyph.png?raw=true"><img src="./readme/desktop-glyph.png" width="50%" title="A game board rendered using standard text glyphs"></a><br/>
     The same board rendered using the same font, but as Unicode glyphs.
 </p>
 
