@@ -134,6 +134,7 @@ export function generateLayoutCode({ layoutMask, width, height }) {
 export function generateBoardLayout(layoutCode) {
   if (
     layoutCode === null ||
+    typeof layoutCode !== 'string' ||
     layoutCode.length < 6 ||
     layoutCode.slice(0, 3) !== GameTypeLayoutCodeIDs[GameTypes.TWOCORNER]
   ) {

@@ -1,6 +1,10 @@
 import * as BoardGenerator from "./twocorner/BoardGenerator";
+
 import * as BoardLayoutGenerator from "./twocorner/BoardLayoutGenerator";
 export * as BoardLayoutGenerator from "./twocorner/BoardLayoutGenerator";
+
+import * as DefaultBoardLayouts from "./twocorner/DefaultBoardLayouts";
+export * as DefaultBoardLayouts from "./twocorner/DefaultBoardLayouts";
 
 export {
   MAX_BOARD_WIDTH,
@@ -18,8 +22,8 @@ export function generateBoard({
   let generatedBoard, finalLayoutCode;
 
   try {
-    // Generate the board based on the provided layout code or from a basic rectangular board based on the provided width and
-    // height.
+    // Generate the board based on the provided layout code or from a basic
+    // rectangular board based on the provided width and height.
     finalLayoutCode =
       layoutCode != null
         ? layoutCode

@@ -1,9 +1,10 @@
 import * as BoardGenerator from "./traditional/BoardGenerator";
+
 import * as BoardLayoutGenerator from "./traditional/BoardLayoutGenerator";
 export * as BoardLayoutGenerator from "./traditional/BoardLayoutGenerator";
 
-export const LAYOUT_CODE_TURTLE =
-  "MJS01f8nmP8DHDKDNNNP85KDMMMNP86NMQWPWPWPWCMNNC4CYFNNNMQWC2CgTPVPWCMNNNC4CYZ4CYPYDNNMQWPVPVPWCMNNNP84NMQWPWPWPWCMNNP86KDMMMNP85HDKDNNN";
+import * as DefaultBoardLayouts from "./traditional/DefaultBoardLayouts";
+export * as DefaultBoardLayouts from "./traditional/DefaultBoardLayouts";
 
 export const ALL_FLOWER_TILES = [0x22, 0x23, 0x24, 0x25],
   ALL_SEASON_TILES = [0x26, 0x27, 0x28, 0x29];
@@ -14,58 +15,58 @@ export {
   MAX_BOARD_DEPTH,
 } from "./traditional/BoardLayoutGenerator";
 
-// Generate a full playable board.
-//
-// For now, just generate the classic "turtle" layout.
 export function generateBoard({
-  layoutCode,
+  layoutCode = DefaultBoardLayouts.TURTLE.code,
   seed,
   useBlindShuffle = false,
   tileDistribution,
-  fullTest = false,
 }) {
-  const turtleLayoutCode = fullTest
-    ? BoardLayoutGenerator.generateLayoutCode({
-        tiles: BoardLayoutGenerator.generateTurtleBoard(),
-        width: 15,
-        height: 8,
-      })
-    : layoutCode != null
-    ? layoutCode
-    : LAYOUT_CODE_TURTLE;
+  let generatedBoard,
+    finalLayoutCode = layoutCode;
 
-  console.log(
-    "Attempting to create Traditional board with layout code '" +
-      layoutCode +
-      "' and seed '" +
-      seed +
-      "' and Shuffle Type '" +
-      (useBlindShuffle ? "Simple" : "Presolved") +
-      "' and Tile Dist Option '" +
-      tileDistribution +
-      "'"
-  );
+  try {
+    console.log(
+      "Attempting to create Traditional board with layout code '" +
+        finalLayoutCode +
+        "' and seed '" +
+        seed +
+        "' and Shuffle Type '" +
+        (useBlindShuffle ? "Simple" : "Presolved") +
+        "' and Tile Dist Option '" +
+        tileDistribution +
+        "'"
+    );
 
-  const board = useBlindShuffle
-    ? BoardGenerator.generateBoardWithSimpleShuffle({
-        layout: BoardLayoutGenerator.generateBoardLayout(turtleLayoutCode),
-        seed,
-        tileDistribution,
-      })
-    : BoardGenerator.generateBoardWithPresolvedShuffle({
-        layout: BoardLayoutGenerator.generateBoardLayout(turtleLayoutCode),
-        seed,
-        tileDistribution,
-      });
+    generatedBoard = useBlindShuffle
+      ? BoardGenerator.generateBoardWithSimpleShuffle({
+          layout: BoardLayoutGenerator.generateBoardLayout(finalLayoutCode),
+          seed,
+          tileDistribution,
+        })
+      : BoardGenerator.generateBoardWithPresolvedShuffle({
+          layout: BoardLayoutGenerator.generateBoardLayout(finalLayoutCode),
+          seed,
+          tileDistribution,
+        });
+  } catch (e) {
+    console.error(e.message);
+    console.error("Invalid generated board, switching to default board.");
+
+    finalLayoutCode = DefaultBoardLayouts.TURTLE.code;
+
+    generatedBoard = BoardGenerator.generateBoardWithPresolvedShuffle({
+      layout: BoardLayoutGenerator.generateBoardLayout(finalLayoutCode),
+    });
+  }
 
   updateTileVisibilityAndSelectability(
-    board?.obstructedTiles,
-    board?.obstructedTileRegions
+    generatedBoard?.obstructedTiles,
+    generatedBoard?.obstructedTileRegions
   );
 
   return {
-    ...board,
-    layoutCode: turtleLayoutCode,
+    ...generatedBoard,
+    layoutCode: finalLayoutCode,
   };
 }
 

@@ -313,7 +313,8 @@ const NewBoardModalBody = ({
             handleResetBoard({
               newGameType: GameTypes.TRADITIONAL,
               newSeed: useCustomSeed ? parseInt(seed) : null,
-              newLayoutCode: TraditionalGameType.LAYOUT_CODE_TURTLE,
+              newLayoutCode:
+                TraditionalGameType.DefaultBoardLayouts.TURTLE.code,
               newBlindShuffle: (difficulty & 1) !== 0,
             })
           }

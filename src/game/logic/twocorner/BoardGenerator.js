@@ -174,7 +174,7 @@ export function generateBoardWithSimpleShuffle({
   for (let i = allValidTiles.length - 1; i > 0; i--) {
     const randValue = Math.floor(seededRng.next() * (i + 1));
 
-    char = tiles[allValidTiles[i]].char;
+    const char = tiles[allValidTiles[i]].char;
     tiles[allValidTiles[i]].char = tiles[allValidTiles[randValue]].char;
     tiles[allValidTiles[randValue]].char = char;
   }

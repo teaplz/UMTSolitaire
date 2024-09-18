@@ -197,6 +197,7 @@ export function generateLayoutCode({ tiles, width, height }) {
 export function generateBoardLayout(layoutCode) {
   if (
     layoutCode === null ||
+    typeof layoutCode !== 'string' ||
     layoutCode.length < 6 ||
     layoutCode.slice(0, 3) !== GameTypeLayoutCodeIDs[GameTypes.TRADITIONAL]
   ) {
@@ -425,47 +426,3 @@ const layoutCodeVowelSubstitutions = {
     "3", // F
   ],
 };
-
-// Used for debugging purposes. This is a manual recreation of the classic
-// "Turtle" layout. Not efficient in the slightest. May delete at some point.
-export function generateTurtleBoard() {
-  const tiles = Array.from({ length: 15 * 8 }, (_) => []);
-
-  // Row 1
-  for (let x = 1; x < 13; x++) tiles[15 * 0 + x].push({});
-  // Row 2
-  for (let x = 3; x < 11; x++) tiles[15 * 1 + x].push({});
-  for (let x = 4; x < 10; x++) tiles[15 * 1 + x].push({});
-  // Row 3
-  for (let x = 2; x < 12; x++) tiles[15 * 2 + x].push({});
-  for (let x = 4; x < 10; x++) tiles[15 * 2 + x].push({});
-  for (let x = 5; x < 9; x++) tiles[15 * 2 + x].push({});
-  // Row 4
-  for (let x = 0; x < 1; x++) tiles[15 * 3 + x].push({ yhalfstep: true });
-  for (let x = 1; x < 13; x++) tiles[15 * 3 + x].push({});
-  for (let x = 13; x < 15; x++) tiles[15 * 3 + x].push({ yhalfstep: true });
-  for (let x = 4; x < 10; x++) tiles[15 * 3 + x].push({});
-  for (let x = 5; x < 9; x++) tiles[15 * 3 + x].push({});
-  for (let x = 6; x < 8; x++) tiles[15 * 3 + x].push({});
-  for (let x = 6; x < 7; x++)
-    tiles[15 * 3 + x].push({
-      xhalfstep: true,
-      yhalfstep: true,
-    });
-  // Row 5
-  for (let x = 1; x < 13; x++) tiles[15 * 4 + x].push({});
-  for (let x = 4; x < 10; x++) tiles[15 * 4 + x].push({});
-  for (let x = 5; x < 9; x++) tiles[15 * 4 + x].push({});
-  for (let x = 6; x < 8; x++) tiles[15 * 4 + x].push({});
-  // Row 6
-  for (let x = 2; x < 12; x++) tiles[15 * 5 + x].push({});
-  for (let x = 4; x < 10; x++) tiles[15 * 5 + x].push({});
-  for (let x = 5; x < 9; x++) tiles[15 * 5 + x].push({});
-  // Row 7
-  for (let x = 3; x < 11; x++) tiles[15 * 6 + x].push({});
-  for (let x = 4; x < 10; x++) tiles[15 * 6 + x].push({});
-  // Row 8
-  for (let x = 1; x < 13; x++) tiles[15 * 7 + x].push({});
-
-  return tiles;
-}
