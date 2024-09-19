@@ -39,9 +39,9 @@ export default function Tile({
   else if (canBeMatchedWithOther) tileStatusClass = "game-tile-hint-all";
 
   if (useEmoji) {
-    // In certain versions of Windows, change the revamped Red Dragon emoji
-    // to one of the Flower emojis (Plum?)
-    if (char === 0x04 && fixRedDragonBugs) char = 0x22;
+    // In certain versions of Windows, change the revamped Red Dragon tile emoji
+    // to the Joker tile emoji.
+    if (char === 0x04 && fixRedDragonBugs) char = 0x2a;
 
     // If we're using the non-standard emoji variant, just display them normally.
     return (
