@@ -25,18 +25,16 @@ export function generateBoard({
     // Generate the board based on the provided layout code or from a basic
     // rectangular board based on the provided width and height.
     finalLayoutCode =
-      layoutCode != null
-        ? layoutCode
-        : BoardLayoutGenerator.generateLayoutCode({
-            width: boardWidth,
-            height: boardHeight,
-          });
+      layoutCode ??
+      BoardLayoutGenerator.generateLayoutCode({
+        width: boardWidth,
+        height: boardHeight,
+      });
 
     console.log(
       "Attempting to create Two-Corner board with layout code '" +
         finalLayoutCode +
-        "' and seed '" +
-        seed +
+        (seed != null ? "' and " + "seed '" + seed : "") +
         "' and Shuffle Type '" +
         (useBlindShuffle ? "Simple" : "Presolved") +
         "' and Tile Dist Option '" +

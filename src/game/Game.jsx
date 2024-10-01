@@ -102,27 +102,25 @@ export default function Game({
   //
 
   // The type of game being played.
-  const [gameType, setGameType] = useState(GameTypes.TWOCORNER);
+  const [gameType, setGameType] = useState(GameTypes.TRADITIONAL);
 
   // Board dimensions, for use with basic board generation with certain
   // gametypes.
-  const [boardWidth, setBoardWidth] = useState(17);
-  const [boardHeight, setBoardHeight] = useState(8);
+  const [boardWidth, setBoardWidth] = useState();
+  const [boardHeight, setBoardHeight] = useState();
 
   // The code to represent the tile structure.
-  const [layoutCode, setLayoutCode] = useState(null);
+  const [layoutCode, setLayoutCode] = useState();
 
   // Determines the "seed" for the randomized tile selection.
-  const [seed, setSeed] = useState(1);
+  const [seed, setSeed] = useState();
 
   // If enabled, do a faster simple shuffle that does not gaurantee
   // winnable boards, for an extra challenge.
-  const [blindShuffle, setBlindShuffle] = useState(false);
+  const [blindShuffle, setBlindShuffle] = useState();
 
   // Determines how the tiles are distributed on the board.
-  const [tileDistribution, setTileDistribution] = useState(
-    TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS
-  );
+  const [tileDistribution, setTileDistribution] = useState();
 
   //
   // Game and Board State
@@ -203,7 +201,7 @@ export default function Game({
     // Get the initial board, in order of priority:
     // - Create from URL search parameters. (Shared hyperlink)
     // - Recreate from the browser's web storage. (Persistence)
-    // - Create basic 17x8 board. (Default)
+    // - Create basic board. (Default)
     if (layoutParam !== null) {
       resetGameState({
         newGameType: null,
@@ -258,14 +256,23 @@ export default function Game({
         console.log(e);
 
         resetGameState({
-          newGameType: "TWOCORNER",
-          newBoardWidth: 17,
-          newBoardHeight: 8,
-          newSeed: null,
+          newGameType: GameTypes.TRADITIONAL,
+          newLayoutCode: null,
+          newBoardWidth: null,
+          newBoardHeight: null,
+          newBlindShuffle: null,
+          newTileDistribution: null,
         });
       }
     } else {
-      resetGameState();
+      resetGameState({
+        newGameType: GameTypes.TRADITIONAL,
+        newLayoutCode: null,
+        newBoardWidth: null,
+        newBoardHeight: null,
+        newBlindShuffle: null,
+        newTileDistribution: null,
+      });
     }
   }, []);
 
@@ -408,7 +415,7 @@ export default function Game({
 
     // If we're getting the new board from a layout code, base its
     // gametype on the layout code.
-    if (newLayoutCode !== null && newGameType === null) {
+    if (newLayoutCode != null && newGameType === null) {
       const layoutCodeID = newLayoutCode?.slice(0, 3);
       useGameType = Object.keys(GameTypeLayoutCodeIDs).find(
         (key) => GameTypeLayoutCodeIDs[key] === layoutCodeID

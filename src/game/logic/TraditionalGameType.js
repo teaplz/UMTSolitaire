@@ -16,20 +16,19 @@ export {
 } from "./traditional/BoardLayoutGenerator";
 
 export function generateBoard({
-  layoutCode = DefaultBoardLayouts.TURTLE.code,
+  layoutCode,
   seed,
   useBlindShuffle = false,
   tileDistribution,
 }) {
   let generatedBoard,
-    finalLayoutCode = layoutCode;
+    finalLayoutCode = layoutCode ?? DefaultBoardLayouts.TURTLE.code;
 
   try {
     console.log(
       "Attempting to create Traditional board with layout code '" +
         finalLayoutCode +
-        "' and seed '" +
-        seed +
+        (seed != null ? "' and seed '" + seed : "") +
         "' and Shuffle Type '" +
         (useBlindShuffle ? "Simple" : "Presolved") +
         "' and Tile Dist Option '" +
