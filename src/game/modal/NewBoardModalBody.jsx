@@ -42,7 +42,7 @@ const NewBoardModalBody = ({
   const [useCustomSize, setUseCustomSize] = useState(false);
 
   return (
-    <div>
+    <>
       <h1>Start New Board</h1>
       <div>
         <h2>Board Layout</h2>
@@ -325,7 +325,7 @@ const NewBoardModalBody = ({
       <div>
         <button onClick={prevModal}>Go Back</button>
       </div>
-    </div>
+    </>
   );
 };
 

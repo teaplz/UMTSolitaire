@@ -7,7 +7,6 @@
   justify-content: space-around;
   align-items: center;
   user-select: none;
-  border: 0.25vmin solid black;
   box-shadow: 0 0 0.5em 0 black;
   z-index: 1000;
 }

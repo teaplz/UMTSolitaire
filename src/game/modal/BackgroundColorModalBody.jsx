@@ -18,7 +18,7 @@ const BackgroundColorModalBody = ({
   const [displayAdvanced, setDisplayAdvanced] = useState(false);
 
   return (
-    <div>
+    <>
       <div>
         <div
           style={{
@@ -99,7 +99,7 @@ const BackgroundColorModalBody = ({
           Cancel Changes
         </button>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -12,7 +12,7 @@ const GameWinModalBody = ({
   layoutEditModal,
 }) => {
   return (
-    <div>
+    <>
       <h1>You Win!</h1>
       <div>
         You cleared all {numTiles} tiles in
@@ -65,7 +65,7 @@ const GameWinModalBody = ({
           Copy Layout Code
         </button>
       </div>
-    </div>
+    </>
   );
 };
 

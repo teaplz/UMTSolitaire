@@ -8,17 +8,20 @@ const AdvancedSettingsModalBody = ({
   prevModal,
 }) => {
   return (
-    <div>
+    <>
       <h1>Advanced Options</h1>
       <div>
-        <button onClick={toggleHighlightAllMatches} style={{marginBottom: 0}}>
+        <button onClick={toggleHighlightAllMatches} style={{ marginBottom: 0 }}>
           {showAllValidMatches ? "Hide All Matches" : "Show All Matches"}
         </button>
         <br />
         Cheat to show every possible match at once.
       </div>
       <div>
-        <button onClick={toggleHighlightMatchesForTile} style={{marginBottom: 0}}>
+        <button
+          onClick={toggleHighlightMatchesForTile}
+          style={{ marginBottom: 0 }}
+        >
           {showMatchingTiles
             ? "Hide Matches For Selected Tile"
             : "Show Matches For Selected Tile"}
@@ -27,7 +30,7 @@ const AdvancedSettingsModalBody = ({
         Cheat to show every matching tile for the selected tile.
       </div>
       <div>
-        <button onClick={toggleEmojiMode} style={{marginBottom: 0}}>
+        <button onClick={toggleEmojiMode} style={{ marginBottom: 0 }}>
           {useEmoji ? "Force Text Glyphs for Tiles" : "Force Emoji for Tiles"}
         </button>
         <br />
@@ -36,7 +39,7 @@ const AdvancedSettingsModalBody = ({
       <div>
         <button onClick={prevModal}>Back to Settings</button>
       </div>
-    </div>
+    </>
   );
 };
 

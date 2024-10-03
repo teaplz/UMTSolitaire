@@ -9,10 +9,16 @@
   overflow: auto;
   outline: none;
   padding: 20px;
-
   text-align: center;
   border: 5px solid black;
   border-radius: 2em;
+}
+
+.GameModal > div {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: auto;
 }
 
 .GameModal button {
@@ -28,4 +34,20 @@
 
 .GameModal hr {
   margin: 2em 3em;
+}
+
+.GameModal .buttonMenu {
+  display: grid;
+  grid: auto-flow / repeat(auto-fit, minmax(240px, 1fr));
+  flex: 1;
+}
+
+@media (min-width: 720px) {
+  .GameModal .buttonMenu {
+    grid: auto-flow / repeat(3, 1fr);
+  }
+}
+
+.GameModal .buttonMenu button {
+  padding: 1em;
 }

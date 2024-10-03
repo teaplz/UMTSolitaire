@@ -13,7 +13,7 @@ const GameLoseModalBody = ({
   layoutEditModal,
 }) => {
   return (
-    <div>
+    <>
       <h1>You Have No Valid Moves!</h1>
       <div>
         You still have {remainingTiles} tiles remaining, but cannot match any
@@ -60,7 +60,7 @@ const GameLoseModalBody = ({
           Copy Layout Code
         </button>
       </div>
-    </div>
+    </>
   );
 };
 

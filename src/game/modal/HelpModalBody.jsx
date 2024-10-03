@@ -11,7 +11,7 @@ const HelpModalBody = ({ useEmoji, closeModal }) => {
   };
 
   return (
-    <div>
+    <>
       <h1>Welcome to Unicode Mahjong Tile Solitaire</h1>
       <div>
         <p>
@@ -109,7 +109,7 @@ const HelpModalBody = ({ useEmoji, closeModal }) => {
       <div>
         <button onClick={closeModal}>Return to Game</button>
       </div>
-    </div>
+    </>
   );
 };
 

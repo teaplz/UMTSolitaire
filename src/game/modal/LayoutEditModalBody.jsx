@@ -545,7 +545,7 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, prevModal }) => {
   };
 
   return (
-    <div>
+    <>
       <h1>Puzzle Layout Edit</h1>
       {renderLayout()}
       {renderLayoutPalette()}
@@ -595,7 +595,7 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, prevModal }) => {
       <div>
         <button onClick={prevModal}>Cancel</button>
       </div>
-    </div>
+    </>
   );
 };
 

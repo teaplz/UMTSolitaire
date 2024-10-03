@@ -1079,7 +1079,7 @@ export default function Game({
         shouldCloseOnEsc={false}
         className="GameModal"
       >
-        {renderModalBody(modalState)}
+        <div>{renderModalBody(modalState)}</div>
       </ReactModal>
     </>
   );
