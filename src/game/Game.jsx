@@ -910,12 +910,13 @@ export default function Game({
         return (
           <NewBoardModalBody
             {...{
+              prevGameType: gameType,
               prevWidth: boardWidth,
               prevHeight: boardHeight,
               prevBlindShuffle: blindShuffle,
               prevTileDistribution: tileDistribution,
               prevSeed: seed,
-              layoutCode,
+              prevLayoutCode: layoutCode,
               handleResetBoard: resetGameState,
               prevModal,
             }}

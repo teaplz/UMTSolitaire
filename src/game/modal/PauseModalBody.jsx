@@ -35,7 +35,7 @@ const PauseModalBody = ({
           Copy Layout Code
         </button>
       </div>
-      <div className="buttonMenu">
+      <div className="buttonMenu bm-limit3">
         <button onClick={hideModal}>
           <svg
             width="2em"
