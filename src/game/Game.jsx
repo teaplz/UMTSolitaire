@@ -14,8 +14,7 @@ import GameTimer from "./GameTimer";
 import PauseModalBody from "./modal/PauseModalBody";
 import NewBoardModalBody from "./modal/NewBoardModalBody";
 import AdvancedSettingsModalBody from "./modal/AdvancedSettingsModalBody";
-import GameWinModalBody from "./modal/GameWinModalBody";
-import GameLoseModalBody from "./modal/GameLoseModalBody";
+import GameEndModalBody from "./modal/GameEndModalBody";
 import HelpModalBody from "./modal/HelpModalBody";
 import BackgroundColorModalBody from "./modal/BackgroundColorModalBody";
 import LayoutEditModalBody from "./modal/LayoutEditModalBody";
@@ -924,8 +923,9 @@ export default function Game({
         );
       case GameModals.GAME_WON:
         return (
-          <GameWinModalBody
+          <GameEndModalBody
             {...{
+              gameWon: true,
               numTiles,
               clearTime: timerRef.current,
               gameType,
@@ -934,14 +934,19 @@ export default function Game({
               shareUrls: generateShareUrls(),
               handleResetBoard: resetGameState,
               newBoardModal: () => showModal(GameModals.NEW_BOARD),
+              advancedSettingsModal: () =>
+                showModal(GameModals.SETTINGS_ADVANCED),
+              backgroundColorModal: () =>
+                showModal(GameModals.SETTINGS_BACKGROUND),
               layoutEditModal: () => showModal(GameModals.LAYOUT_EDIT),
             }}
           />
         );
       case GameModals.GAME_LOST:
         return (
-          <GameLoseModalBody
+          <GameEndModalBody
             {...{
+              gameWon: false,
               remainingTiles: numTiles - tileHistory.length * 2,
               gameType,
               seed,
@@ -951,6 +956,10 @@ export default function Game({
               handleUndoMatch: () => undoMatch({ doHideModal: true }),
               handleResetBoard: resetGameState,
               newBoardModal: () => showModal(GameModals.NEW_BOARD),
+              advancedSettingsModal: () =>
+                showModal(GameModals.SETTINGS_ADVANCED),
+              backgroundColorModal: () =>
+                showModal(GameModals.SETTINGS_BACKGROUND),
               layoutEditModal: () => showModal(GameModals.LAYOUT_EDIT),
             }}
           />
