@@ -8,7 +8,7 @@ export default function Tile({
   canBeMatchedWithSelected,
   canBeMatchedWithOther,
   useEmoji,
-  fixRedDragonBugs,
+  fixRedDragonBug,
   className,
   style,
   onClick,
@@ -41,7 +41,7 @@ export default function Tile({
   if (useEmoji) {
     // In certain versions of Windows, change the revamped Red Dragon tile emoji
     // to the Joker tile emoji.
-    if (char === 0x04 && fixRedDragonBugs) char = 0x2a;
+    if (char === 0x04 && fixRedDragonBug) char = 0x2a;
 
     // If we're using the non-standard emoji variant, just display them normally.
     return (
@@ -63,7 +63,7 @@ export default function Tile({
 
       // In certain browsers, change the Red Dragon glyph to a re-colored
       // White Dragon glyph so that it isn't forced as an emoji.
-      if (char === 0x04 && fixRedDragonBugs) char = 0x06;
+      if (char === 0x04 && fixRedDragonBug) char = 0x06;
     } else if ((char >= 0x10 && char <= 0x18) || char === 0x05) {
       // Bamboos and Green Dragon
       tileColorClass = "game-tile-glyph-green";

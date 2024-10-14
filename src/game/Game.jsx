@@ -13,10 +13,9 @@ import GameTimer from "./GameTimer";
 
 import PauseModalBody from "./modal/PauseModalBody";
 import NewBoardModalBody from "./modal/NewBoardModalBody";
-import AdvancedSettingsModalBody from "./modal/AdvancedSettingsModalBody";
 import GameEndModalBody from "./modal/GameEndModalBody";
 import HelpModalBody from "./modal/HelpModalBody";
-import BackgroundColorModalBody from "./modal/BackgroundColorModalBody";
+import SettingsModalBody from "./modal/SettingsModalBody";
 import LayoutEditModalBody from "./modal/LayoutEditModalBody";
 
 import "./modal/Modal.css";
@@ -48,7 +47,11 @@ export default function Game({
 
   // Replace the Red Dragon tile with another, as some browsers do not support
   // it correctly.
-  const [fixRedDragonBugs, setFixRedDragonBugs] = useState(false);
+  const [fixRedDragonBug, setFixRedDragonBug] = useState(false);
+  const [overrideRedDragonBugFix, setOverrideRedDragonBugFix] = useState(null);
+
+  // Remove "3D" effect for tiles for better performance.
+  const [lowDetailMode, setLowDetailMode] = useState(false);
 
   // Debug / Cheat: Show all tiles matching the currently selected tile.
   const [showMatchingTiles, setShowMatchingTiles] = useState(false);
@@ -79,8 +82,7 @@ export default function Game({
   const GameModals = {
     HELP: "HELP",
     PAUSE: "PAUSE",
-    SETTINGS_ADVANCED: "SETTINGS_ADVANCED",
-    SETTINGS_BACKGROUND: "SETTINGS_BACKGROUND",
+    SETTINGS: "SETTINGS",
     LAYOUT_EDIT: "LAYOUT_EDIT",
     NEW_BOARD: "NEW_BOARD",
     GAME_WON: "GAME_WON",
@@ -145,7 +147,7 @@ export default function Game({
   // List of tiles that are currently in its removal animation.
   const [tilesInRemovalAnimation, setTilesInRemovalAnimation] = useState([]);
 
-  // All tiles matching the same char as the selected tile. Used alongside
+  // All tile ids matching the same char as the selected tile. Used alongside
   // showMatchingTiles.
   const [hintedTiles, setHintedTiles] = useState([]);
 
@@ -364,7 +366,7 @@ export default function Game({
             // Windows 11+ changes the angle of the Red Dragon emoji.
             // Replace with a different emoji.
             if (parseInt(ua.platformVersion) >= 13) {
-              setFixRedDragonBugs(true);
+              setFixRedDragonBug(true);
             }
           }
         });
@@ -381,7 +383,7 @@ export default function Game({
       // they have chosen not to update the UA in favor of switching over to
       // UA-CH. As it is impossible to use UA to detect modern Windows versions,
       // just replace the emoji for all modern Windows versions.
-      setFixRedDragonBugs(true);
+      setFixRedDragonBug(true);
     }
 
     // Chrome for Android has a bug where it'll not respect VS15/U+FE0E and
@@ -396,7 +398,7 @@ export default function Game({
           window.navigator.userAgent.includes("Chrome") &&
           window.navigator.userAgent.includes("Mobile")
     ) {
-      setFixRedDragonBugs(true);
+      setFixRedDragonBug(true);
     }
   }
 
@@ -613,11 +615,12 @@ export default function Game({
 
           // Update the hinting system, if it's enabled.
           if (showMatchingTiles === true) {
-            const hintedTiles = tiles.filter(
-              (t) => t.char === tileObj.char && t.selectable
+            setHintedTiles(
+              tiles
+                .flat()
+                .filter((t) => t?.char === tileObj.char && !t.hidden)
+                .map((t) => t.id)
             );
-
-            setHintedTiles(hintedTiles);
           }
         }
       } else if (
@@ -630,11 +633,12 @@ export default function Game({
 
         // Update the hinting system, if it's enabled.
         if (showMatchingTiles === true) {
-          const hintedTiles = tiles.filter(
-            (t) => t.char === tileObj.char && t.selectable
+          setHintedTiles(
+            tiles
+              .flat()
+              .filter((t) => t?.char === tileObj.char && !t.hidden)
+              .map((t) => t.id)
           );
-
-          setHintedTiles(hintedTiles);
         }
       }
     } else if (gameType === GameTypes.TWOCORNER) {
@@ -714,11 +718,11 @@ export default function Game({
 
           // Update the hinting system, if it's enabled.
           if (showMatchingTiles === true) {
-            const hintedTiles = tiles.filter(
-              (t) => t.char === tiles[tileId].char
+            setHintedTiles(
+              tiles
+                .filter((t) => t.char === tiles[tileId].char)
+                .map((t) => t.id)
             );
-
-            setHintedTiles(hintedTiles);
           }
         }
       } else if (
@@ -731,11 +735,9 @@ export default function Game({
 
         // Update the hinting system, if it's enabled.
         if (showMatchingTiles === true) {
-          const hintedTiles = tiles.filter(
-            (t) => t.char === tiles[tileId].char
+          setHintedTiles(
+            tiles.filter((t) => t.char === tiles[tileId].char).map((t) => t.id)
           );
-
-          setHintedTiles(hintedTiles);
         }
       }
     }
@@ -859,38 +861,30 @@ export default function Game({
               resetGameState,
               hideModal,
               newBoardModal: () => showModal(GameModals.NEW_BOARD),
-              advancedSettingsModal: () =>
-                showModal(GameModals.SETTINGS_ADVANCED),
-              backgroundColorModal: () =>
-                showModal(GameModals.SETTINGS_BACKGROUND),
+              helpModal: () => showModal(GameModals.HELP),
+              settingsModal: () => showModal(GameModals.SETTINGS),
               layoutEditModal: () => showModal(GameModals.LAYOUT_EDIT),
             }}
           />
         );
-      case GameModals.SETTINGS_ADVANCED:
+      case GameModals.SETTINGS:
         return (
-          <AdvancedSettingsModalBody
-            {...{
-              showAllValidMatches,
-              showMatchingTiles,
-              useEmoji,
-              toggleHighlightAllMatches: () =>
-                setShowAllValidMatches((prevState) => !prevState),
-              toggleHighlightMatchesForTile: () =>
-                setShowMatchingTiles((prevState) => !prevState),
-              toggleEmojiMode: () => setUseEmoji((prevState) => !prevState),
-              prevModal,
-            }}
-          />
-        );
-      case GameModals.SETTINGS_BACKGROUND:
-        return (
-          <BackgroundColorModalBody
+          <SettingsModalBody
             {...{
               backgroundColor,
-              backgroundImage,
               setBackgroundColor,
+              backgroundImage,
               setBackgroundImage,
+              lowDetailMode,
+              setLowDetailMode,
+              useEmoji,
+              setUseEmoji,
+              overrideRedDragonBugFix,
+              setOverrideRedDragonBugFix,
+              showAllValidMatches,
+              setShowAllValidMatches,
+              showMatchingTiles,
+              setShowMatchingTiles,
               prevModal,
             }}
           />
@@ -934,10 +928,8 @@ export default function Game({
               shareUrls: generateShareUrls(),
               handleResetBoard: resetGameState,
               newBoardModal: () => showModal(GameModals.NEW_BOARD),
-              advancedSettingsModal: () =>
-                showModal(GameModals.SETTINGS_ADVANCED),
-              backgroundColorModal: () =>
-                showModal(GameModals.SETTINGS_BACKGROUND),
+              helpModal: () => showModal(GameModals.HELP),
+              settingsModal: () => showModal(GameModals.SETTINGS),
               layoutEditModal: () => showModal(GameModals.LAYOUT_EDIT),
             }}
           />
@@ -956,10 +948,8 @@ export default function Game({
               handleUndoMatch: () => undoMatch({ doHideModal: true }),
               handleResetBoard: resetGameState,
               newBoardModal: () => showModal(GameModals.NEW_BOARD),
-              advancedSettingsModal: () =>
-                showModal(GameModals.SETTINGS_ADVANCED),
-              backgroundColorModal: () =>
-                showModal(GameModals.SETTINGS_BACKGROUND),
+              helpModal: () => showModal(GameModals.HELP),
+              settingsModal: () => showModal(GameModals.SETTINGS),
               layoutEditModal: () => showModal(GameModals.LAYOUT_EDIT),
             }}
           />
@@ -990,7 +980,8 @@ export default function Game({
             : [],
           selectedTile,
           useEmoji,
-          fixRedDragonBugs,
+          fixRedDragonBug: overrideRedDragonBugFix ?? fixRedDragonBug,
+          lowDetailMode,
           handleTileClick,
         }}
       />

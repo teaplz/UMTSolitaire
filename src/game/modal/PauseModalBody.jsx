@@ -9,8 +9,8 @@ const PauseModalBody = ({
   resetGameState,
   hideModal,
   newBoardModal,
-  advancedSettingsModal,
-  backgroundColorModal,
+  helpModal,
+  settingsModal,
   layoutEditModal,
 }) => {
   return (
@@ -90,7 +90,7 @@ const PauseModalBody = ({
           <br />
           Edit Puzzle Layout
         </button>
-        <button onClick={backgroundColorModal}>
+        <button onClick={settingsModal}>
           <svg
             width="2em"
             viewBox="0 0 24 24"
@@ -103,7 +103,7 @@ const PauseModalBody = ({
           <br />
           Settings
         </button>
-        <button onClick={advancedSettingsModal}>
+        <button onClick={helpModal}>
           <svg
             width="2em"
             viewBox="0 0 30 30"

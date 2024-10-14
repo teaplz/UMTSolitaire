@@ -11,13 +11,14 @@ export default function GameBoard({
   boardHeight,
   tiles,
   pathingTiles,
-  padBoard = false,
+  padBoard,
   tilesInRemovalAnimation,
   hintedTiles,
   wholeMatchingTiles,
   selectedTile,
   useEmoji,
-  fixRedDragonBugs,
+  fixRedDragonBug,
+  lowDetailMode,
   handleTileClick,
 }) {
   // These are stored as arrays of rows of tiles.
@@ -111,11 +112,11 @@ export default function GameBoard({
               <Tile
                 char={tile.char}
                 isSelected={tile.id === selectedTile}
-                canBeMatchedWithSelected={hintedTiles?.includes(tile)}
+                canBeMatchedWithSelected={hintedTiles?.includes(tile.id)}
                 canBeMatchedWithOther={wholeMatchingTiles?.includes(tile.id)}
                 isFadingOut={tile.inRemovalAnim}
                 useEmoji={useEmoji}
-                fixRedDragonBugs={fixRedDragonBugs}
+                fixRedDragonBug={fixRedDragonBug}
                 className={ClassNames(
                   "game-tile",
                   tile.inRemovalAnim ? "game-tile-anim-fadeout" : null,
@@ -233,7 +234,13 @@ export default function GameBoard({
   // itself through "inheriting" the parent div), and one for handling which
   // font style to use (emoji or text glyph).
   return (
-    <div className="game-board" style={horizontalTileStyle}>
+    <div
+      className={ClassNames(
+        "game-board",
+        lowDetailMode ? "game-board-low" : null
+      )}
+      style={horizontalTileStyle}
+    >
       <div className="game-board-v" style={verticalTileStyle}>
         <div
           className={ClassNames(

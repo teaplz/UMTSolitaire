@@ -1,3 +1,5 @@
+/* Basic game board */
+
 .game-board {
   user-select: none;
   -webkit-user-drag: none;
@@ -32,6 +34,8 @@
   padding: 1em;
 }
 
+/* Game board row */
+
 .game-board-emoji div {
   display: flex;
   justify-content: center;
@@ -43,6 +47,8 @@
   justify-content: center;
   min-width: fit-content;
 }
+
+/* Game board coordinate and tile */
 
 .game-board-coord {
   display: grid;
@@ -60,6 +66,12 @@
 .game-tile:not(.game-tile-selectable) {
   pointer-events: none;
 }
+
+.game-tile-empty {
+  visibility: hidden;
+}
+
+/* Ttile for emoji boards */
 
 .game-board-emoji .game-tile {
   color: black;
@@ -93,6 +105,8 @@
   text-shadow: 0 0 0 blue, 0.09em 0.09em 0 lightgrey, 0.16em 0.16em 0 teal,
     0.16em 0.16em 0.32em black;
 }
+
+/* Tile for glyph boards */
 
 .game-board-glyph .game-tile:before {
   content: "\1F02B\FE0E";
@@ -225,9 +239,70 @@
   color: #aa660055;
 }
 
-.game-tile-empty {
-  visibility: hidden;
+/* Low Detail Mode removes the "3D" text-shadow effect. */
+
+.game-board-low .game-tile,
+.game-board-low .game-board-glyph .game-tile:before {
+  text-shadow: none !important;
 }
+
+.game-board-low .game-board-glyph .game-tile.game-tile-glyph-red {
+  color: #880000 !important;
+}
+
+.game-board-low .game-board-glyph .game-tile.game-tile-glyph-green {
+  color: #008800 !important;
+}
+
+.game-board-low .game-board-glyph .game-tile.game-tile-glyph-blue {
+  color: #000088 !important;
+}
+
+.game-board-low .game-board-glyph .game-tile.game-tile-glyph-flowers {
+  color: #008888 !important;
+}
+
+.game-board-low .game-board-glyph .game-tile.game-tile-glyph-seasons {
+  color: #882200 !important;
+}
+
+@media (hover: hover) {
+  .game-board-low .game-board-emoji .game-tile:hover {
+    text-shadow: 0 0 0 yellow !important;
+  }
+
+  .game-board-low .game-board-glyph .game-tile:hover:before {
+    color: #fcfcd9 !important;
+  }
+}
+
+.game-board-low .game-board-emoji .game-tile.game-tile-selected,
+.game-board-low .game-board-emoji .game-tile.game-tile-anim-fadeout {
+  text-shadow: 0 0 0 yellow !important;
+}
+
+.game-board-low .game-board-glyph .game-tile.game-tile-selected:before,
+.game-board-low .game-board-glyph .game-tile.game-tile-anim-fadeout:before {
+  color: #f5f5a7 !important;
+}
+
+.game-board-low .game-board-emoji .game-tile.game-tile-hint-all {
+  text-shadow: 0 0 0 red !important;
+}
+
+.game-board-low .game-board-glyph .game-tile.game-tile-hint-all:before {
+  color: #f5a7a7 !important;
+}
+
+.game-board-low .game-board-emoji .game-tile.game-tile-hint-current {
+  text-shadow: 0 0 0 blue !important;
+}
+
+.game-board-low .game-board-glyph .game-tile.game-tile-hint-current:before {
+  color: #a7a7f5 !important;
+}
+
+/* Pathing arrows for matching animation in some modes */
 
 .game-path {
   color: gold;
@@ -285,6 +360,8 @@
 .game-path-LU:after {
   content: "\2517";
 }
+
+/* Matching animation */
 
 .game-tile-anim-fadeout,
 .game-path-anim-fadeout {
