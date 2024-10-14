@@ -75,7 +75,7 @@ export function updateTileVisibilityAndSelectability(
 ) {
   obstructedTiles?.forEach((t) => {
     t.tile.hidden =
-      t.char != null &&
+      t.tile.char != null &&
       obstructedTileRegions[t.tile.id].reduce(
         (acc, cur) => acc | cur.region,
         0
