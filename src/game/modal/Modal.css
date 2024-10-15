@@ -12,6 +12,8 @@
   text-align: center;
   border: 5px solid black;
   border-radius: 2em;
+  margin: auto;
+  max-width: 100ch;
 }
 
 .GameModal > div {

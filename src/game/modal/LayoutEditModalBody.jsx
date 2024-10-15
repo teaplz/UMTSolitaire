@@ -7,13 +7,6 @@ import { GameTypeLayoutCodeIDs, GameTypes } from "../GameTypes";
 
 import "./LayoutEditModalBody.css";
 
-const shiftDir = {
-  UP: "UP",
-  DOWN: "DOWN",
-  LEFT: "LEFT",
-  RIGHT: "RIGHT",
-};
-
 const LayoutEditModalBody = ({ initialLayout, startNewGame, prevModal }) => {
   const editorGameTypeSettings = {
     [GameTypes.TRADITIONAL]: {
@@ -58,6 +51,13 @@ const LayoutEditModalBody = ({ initialLayout, startNewGame, prevModal }) => {
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [editorPaintState, setEditorPaintState] = useState(1);
+
+  const shiftDir = {
+    UP: "UP",
+    DOWN: "DOWN",
+    LEFT: "LEFT",
+    RIGHT: "RIGHT",
+  };
 
   // Generate the initial layout when entering the modal.
   useEffect(() => {
