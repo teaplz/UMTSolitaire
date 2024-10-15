@@ -475,7 +475,7 @@ export default function Game({
       setPathingTiles([]);
     }
 
-    setModalDisplayed(false);
+    hideModal();
     setGameEnded(false);
     timerRef.current.reset();
   }
@@ -808,7 +808,7 @@ export default function Game({
     setModalDisplayed(true);
 
     if (newState) {
-      setModalHistory(modalHistory.concat(modalState));
+      if (modalState != null) setModalHistory(modalHistory.concat(modalState));
       setModalState(newState);
     }
   }
@@ -818,17 +818,18 @@ export default function Game({
     if (!gameEnded) timerRef.current.start();
 
     setModalDisplayed(false);
+    setModalState(null);
     setModalHistory([]);
   }
 
   // Go to the previous modal in the history.
-  const prevModal = () => {
+  function prevModal() {
     if (modalHistory.length === 0) hideModal();
     else {
       setModalState(modalHistory[modalHistory.length - 1]);
       setModalHistory(modalHistory.slice(0, -1));
     }
-  };
+  }
 
   // Generate the URL for sharing/bookmarking the current game board.
   function generateShareUrls() {
@@ -848,7 +849,17 @@ export default function Game({
   function renderModalBody(modalState) {
     switch (modalState) {
       case GameModals.HELP:
-        return <HelpModalBody {...{ useEmoji, closeModal: hideModal }} />;
+        return (
+          <HelpModalBody
+            {...{
+              gameType,
+              useEmoji,
+              hideModal,
+              prevModal,
+              hasPrevModal: modalHistory.length > 0,
+            }}
+          />
+        );
       case GameModals.PAUSE:
         return (
           <PauseModalBody
