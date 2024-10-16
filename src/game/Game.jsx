@@ -854,6 +854,7 @@ export default function Game({
             {...{
               gameType,
               useEmoji,
+              lowDetailMode,
               hideModal,
               prevModal,
               hasPrevModal: modalHistory.length > 0,

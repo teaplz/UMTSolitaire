@@ -1,5 +1,7 @@
 import "../board/GameBoard.css";
 
+import ClassNames from "classnames";
+
 import Tile from "../board/Tile";
 import PathNode from "../board/PathNode";
 
@@ -8,14 +10,14 @@ import { GameTypes } from "../GameTypes";
 const HelpModalBody = ({
   gameType,
   useEmoji,
+  lowDetailMode,
   hideModal,
   prevModal,
   hasPrevModal,
 }) => {
   const helpImageBoardStyle = {
-    fontSize: "7vmin",
+    fontSize: "5em",
     pointerEvents: "none",
-    userSelect: "none",
   };
 
   const TraditionalRules = (
@@ -26,68 +28,59 @@ const HelpModalBody = ({
         matching tiles.
       </p>
       <div
-        className={useEmoji ? "game-board-emoji" : "game-board-glyph"}
+        className={ClassNames(
+          "game-board",
+          lowDetailMode ? "game-board-low" : null
+        )}
         style={helpImageBoardStyle}
       >
-        <div>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x05} {...{ useEmoji }} />
+        <div className={useEmoji ? "game-board-emoji" : "game-board-glyph"}>
+          <div>
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x05} {...{ useEmoji }} />
             </span>
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x14} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x14} {...{ useEmoji }} />
             </span>
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x14} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x14} {...{ useEmoji }} />
             </span>
-          </span>
-        </div>
-        <div>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x1d} {...{ useEmoji }} />
+          </div>
+          <div>
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x1d} {...{ useEmoji }} />
             </span>
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x0b} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x0b} {...{ useEmoji }} />
+              <Tile
+                className="game-tile game-tile-selected"
+                style={{
+                  top: "-0.66em",
+                  left: "-0.66em",
+                }}
+                char={0x05}
+                {...{ useEmoji }}
+              />
             </span>
-            <span
-              className="game-tile game-tile-selected"
-              style={{
-                top: "-0.66em",
-                left: "-0.66em",
-              }}
-            >
-              <Tile char={0x05} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile
+                className="game-tile game-tile-selected"
+                char={0x05}
+                {...{ useEmoji }}
+              />
             </span>
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile game-tile-selected">
-              <Tile char={0x05} {...{ useEmoji }} />
+          </div>
+          <div>
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x0b} {...{ useEmoji }} />
             </span>
-          </span>
-        </div>
-        <div>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x0b} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x05} {...{ useEmoji }} />
             </span>
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x05} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x1d} {...{ useEmoji }} />
             </span>
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x1d} {...{ useEmoji }} />
-            </span>
-          </span>
+          </div>
         </div>
       </div>
       <p style={{ margin: "2em" }}>
@@ -106,84 +99,65 @@ const HelpModalBody = ({
         matching tiles.
       </p>
       <div
-        className={useEmoji ? "game-board-emoji" : "game-board-glyph"}
+        className={ClassNames(
+          "game-board",
+          lowDetailMode ? "game-board-low" : null
+        )}
         style={helpImageBoardStyle}
       >
-        <div>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile {...{ useEmoji }} />
+        <div className={useEmoji ? "game-board-emoji" : "game-board-glyph"}>
+          <div>
+            <span className="game-board-coord">
+              <Tile className="game-tile" {...{ useEmoji }} />
+              <PathNode node={["L", "D"]} fadeout={false} />
             </span>
-            <PathNode node={["L", "D"]} fadeout={false} />
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x14} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x14} {...{ useEmoji }} />
+              <PathNode node={["L", "-start"]} fadeout={false} />
             </span>
-            <PathNode node={["L", "-start"]} fadeout={false} />
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x1d} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x1d} {...{ useEmoji }} />
+              <PathNode node={["R", "-start"]} fadeout={false} />
             </span>
-            <PathNode node={["R", "-start"]} fadeout={false} />
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" {...{ useEmoji }} />
+              <PathNode node={["R", "D"]} fadeout={false} />
             </span>
-            <PathNode node={["R", "D"]} fadeout={false} />
-          </span>
-        </div>
-        <div>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x14} {...{ useEmoji }} />
+          </div>
+          <div>
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x14} {...{ useEmoji }} />
+              <PathNode node={["D", "-end"]} fadeout={false} />
             </span>
-            <PathNode node={["D", "-end"]} fadeout={false} />
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x0b} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x0b} {...{ useEmoji }} />
+              <PathNode node={["D", "-start"]} fadeout={false} />
             </span>
-            <PathNode node={["D", "-start"]} fadeout={false} />
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x05} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x05} {...{ useEmoji }} />
             </span>
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" {...{ useEmoji }} />
+              <PathNode node={["D"]} fadeout={false} />
             </span>
-            <PathNode node={["D"]} fadeout={false} />
-          </span>
-        </div>
-        <div>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x03} {...{ useEmoji }} />
+          </div>
+          <div>
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x03} {...{ useEmoji }} />
             </span>
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x0b} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x0b} {...{ useEmoji }} />
+              <PathNode node={["D", "-end"]} fadeout={false} />
             </span>
-            <PathNode node={["D", "-end"]} fadeout={false} />
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile char={0x1d} {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" char={0x1d} {...{ useEmoji }} />
+              <PathNode node={["L", "-end"]} fadeout={false} />
             </span>
-            <PathNode node={["L", "-end"]} fadeout={false} />
-          </span>
-          <span className="game-board-coord">
-            <span className="game-tile">
-              <Tile {...{ useEmoji }} />
+            <span className="game-board-coord">
+              <Tile className="game-tile" {...{ useEmoji }} />
+              <PathNode node={["D", "L"]} fadeout={false} />
             </span>
-            <PathNode node={["D", "L"]} fadeout={false} />
-          </span>
+          </div>
         </div>
       </div>
       <p style={{ margin: "2em" }}>
@@ -211,7 +185,7 @@ const HelpModalBody = ({
       <div>
         <a href="https://github.com/teaplz/UMTSolitaire">UMTSolitaire</a> v1.0
         by <a href="https://github.com/teaplz">teaplz</a>.
-        <br/>
+        <br />
         All mahjong tile graphics are comprised of system Unicode fonts.
       </div>
     </>
