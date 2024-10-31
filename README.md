@@ -2,7 +2,7 @@
 
 <a href="./readme/cat.png?raw=true"><img align="right" width="25%" src="./readme/cat.png" title="A game board resembling a cat's face."></a>
 
-**[Unicode Mahjong Tile Solitaire](https://teaplz.github.io/2ctilesol)** 
+**[Unicode Mahjong Tile Solitaire](https://teaplz.github.io/UMTSolitaire)** 
 is a simple web adaptation of the [Mahjong solitaire](https://en.wikipedia.org/wiki/Mahjong_solitaire) puzzle game that does not use any custom images or fonts for displaying tiles, instead utilizing the [Mahjong Tiles Unicode block](https://en.wikipedia.org/wiki/Mahjong_Tiles_(Unicode_block)) with system fonts, either adjusted with CSS to better resemble tiles or using non-standard emoji variants (namely Microsoft's Segoe UI Emoji).
 
 
