@@ -431,7 +431,7 @@ export default function Game({
           layoutCode: newLayoutCode,
           seed: newSeed,
           useBlindShuffle: newBlindShuffle,
-          tileDistribution: parseInt(newTileDistribution ?? 0),
+          tileDistribution: parseInt(newTileDistribution) || 0,
         });
       } else if (useGameType === GameTypes.TWOCORNER) {
         generatedBoard = TwoCornerGameType.generateBoard({
@@ -440,7 +440,7 @@ export default function Game({
           boardHeight: newBoardHeight,
           seed: newSeed,
           useBlindShuffle: newBlindShuffle,
-          tileDistribution: parseInt(newTileDistribution ?? 0),
+          tileDistribution: parseInt(newTileDistribution) || 0,
         });
       } else {
         console.error("Invalid gametype selection! Cancel the board reset.");
@@ -838,6 +838,7 @@ export default function Game({
     return {
       layoutUrl,
       gameUrl: `${layoutUrl}&s=${seed}${blindShuffle ? "&ts" : ""}${
+        !isNaN(parseInt(tileDistribution)) &&
         tileDistribution != TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS
           ? `&td=${tileDistribution}`
           : ""
