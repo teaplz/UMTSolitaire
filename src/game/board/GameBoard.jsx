@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import React from "react";
 import ClassNames from "classnames";
 
 import Tile from "./Tile";
@@ -6,7 +7,7 @@ import PathNode from "./PathNode";
 
 import "./GameBoard.css";
 
-export default function GameBoard({
+const GameBoard = ({
   boardWidth,
   boardHeight,
   tiles,
@@ -20,7 +21,7 @@ export default function GameBoard({
   fixRedDragonBug,
   lowDetailMode,
   handleTileClick,
-}) {
+}) => {
   // These are stored as arrays of rows of tiles.
   const [tileMap, setTileMap] = useState([]);
 
@@ -29,38 +30,36 @@ export default function GameBoard({
   // the 3D portion of a shifted tile over/under an adjacent tile.
   const [useHalfSteps, setUseHalfSteps] = useState(false);
 
+  const [tileDisplayOptions, setTileDisplayOptions] = useState({});
+
   // Regenerate tile maps every time the tile layout changes.
   useEffect(() => {
     const tileMap = [];
 
-    let useHalfSteps = false;
+    let useHalfSteps = tiles?.some(
+      (c) => Array.isArray(c) && c?.some((t) => t?.xhalfstep || t?.yhalfstep)
+    );
 
     for (let y = 0; y < boardHeight; y++) {
       tileMap[y] = tiles
         .slice(y * boardWidth, (y + 1) * boardWidth)
         .map((coord) => {
           if (coord?.length > 0) {
+            // For each tile stacked in each coordinate,
             return coord.map((tile) => {
-              if (tile === null)
-                return Array(1).fill({
-                  id: null,
-                  char: null,
-                  selectable: null,
+              if (tile != null)
+                return {
+                  id: tile.id,
+                  char: tile.hidden ? 0x2b : tile.char,
+                  selectable: tile.selectable,
+                  xhalfstep: tile.xhalfstep,
+                  yhalfstep: tile.yhalfstep,
                   inRemovalAnim: false,
-                });
-
-              if (tile.xhalfstep || tile.yhalfstep) useHalfSteps = true;
-
-              return {
-                id: tile.id,
-                char: tile.hidden ? 0x2b : tile.char,
-                selectable: tile.selectable,
-                xhalfstep: tile.xhalfstep,
-                yhalfstep: tile.yhalfstep,
-                inRemovalAnim: false,
-              };
+                };
             });
           } else if (coord != null) {
+            // In "flat" game modes, each coordinate in the tiles array consists
+            // of a single tile object, rather than a sub-array for each height.
             return Array(1).fill({
               id: coord.id,
               char: coord.char,
@@ -68,10 +67,12 @@ export default function GameBoard({
               inRemovalAnim: false,
             });
           } else {
+            // Use a single hidden tile as a "buffer" to line up the tiles at
+            // the correct location.
             return Array(1).fill({
               id: null,
               char: null,
-              selectable: null,
+              selectable: false,
               inRemovalAnim: false,
             });
           }
@@ -84,7 +85,7 @@ export default function GameBoard({
       tileMap.forEach((row) =>
         row.forEach((coord) =>
           coord.forEach((tile, index) => {
-            if (tile.id === comparisonTile.id) {
+            if (tile?.id === comparisonTile.id) {
               coord[index].char = comparisonTile.char;
               coord[index].inRemovalAnim = true;
             }
@@ -108,61 +109,79 @@ export default function GameBoard({
       <div key={yindex}>
         {row.map((loc, xindex) => (
           <span className="game-board-coord" key={xindex}>
-            {loc.map((tile, height) => (
-              <Tile
-                char={tile.char}
-                isSelected={tile.id === selectedTile}
-                canBeMatchedWithSelected={hintedTiles?.includes(tile.id)}
-                canBeMatchedWithOther={wholeMatchingTiles?.includes(tile.id)}
-                isFadingOut={tile.inRemovalAnim}
-                useEmoji={useEmoji}
-                fixRedDragonBug={fixRedDragonBug}
-                className={ClassNames(
-                  "game-tile",
-                  tile.inRemovalAnim ? "game-tile-anim-fadeout" : null,
-                  tile.selectable ? "game-tile-selectable" : null
-                )}
-                style={
-                  height > 0
-                    ? {
-                        top: height * -0.16 + (tile.yhalfstep ? 0.5 : 0) + "em",
-                        left:
-                          height * -0.16 + (tile.xhalfstep ? 0.5 : 0) + "em",
-                        zIndex: useHalfSteps
+            {loc?.map(
+              (tile, height) =>
+                tile && (
+                  <Tile
+                    char={tile.char}
+                    isSelected={tile.id === selectedTile}
+                    canBeMatchedWithSelected={hintedTiles?.includes(tile.id)}
+                    canBeMatchedWithOther={wholeMatchingTiles?.includes(
+                      tile.id
+                    )}
+                    isFadingOut={tile.inRemovalAnim}
+                    {...tileDisplayOptions}
+                    className={ClassNames(
+                      "game-tile",
+                      tile.inRemovalAnim ? "game-tile-anim-fadeout" : null,
+                      tile.selectable ? "game-tile-selectable" : null
+                    )}
+                    styleTop={
+                      height > 0
+                        ? height * -0.16 + (tile.yhalfstep ? 0.5 : 0) + "em"
+                        : useHalfSteps && tile.yhalfstep
+                        ? "0.5em"
+                        : null
+                    }
+                    styleLeft={
+                      height > 0
+                        ? height * -0.16 + (tile.xhalfstep ? 0.5 : 0) + "em"
+                        : useHalfSteps && tile.xhalfstep
+                        ? "0.5em"
+                        : null
+                    }
+                    styleZIndex={
+                      height > 0
+                        ? useHalfSteps
                           ? 2 *
                               (height * (boardWidth + boardHeight) +
                                 xindex +
                                 yindex) +
                             (tile.yhalfstep ? 1 : 0) +
                             (tile.yhalfstep ? 1 : 0)
-                          : height,
-                      }
-                    : useHalfSteps && (tile.xhalfstep || tile.yhalfstep)
-                    ? {
-                        top: (tile.yhalfstep ? 0.5 : 0) + "em",
-                        left: (tile.xhalfstep ? 0.5 : 0) + "em",
-                        zIndex:
-                          2 * (xindex + yindex) +
+                          : height
+                        : useHalfSteps
+                        ? 2 * (xindex + yindex) +
                           (tile.yhalfstep ? 1 : 0) +
-                          (tile.yhalfstep ? 1 : 0),
-                      }
-                    : { zIndex: useHalfSteps ? 2 * (xindex + yindex) : null }
-                }
-                onClick={
-                  tile.selectable ? () => handleTileClick(tile.id) : null
-                }
-                key={height}
-              />
-            ))}
-
-            {pathingTiles != null && pathingTiles[loc[0].id]?.length > 0 && (
-              <PathNode key={curPathingKey} node={pathingTiles[loc[0].id]} />
+                          (tile.yhalfstep ? 1 : 0)
+                        : null
+                    }
+                    onClick={
+                      tile.selectable ? () => handleTileClick(tile.id) : null
+                    }
+                    key={xindex + "x" + yindex + "_" + height}
+                  />
+                )
             )}
+
+            {pathingTiles != null &&
+              loc != null &&
+              loc[0] != null &&
+              pathingTiles[loc[0].id]?.length > 0 && (
+                <PathNode key={curPathingKey} node={pathingTiles[loc[0].id]} />
+              )}
           </span>
         ))}
       </div>
     ));
   };
+
+  useEffect(() => {
+    setTileDisplayOptions({
+      useEmoji,
+      fixRedDragonBug,
+    });
+  }, [useEmoji, fixRedDragonBug]);
 
   const [horizontalTileStyle, setHorizontalTileStyle] = useState({});
   const [verticalTileStyle, setVerticalTileStyle] = useState({});
@@ -253,7 +272,9 @@ export default function GameBoard({
       </div>
     </div>
   );
-}
+};
+
+export default React.memo(GameBoard);
 
 // Magic numbers for use in font size calculations.
 // These were obtained through browser testing (changed until scrollbar became

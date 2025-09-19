@@ -1,8 +1,9 @@
+import React from "react";
 import ClassNames from "classnames";
 
 // The component for each individual tile, displayed as a mahjong tile from
 // the Mahjong Tiles Unicode block (U+1F000 to U+1F02B).
-export default function Tile({
+const Tile = ({
   char,
   isSelected,
   canBeMatchedWithSelected,
@@ -10,9 +11,11 @@ export default function Tile({
   useEmoji,
   fixRedDragonBug,
   className,
-  style,
+  styleTop,
+  styleLeft,
+  styleZIndex,
   onClick,
-}) {
+}) => {
   // Check if tile is valid to display. They should be sent in the "char"
   // property from 0 (U+1F000) to 43 (U+1F02B).
 
@@ -20,7 +23,7 @@ export default function Tile({
     return (
       <span
         className={ClassNames(className, "game-tile-empty")}
-        style={style}
+        style={{ top: styleTop, left: styleLeft, zIndex: styleZIndex }}
         onClick={onClick}
       >
         &#x1F02B;{!useEmoji && "\uFE0E"}
@@ -47,7 +50,7 @@ export default function Tile({
     return (
       <span
         className={ClassNames(className, tileStatusClass)}
-        style={style}
+        style={{ top: styleTop, left: styleLeft, zIndex: styleZIndex }}
         onClick={onClick}
       >
         {String.fromCodePoint(0x1f000 + char)}
@@ -85,11 +88,13 @@ export default function Tile({
     return (
       <span
         className={ClassNames(className, tileColorClass, tileStatusClass)}
-        style={style}
+        style={{ top: styleTop, left: styleLeft, zIndex: styleZIndex }}
         onClick={onClick}
       >
         {String.fromCodePoint(0x1f000 + char, 0xfe0e)}
       </span>
     );
   }
-}
+};
+
+export default React.memo(Tile);

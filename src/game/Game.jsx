@@ -172,7 +172,7 @@ export default function Game({
   // and "-end" to show the endpoints)
   const [pathingTiles, setPathingTiles] = useState([]);
 
-  // For certain gametpyes, this shows all the initial tile obstructions
+  // For certain gametypes, this shows all the initial tile obstructions
   // (overlapping and x-adjacent).
   const [tileObstructions, setTileObstructions] = useState([]);
 
@@ -990,7 +990,7 @@ export default function Game({
             ? allValidMatchingTiles
             : randomMatchDisplayed
             ? allValidMatchesAtRandom[allValidMatchesRandomCycle]
-            : [],
+            : null,
           selectedTile,
           useEmoji,
           fixRedDragonBug: overrideRedDragonBugFix ?? fixRedDragonBug,
