@@ -54,10 +54,8 @@ const HelpModalBody = ({
               <Tile className="game-tile" char={0x0b} {...{ useEmoji }} />
               <Tile
                 className="game-tile game-tile-selected"
-                style={{
-                  top: "-0.66em",
-                  left: "-0.66em",
-                }}
+                styleTop="-0.16em"
+                styleLeft="-0.16em"
                 char={0x05}
                 {...{ useEmoji }}
               />

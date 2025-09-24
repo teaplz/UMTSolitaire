@@ -114,7 +114,7 @@ const GameBoard = ({
                 tile && (
                   <Tile
                     char={tile.char}
-                    isSelected={tile.id === selectedTile}
+                    isSelected={tile.id === selectedTile && tile.id != null}
                     canBeMatchedWithSelected={hintedTiles?.includes(tile.id)}
                     canBeMatchedWithOther={wholeMatchingTiles?.includes(
                       tile.id
