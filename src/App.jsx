@@ -1,7 +1,6 @@
 import "./App.css";
 
 import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Game from "./game/Game";
 
@@ -82,23 +81,14 @@ function App() {
           : "",
       }}
     >
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="*"
-            element={
-              <Game
-                {...{
-                  backgroundColor,
-                  backgroundImage,
-                  setBackgroundColor,
-                  setBackgroundImage,
-                }}
-              />
-            }
-          />
-        </Routes>
-      </BrowserRouter>
+      <Game
+        {...{
+          backgroundColor,
+          backgroundImage,
+          setBackgroundColor,
+          setBackgroundImage,
+        }}
+      />
     </div>
   );
 }

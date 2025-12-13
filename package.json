@@ -9,19 +9,18 @@
   },
   "dependencies": {
     "classnames": "^2.5.1",
-    "rand-seed": "^2.1.7",
+    "rand-seed": "^3.0.0",
     "react": "^19.1.0",
     "react-colorful": "^5.6.1",
-    "react-dom": "^19.1.0",
+    "react-dom": "^19.2.3",
     "react-modal": "^3.16.3",
-    "react-router-dom": "^7.6.2",
     "react-timer-hook": "^4.0.5"
   },
   "devDependencies": {
-    "@types/react": "^19.1.7",
-    "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.5.1",
-    "vite": "^6.3.5",
-    "vite-plugin-pwa": "^1.0.0"
+    "@types/react": "^19.2.3",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "vite": "^7.2.7",
+    "vite-plugin-pwa": "^1.2.0"
   }
 }

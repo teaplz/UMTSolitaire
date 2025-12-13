@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
 import ReactModal from "react-modal";
 
 import { GameTypeLayoutCodeIDs, GameTypes } from "./GameTypes";
@@ -184,7 +183,7 @@ export default function Game({
   // End State List
   // --------------
 
-  const [searchParams] = useSearchParams();
+  const searchParams = new URLSearchParams(window.location.search);
 
   const timerRef = useRef();
 
