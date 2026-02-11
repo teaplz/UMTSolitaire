@@ -267,7 +267,7 @@ export function generateBoardWithPresolvedShuffle({
 
   // Get overlapping and/or adjacent tiles for each tile in the initial
   // layout.
-  const { obstructedTiles, obstructedTileRegions } = calculateObstructedTiles({
+  const obstructedTiles = calculateObstructedTiles({
     tiles,
     width: layout.width,
     height: layout.height,
@@ -544,7 +544,7 @@ export function generateBoardWithPresolvedShuffle({
 
     tilesToProcess.forEach((t) => {
       t.overlapping = t.overlapping.filter(
-        (ot) => ot !== firstTile.tile && ot !== secondTile.tile
+        (ot) => ot.tile !== firstTile.tile && ot.tile !== secondTile.tile
       );
       t.leftAdjacent = t.leftAdjacent.filter(
         (ot) => ot !== firstTile.tile && ot !== secondTile.tile
@@ -568,13 +568,9 @@ export function generateBoardWithPresolvedShuffle({
     coord?.forEach((tile, i) => {
       if (tile && !("char" in tile)) {
         obstructedTiles.forEach((t) => {
-          t.overlapping = t.overlapping.filter((ot) => ot !== tile);
+          t.overlapping = t.overlapping.filter((ot) => ot.tile !== tile);
           t.leftAdjacent = t.leftAdjacent.filter((ot) => ot !== tile);
           t.rightAdjacent = t.rightAdjacent.filter((ot) => ot !== tile);
-        });
-
-        obstructedTileRegions.forEach((t) => {
-          t = t.filter((ot) => ot !== tile);
         });
 
         coord[i] = null;
@@ -589,7 +585,6 @@ export function generateBoardWithPresolvedShuffle({
     tiles,
     numTiles,
     obstructedTiles,
-    obstructedTileRegions,
     seed: finalSeed,
   };
 }
@@ -600,27 +595,20 @@ export function generateBoardWithPresolvedShuffle({
 //
 // Note: Tiles are references to the tiles array and are not copies.
 //
-// Returns the following:
-//
-// obstructedTiles - Array of the following, intended to be mutated.
+// Returns an array of the following:
 // {
 //    tile (tile being obstructed),
-//    overlapping (array of tiles overlapping it),
+//    overlapping (array of tiles overlapping it and the regions, see below),
 //    leftAdjacent (array of tiles touching it from the left),
 //    rightAdjacent (array of tiles touching it from the right)
 // }
 //
-// obstructedTileRegions - Array containing quadrant regions of the tile being
-//    overlapped, and by which tiles. Intended to be used with obstructedTiles
-//    for determining whether to hide the tile on the board. Array is indexed
-//    by tile ID and is not intended to be mutated.
-// [
+// The overlapping array are objects:
 //  {
 //    tile (tile overlapping it),
-///    region(4-bit number for which region is being obscured, see
-//            OverlappingTileRegions)
+///    region (4-bit number for which region is being obscured, see
+//             OverlappingTileRegions)
 //  }
-// ]
 //
 export function calculateObstructedTiles({ tiles, width, height }) {
   if (tiles == null) return null;
@@ -946,16 +934,7 @@ export function calculateObstructedTiles({ tiles, width, height }) {
     })
   );
 
-  // Split tile overlap regions into separate array.
-  const obstructedTileRegions = obstructedTiles.map(
-    ({ overlapping }) => overlapping
-  );
-
-  obstructedTiles.forEach(
-    (t) => (t.overlapping = t.overlapping.map(({ tile }) => tile))
-  );
-
-  return { obstructedTiles, obstructedTileRegions };
+  return obstructedTiles;
 }
 
 export const OverlappingTileRegions = Object.freeze({
@@ -1005,9 +984,9 @@ function sortTileIDsByHighestOverlapStackDepth(tilesToProcess) {
 
     tempTilesToProcess.forEach((t) => {
       for (let ot = t.overlapping.length - 1; ot >= 0; ot--) {
-        if (tileStackDepths[t.overlapping[ot].id] !== null) {
-          if (!toPushUp.includes(t.overlapping[ot].id)) {
-            toPushUp.push(t.overlapping[ot].id);
+        if (tileStackDepths[t.overlapping[ot].tile.id] !== null) {
+          if (!toPushUp.includes(t.overlapping[ot].tile.id)) {
+            toPushUp.push(t.overlapping[ot].tile.id);
           }
           t.overlapping.splice(ot, 1);
         }
@@ -1020,8 +999,8 @@ function sortTileIDsByHighestOverlapStackDepth(tilesToProcess) {
         .filter((t2) => t2.tile.id === toPushUp[i])
         .forEach((t3) => {
           t3.overlapping.forEach((ot) => {
-            if (!toPushUp.includes(ot.id)) {
-              toPushUp.push(ot.id);
+            if (!toPushUp.includes(ot.tile.id)) {
+              toPushUp.push(ot.tile.id);
             }
           });
         });

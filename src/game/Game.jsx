@@ -175,10 +175,6 @@ export default function Game({
   // (overlapping and x-adjacent).
   const [tileObstructions, setTileObstructions] = useState([]);
 
-  // For certain gametpyes, this shows all whether or not a tile is obstructed
-  // by other tiles.
-  const [tileOverlapRegions, setTileOverlapRegions] = useState([]);
-
   // --------------
   // End State List
   // --------------
@@ -230,14 +226,13 @@ export default function Game({
         setTileHistory(gameState.tileHistory);
 
         if (gameState.gameType === GameTypes.TRADITIONAL) {
-          const obstructions = TraditionalGameType.calculateObstructedTiles({
-            tiles: gameState.tiles,
-            width: gameState.boardWidth,
-            height: gameState.boardHeight,
-          });
-
-          setTileObstructions(obstructions.obstructedTiles);
-          setTileOverlapRegions(obstructions.obstructedTileRegions);
+          setTileObstructions(
+            TraditionalGameType.calculateObstructedTiles({
+              tiles: gameState.tiles,
+              width: gameState.boardWidth,
+              height: gameState.boardHeight,
+            })
+          );
         }
 
         const newTimer = new Date();
@@ -469,7 +464,6 @@ export default function Game({
 
     if (useGameType === GameTypes.TRADITIONAL) {
       setTileObstructions(generatedBoard.obstructedTiles);
-      setTileOverlapRegions(generatedBoard.obstructedTileRegions);
     } else if (useGameType === GameTypes.TWOCORNER) {
       setPathingTiles([]);
     }
@@ -603,8 +597,7 @@ export default function Game({
             setTiles(newTiles);
 
             TraditionalGameType.updateTileVisibilityAndSelectability(
-              tileObstructions,
-              tileOverlapRegions
+              tileObstructions
             );
 
             setSelectedTile(null);
@@ -768,11 +761,9 @@ export default function Game({
         setSelectedTile(null);
         setTilesInRemovalAnimation([]);
 
-        // Update tile selectability and visibility for board. (TODO: Only
-        // change affected tiles).
+        // Update tile selectability and visibility for board.
         TraditionalGameType.updateTileVisibilityAndSelectability(
-          tileObstructions,
-          tileOverlapRegions
+          tileObstructions
         );
       } else if (gameType === GameTypes.TWOCORNER) {
         const newTiles = tiles.slice();

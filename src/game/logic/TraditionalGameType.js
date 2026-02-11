@@ -58,10 +58,7 @@ export function generateBoard({
     });
   }
 
-  updateTileVisibilityAndSelectability(
-    generatedBoard?.obstructedTiles,
-    generatedBoard?.obstructedTileRegions
-  );
+  updateTileVisibilityAndSelectability(generatedBoard?.obstructedTiles);
 
   return {
     ...generatedBoard,
@@ -69,27 +66,29 @@ export function generateBoard({
   };
 }
 
-export function updateTileVisibilityAndSelectability(
-  obstructedTiles,
-  obstructedTileRegions
-) {
+export function updateTileVisibilityAndSelectability(obstructedTiles) {
   obstructedTiles?.forEach((t) => {
-    t.tile.hidden =
-      t.tile.char != null &&
-      obstructedTileRegions[t.tile.id].reduce(
-        (acc, cur) => acc | cur.region,
-        0
-      ) === 0b1111 &&
-      !t.overlapping.some((t) => t.char === null);
+    // Cleared tiles neither have their designs hidden nor are selectable.
+    if (t.tile.char === null) {
+      t.tile.hidden = false;
+      t.tile.selectable = false;
+    } else {
+      // Tiles have their designs hidden only if their tile is completely
+      // ovelapped by one or more uncleared tiles directly above them.
+      t.tile.hidden =
+        !t.overlapping.some((cur) => cur.tile.char === null) &&
+        t.overlapping.reduce((acc, cur) => acc | cur.region, 0) === 0b1111;
 
-    t.tile.selectable =
-      t.tile.char != null &&
-      (t.overlapping.length === 0 ||
-        !t.overlapping.some((t) => t.char !== null)) &&
-      (t.leftAdjacent.length === 0 ||
-        !t.leftAdjacent.some((t) => t.char !== null) ||
-        t.rightAdjacent.length === 0 ||
-        !t.rightAdjacent.some((t) => t.char !== null));
+      // Tiles are only selectable if there's no other uncleared tiles adjacent
+      // or overlapping.
+      t.tile.selectable =
+        (t.overlapping.length === 0 ||
+          !t.overlapping.some((t) => t.tile.char !== null)) &&
+        (t.leftAdjacent.length === 0 ||
+          !t.leftAdjacent.some((t) => t.char !== null) ||
+          t.rightAdjacent.length === 0 ||
+          !t.rightAdjacent.some((t) => t.char !== null));
+    }
   });
 }
 
