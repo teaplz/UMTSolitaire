@@ -74,7 +74,9 @@ const NewBoardModalBody = ({
     PRESOLVED: 0,
     SIMPLE: 1,
   };
-  const [tileDistribution, setTileDistribution] = useState(0);
+  const [tileDistribution, setTileDistribution] = useState(
+    TileDistributionOptions.PRIORITIZE_BOTH_PAIRS
+  );
 
   const renderGameSelection = (
     <>
@@ -377,8 +379,8 @@ const NewBoardModalBody = ({
               onChange={({ target: { value: v } }) => setTileDistribution(v)}
               defaultValue={tileDistribution}
             >
-              <option value={TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS}>
-                Prioritize Single Pairs
+              <option value={TileDistributionOptions.SINGLE_PAIRS}>
+                Single Pairs
               </option>
               <option value={TileDistributionOptions.PRIORITIZE_BOTH_PAIRS}>
                 Prioritize Both Pairs
@@ -409,8 +411,12 @@ const NewBoardModalBody = ({
                     : customLayoutCode
                   : layoutCode,
               newSeed: useCustomSeed ? parseInt(seed) : null,
-              newBlindShuffle: shuffleType == ShuffleTypes.SIMPLE,
-              newTileDistribution: tileDistribution,
+              newBlindShuffle: useCustomShuffleAndDist
+                ? shuffleType == ShuffleTypes.SIMPLE
+                : null,
+              newTileDistribution: useCustomShuffleAndDist
+                ? tileDistribution
+                : null,
               newBoardWidth: parseInt(boardWidth),
               newBoardHeight: parseInt(boardHeight),
             })

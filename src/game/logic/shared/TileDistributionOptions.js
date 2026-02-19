@@ -5,10 +5,10 @@ export const TileDistributionOptions = Object.freeze({
   // Smaller Board - Pairs (A,B,C,A,B,C)
   // Larger Board  - Pairs (A,B,C,A,B,C)
   //
-  // This is a balanced approach, with smaller boards having a better chance of
-  // showing each tile design (with 50% boards showing at least one pair) and
-  // larger boards distributing the tiles evenly.
-  PRIORITIZE_SINGLE_PAIRS: 0,
+  // This approach allows smaller boards to show all tile designs (with 50%
+  // boards showing at least one pair), but make them easy due to the lack of
+  // ambiguous matches.
+  SINGLE_PAIRS: 0,
 
   // When the board does not use a complete set of tiles, have it use all four
   // of a tile before moving on to the next tile. Beyond one full set of tiles,
@@ -17,8 +17,9 @@ export const TileDistributionOptions = Object.freeze({
   // Smaller Board - Quads (A,A,B,B,C,C)
   // Larger Board  - Pairs (A,B,C,A,B,C)
   //
-  // This is a balanced approach, similar to PRIORITIZE_SINGLE_PAIRS, but can
-  // make the game easier for smaller boards due to skewed tile distribution.
+  // This is the most balanced approach, allowing more ambiguous matches with
+  // smaller boards (at the cost of less uniqute tile designs), but skewing
+  // larger boards towards less ambiguous matches.
   PRIORITIZE_BOTH_PAIRS: 1,
 
   // For each full set of tiles, have it use all four of a tile before moving
@@ -27,8 +28,9 @@ export const TileDistributionOptions = Object.freeze({
   // Smaller Board - Quads (A,A,B,B,C,C)
   // Larger Board  - Quads (A,A,B,B,C,C)
   //
-  // It is similar to PRIORITIZE_BOTH_PAIRS, but makes the tile distribution
-  // skewed for both smaller and larger boards and makes the game easier.
+  // This approach is similar to PRIORITIZE_BOTH_PAIRS for smaller baords, but
+  // potentially makes larger boards more difficult due to more ambiguous
+  // matches.
   ALWAYS_BOTH_PAIRS: 2,
 
   // For each full set of tiles, use a random assortment.
@@ -44,27 +46,19 @@ export const TileDistributionOptions = Object.freeze({
 });
 
 export const TileDistributionOptionDescriptions = Object.freeze({
-  [TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS]: `A balanced approach where, for each full set of tiles, 
-  it uses one of each pair before moving on to their next pair.
-  
-  It has a better chance of smaller boards showing all tiles (with 50% boards
-  guaranteeing all tiles), with larger boards distributing the tiles evenly.`,
+  [TileDistributionOptions.SINGLE_PAIRS]: `A balanced approach where, for each full set of tiles, 
+  it uses one pair of each tile before moving on to their next pair. Shows more unique tiles for smaller boards,
+  but makes them much easier.`,
 
-  [TileDistributionOptions.PRIORITIZE_BOTH_PAIRS]: `A balanced approach where, when the board does not use a complete set 
-  of tiles, it uses all four of a tile before moving on to the next. After
-  a complete set, it uses one of each pair before moving on to their next pair.
-  
-  It is similar to "Prioritize Single Pairs", but can make the game easier 
-  for smaller boards due to skewed tile distribution.`,
+  [TileDistributionOptions.PRIORITIZE_BOTH_PAIRS]: `A balanced approach where, for the first full set of tiles,
+  it uses both pairs of each tile before moving on to the next tile. For each set of tiles afterwards, it uses
+  one pair of each tile before moving on to their next pair.`,
 
-  [TileDistributionOptions.ALWAYS_BOTH_PAIRS]: `A balanced approach where, for each full set of tiles, it uses all four of
-  a tile before moving on to the next.
-  
-  It is similar to "Prioritize Both Pairs", but can make the game easier for
-  both smaller and larger boards due to skewed tile distribution.`,
+  [TileDistributionOptions.ALWAYS_BOTH_PAIRS]: `A balanced approach where, for each full set of tiles,  it uses 
+  both pairs of each tile before moving on to the next tile. Makes larger boards potentially more difficult.`,
 
   [TileDistributionOptions.RANDOM_PER_SET]: `A realistic approach where, for each full set of tiles, it uses a random
-  assortment. It is similar to dumping entire mahjong sets on the board until it fills up the layout.`,
+  assortment.`,
 
   [TileDistributionOptions.RANDOM]: `Use a completely random assortment of tile pairs. This is the least realistic
   approach, but can be funny.`,

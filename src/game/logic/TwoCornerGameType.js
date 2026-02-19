@@ -46,12 +46,14 @@ export function generateBoard({
       ? BoardGenerator.generateBoardWithSimpleShuffle({
           ...BoardLayoutGenerator.generateBoardLayout(finalLayoutCode),
           seed,
-          tileDistribution,
+          tileDistribution:
+            tileDistribution != null ? Number(tileDistribution) : undefined,
         })
       : BoardGenerator.generateBoardWithPresolvedShuffle({
           ...BoardLayoutGenerator.generateBoardLayout(finalLayoutCode),
           seed,
-          tileDistribution,
+          tileDistribution:
+            tileDistribution != null ? Number(tileDistribution) : undefined,
         });
   } catch (e) {
     console.error(e.message);

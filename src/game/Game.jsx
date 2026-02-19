@@ -29,7 +29,7 @@ export default function Game({
   setBackgroundColor,
   setBackgroundImage,
 }) {
-  const gameStateVer = 7;
+  const gameStateVer = 8;
 
   // ----------------
   // Begin State List
@@ -206,7 +206,14 @@ export default function Game({
         newBoardWidth: null,
         newBoardHeight: null,
         newBlindShuffle: blindShuffleParam,
-        newTileDistribution: tileDistributionParam,
+        // v1.0 has the default tile distribution as SINGLE_PAIRS. v1.1 changes
+        // the default while forcing the share URL to provide a TD parameter.
+        // Remove this hack when either the layout code version changes or v2
+        // of the game.
+        newTileDistribution:
+          seedParam != null && tileDistributionParam == null
+            ? TileDistributionOptions.SINGLE_PAIRS
+            : tileDistributionParam,
       });
     } else if (
       gameState !== null &&
@@ -425,7 +432,7 @@ export default function Game({
           layoutCode: newLayoutCode,
           seed: newSeed,
           useBlindShuffle: newBlindShuffle,
-          tileDistribution: parseInt(newTileDistribution) || 0,
+          tileDistribution: newTileDistribution,
         });
       } else if (useGameType === GameTypes.TWOCORNER) {
         generatedBoard = TwoCornerGameType.generateBoard({
@@ -434,7 +441,7 @@ export default function Game({
           boardHeight: newBoardHeight,
           seed: newSeed,
           useBlindShuffle: newBlindShuffle,
-          tileDistribution: parseInt(newTileDistribution) || 0,
+          tileDistribution: newTileDistribution,
         });
       } else {
         console.error("Invalid gametype selection! Cancel the board reset.");
@@ -452,8 +459,8 @@ export default function Game({
     setBoardHeight(generatedBoard.height);
     setSeed(generatedBoard.seed);
     setLayoutCode(generatedBoard.layoutCode);
-    setBlindShuffle(newBlindShuffle);
-    setTileDistribution(newTileDistribution);
+    setBlindShuffle(generatedBoard.useBlindShuffle);
+    setTileDistribution(generatedBoard.tileDistribution);
     setNumTiles(generatedBoard.numTiles);
     setSelectedTile(null);
     setTileHistory([]);
@@ -836,10 +843,7 @@ export default function Game({
     return {
       layoutUrl,
       gameUrl: `${layoutUrl}&s=${seed}${blindShuffle ? "&ts" : ""}${
-        !isNaN(parseInt(tileDistribution)) &&
-        tileDistribution != TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS
-          ? `&td=${tileDistribution}`
-          : ""
+        !isNaN(parseInt(tileDistribution)) ? `&td=${tileDistribution}` : ""
       }`,
     };
   }
@@ -987,8 +991,8 @@ export default function Game({
           wholeMatchingTiles: showAllValidMatches
             ? allValidMatchingTiles
             : randomMatchDisplayed
-            ? allValidMatchesAtRandom[allValidMatchesRandomCycle]
-            : null,
+              ? allValidMatchesAtRandom[allValidMatchesRandomCycle]
+              : null,
           selectedTile,
           useEmoji,
           fixRedDragonBug: overrideRedDragonBugFix ?? fixRedDragonBug,

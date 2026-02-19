@@ -16,7 +16,7 @@ export function generateBoardWithSimpleShuffle({
   layout,
   seed,
   flowersAndSeasons = true,
-  tileDistribution = TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS,
+  tileDistribution = TileDistributionOptions.PRIORITIZE_BOTH_PAIRS,
 }) {
   if (layout == null)
     throw new Error("Attempted to create board with no board layout.");
@@ -134,15 +134,14 @@ export function generateBoardWithSimpleShuffle({
         }
       } else {
         // Determines when to move on to the next tile selection, either after
-        // a single pair for a half-set (on PRIORITIZE_SINGLE_PAIRS or
+        // a single pair for a half-set (on SINGLE_PAIRS or
         // PRIORITIZE_BOTH_PAIRS after a full set), a single pair for a full set
         // (on RANDOM_PER_SET), or a double pair for a full set
         // (on ALWAYS_BOTH_PAIRS or PRIORITIZE_BOTH_PAIRS before a full set).
         if (
           (chardupe =
             (chardupe + 1) %
-            (tileDistribution ===
-              TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS ||
+            (tileDistribution === TileDistributionOptions.SINGLE_PAIRS ||
             (tileDistribution ===
               TileDistributionOptions.PRIORITIZE_BOTH_PAIRS &&
               fullSetUsed) ||
@@ -222,6 +221,8 @@ export function generateBoardWithSimpleShuffle({
       height: layout.height,
     }),
     seed: finalSeed,
+    useBlindShuffle: true,
+    tileDistribution,
   };
 }
 
@@ -235,7 +236,7 @@ export function generateBoardWithPresolvedShuffle({
   layout,
   seed,
   flowersAndSeasons = true,
-  tileDistribution = TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS,
+  tileDistribution = TileDistributionOptions.PRIORITIZE_BOTH_PAIRS,
 }) {
   if (layout == null)
     throw new Error("Attempted to create board with no board layout.");
@@ -338,7 +339,7 @@ export function generateBoardWithPresolvedShuffle({
       let shuffledTilePairChars = tileCharSet.slice();
 
       if (
-        tileDistribution === TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS ||
+        tileDistribution === TileDistributionOptions.SINGLE_PAIRS ||
         tileDistribution === TileDistributionOptions.PRIORITIZE_BOTH_PAIRS ||
         tileDistribution === TileDistributionOptions.ALWAYS_BOTH_PAIRS
       ) {
@@ -352,8 +353,7 @@ export function generateBoardWithPresolvedShuffle({
         }
 
         if (
-          tileDistribution ===
-            TileDistributionOptions.PRIORITIZE_SINGLE_PAIRS ||
+          tileDistribution === TileDistributionOptions.SINGLE_PAIRS ||
           (tileDistribution === TileDistributionOptions.PRIORITIZE_BOTH_PAIRS &&
             Math.floor(numPairs / (tileCharSet.length << 1)) > 0)
         ) {
@@ -586,6 +586,8 @@ export function generateBoardWithPresolvedShuffle({
     numTiles,
     obstructedTiles,
     seed: finalSeed,
+    useBlindShuffle: false,
+    tileDistribution,
   };
 }
 
