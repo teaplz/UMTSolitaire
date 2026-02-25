@@ -181,7 +181,7 @@ const HelpModalBody = ({
   const RenderAbout = (
     <>
       <div>
-        <a href="https://github.com/teaplz/UMTSolitaire">UMTSolitaire</a> v1.1
+        <a href="https://github.com/teaplz/UMTSolitaire">UMTSolitaire</a> v1.2
         by <a href="https://github.com/teaplz">teaplz</a>.
         <br />
         All mahjong tile graphics are comprised of system Unicode fonts.

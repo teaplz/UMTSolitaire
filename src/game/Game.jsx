@@ -29,7 +29,8 @@ export default function Game({
   setBackgroundColor,
   setBackgroundImage,
 }) {
-  const gameStateVer = 8;
+  const gameStateVer = 8,
+    fullboardVer = 1;
 
   // ----------------
   // Begin State List
@@ -190,6 +191,7 @@ export default function Game({
     // Get game state and URL search parameters.
     const gameState = loadGameState(),
       layoutParam = searchParams?.get("g"),
+      fullboardVerParam = searchParams?.get("bv"),
       seedParam = searchParams?.get("s"),
       blindShuffleParam = searchParams?.get("ts") !== null,
       tileDistributionParam = searchParams?.get("td");
@@ -199,22 +201,26 @@ export default function Game({
     // - Recreate from the browser's web storage. (Persistence)
     // - Create basic board. (Default)
     if (layoutParam !== null) {
-      resetGameState({
-        newGameType: null,
-        newLayoutCode: layoutParam,
-        newSeed: seedParam,
-        newBoardWidth: null,
-        newBoardHeight: null,
-        newBlindShuffle: blindShuffleParam,
-        // v1.0 has the default tile distribution as SINGLE_PAIRS. v1.1 changes
-        // the default while forcing the share URL to provide a TD parameter.
-        // Remove this hack when either the layout code version changes or v2
-        // of the game.
-        newTileDistribution:
-          seedParam != null && tileDistributionParam == null
-            ? TileDistributionOptions.SINGLE_PAIRS
-            : tileDistributionParam,
-      });
+      if (Number(fullboardVerParam) === fullboardVer) {
+        resetGameState({
+          newGameType: null,
+          newLayoutCode: layoutParam,
+          newSeed: seedParam,
+          newBoardWidth: null,
+          newBoardHeight: null,
+          newBlindShuffle: blindShuffleParam,
+          newTileDistribution: tileDistributionParam,
+        });
+      } else {
+        resetGameState({
+          newGameType: null,
+          newLayoutCode: layoutParam,
+          newBoardWidth: null,
+          newBoardHeight: null,
+          newBlindShuffle: null,
+          newTileDistribution: null,
+        });
+      }
     } else if (
       gameState !== null &&
       "v" in gameState &&
@@ -842,7 +848,7 @@ export default function Game({
 
     return {
       layoutUrl,
-      gameUrl: `${layoutUrl}&s=${seed}${blindShuffle ? "&ts" : ""}${
+      gameUrl: `${layoutUrl}&bv=${fullboardVer}&s=${seed}${blindShuffle ? "&ts" : ""}${
         !isNaN(parseInt(tileDistribution)) ? `&td=${tileDistribution}` : ""
       }`,
     };

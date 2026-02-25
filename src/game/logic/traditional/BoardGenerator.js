@@ -462,40 +462,37 @@ export function generateBoardWithPresolvedShuffle({
 
     if (validTiles.length < 2) {
       // This isn't good. We can't make a match! Just skip all the other tiles.
-      console.error(
+      console.warn(
         "Can not fully populate a winning board, likely due to an invalid layout!"
       );
       break;
     }
 
-    // The current algorithm for determining when to trigger the overlap stack
-    // depth check is:
-    //
-    // num of pairs remaining <= current highest stack depth * 2
-    //
-    // There may be a more efficient way to do this.
+    let firstTile, secondTile;
 
-    if (numPairs - i <= overlapStackDepths.length * 2) {
-      // Prioritize tiles that are highest in an overlap stack.
-      const pickedTiles = overlapStackDepths
-        .map((d) => d.filter((t) => validTiles.some((vt) => vt.tile.id === t)))
-        .reverse()
-        .flat()
-        .splice(0, 2);
-
-      validTiles = validTiles.filter((t) => pickedTiles.includes(t.tile.id));
+    // Trigger the overlap stack depth check every time  we're at the point
+    // where it's likely that the final pairs can stack on top of each other.
+    if (
+      overlapStackDepths.length > 1 &&
+      numPairs - i <= overlapStackDepths.length
+    ) {
+      // The first tile is the topmost tile.
+      const topTileIndex = validTiles.findIndex(
+        (vt) =>
+          vt.tile.id === overlapStackDepths[overlapStackDepths.length - 1][0]
+      );
+      firstTile = validTiles[topTileIndex];
+      validTiles.splice(topTileIndex, 1);
+    } else {
+      // Choose first tile.
+      const firstTileIndex = Math.floor(seededRng.next() * validTiles.length);
+      firstTile = validTiles[firstTileIndex];
+      validTiles.splice(firstTileIndex, 1);
     }
-
-    // Choose first tile. Remove it from valid tile list so there's no chance
-    // of it being picked up by the second tile.
-    const firstTileIndex = Math.floor(seededRng.next() * validTiles.length);
-    let firstTile = validTiles[firstTileIndex];
-
-    validTiles.splice(firstTileIndex, 1);
 
     // Choose second tile.
     const secondTileIndex = Math.floor(seededRng.next() * validTiles.length);
-    let secondTile = validTiles[secondTileIndex];
+    secondTile = validTiles[secondTileIndex];
 
     // Assign the next tile character.
     if (tileDistribution === TileDistributionOptions.RANDOM) {
