@@ -470,11 +470,11 @@ export function generateBoardWithPresolvedShuffle({
 
     let firstTile, secondTile;
 
-    // Trigger the overlap stack depth check every time  we're at the point
+    // Trigger the overlap stack depth check every time we're at the point
     // where it's likely that the final pairs can stack on top of each other.
     if (
       overlapStackDepths.length > 1 &&
-      numPairs - i <= overlapStackDepths.length
+      numPairs - i == overlapStackDepths.length
     ) {
       // The first tile is the topmost tile.
       const topTileIndex = validTiles.findIndex(
@@ -484,6 +484,15 @@ export function generateBoardWithPresolvedShuffle({
       firstTile = validTiles[topTileIndex];
       validTiles.splice(topTileIndex, 1);
     } else {
+      // Debugging segment that picks the bottommost tiles of the board. Used
+      // for testing the worst-case for the overlap stack depth check.
+      //
+      // const pickedTiles = overlapStackDepths
+      //   .map((d) => d.filter((t) => validTiles.some((vt) => vt.tile.id === t)))
+      //   .flat()
+      //   .splice(0, 2);
+      // validTiles = validTiles.filter((t) => pickedTiles.includes(t.tile.id));
+
       // Choose first tile.
       const firstTileIndex = Math.floor(seededRng.next() * validTiles.length);
       firstTile = validTiles[firstTileIndex];
